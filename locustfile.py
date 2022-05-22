@@ -2,9 +2,9 @@ import logging
 from requests.adapters import HTTPAdapter
 import locust.stats
 from locust import HttpUser, task, constant
-
-from ts.requests import IndependentRequests
 import datetime
+
+from ts.requests import *
 
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
 locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 10
@@ -23,26 +23,7 @@ locust.stats.PERCENTILES_TO_REPORT = [
 ]
 
 
-class UserNoLogin(HttpUser):
-    weight = 50
-    wait_time = constant(1)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-
-    @task
-    def perfom_task(self):
-        requests = IndependentRequests(self.client)
-        logging.debug(f"""Running user "no login" with id {requests.request_id}...""")
-
-        requests.visit_home()
-        requests.search_departure()
-        requests.search_return()
-
-
-# class UserBooking(HttpUser):
+# class UserNoLogin(HttpUser):
 #     weight = 50
 #     wait_time = constant(1)
 
@@ -52,11 +33,41 @@ class UserNoLogin(HttpUser):
 #         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
 
 #     @task
-#     def perform_task(self):
-#         requests = Requests(self.client)
-#         logging.debug(f"""Running user "no booking" with id {requests.request_id}...""")
+#     def perfom_task(self):
+#         ts_request = IndependentRequest(self.client)
+#         logging.debug(f"""Running user "no login" with id {ts_request.request_id}...""")
 
-#         requests.perform_task("home")
-#         requests.perform_task("login")
-#         requests.perform_task("search_departure")
-#         requests.perform_task("book")
+#         ts_request.visit_home()
+#         self.search_departure(ts_request)
+#         self.search_return(ts_request)
+
+#     def search_departure(self, ts_request: IndependentRequest):
+#         now = datetime.datetime.now().strftime("%Y-%m-%d")
+#         ts_request.search_ticket(now, "Shang Hai", "Su Zhou")
+
+#     def search_return(self, ts_request: IndependentRequest):
+#         now = datetime.datetime.now().strftime("%Y-%m-%d")
+#         ts_request.search_ticket(now, "Su Zhou", "Shang Hai")
+
+
+class UserBooking(HttpUser):
+    weight = 50
+    wait_time = constant(1)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
+        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+
+    @task
+    def perform_task(self):
+        ts_request = DependentRequest(self.client)
+        logging.debug(
+            f"""Running user "no booking" with id {ts_request.request_id}..."""
+        )
+
+        ts_request.create_and_login_user()
+        ts_request.book()
+        ts_request.cancel_last_order_with_no_refund()
+        ts_request.get_voucher_of_last_order()
+        ts_request.pick_up_ticket()

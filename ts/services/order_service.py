@@ -6,7 +6,7 @@ import logging
 from locust.clients import HttpSession
 
 
-def get_orders_by_login_id(client: HttpSession, user_id: str, bearer: str):
+def get_orders_by_login_id(client: HttpSession, user_id: str, bearer: str) -> str:
     order_id = ""
     with client.post(
         url="/api/v1/orderservice/order/refresh",

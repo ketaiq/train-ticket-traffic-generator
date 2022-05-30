@@ -3,7 +3,7 @@ from ts.services.auth_service import login_user
 from ts.services.admin_user_service import add_one_user
 from ts.services.visit_page import visit_client_login, visit_client_ticket_book
 from ts.services.assurance_service import get_assurance_types
-from ts.services.food_service import get_all_food
+from ts.services.food_service import get_food_menu
 from ts.services.contacts_service import get_contacts_by_account_id, add_one_contact
 from ts.services.preserve_service import reserve_one_ticket
 from ts.services.order_service import get_orders_by_login_id
@@ -92,13 +92,13 @@ class TrainTicketRequest:
 
         Dependence: book --> login
         """
-        visit_client_ticket_book(self.client, self.bearer)
-        get_assurance_types(self.client, self.bearer)
-        get_all_food(self.client, self.bearer)
+        visit_client_ticket_book(self.client, self.bearer, self.user_id)
+        get_assurance_types(self.client, self.bearer, self.user_id)
+        get_food_menu(self.client, self.bearer, self.user_id)
         contact_id = self.get_a_contact()
         reserve_one_ticket(self.client, self.user_id, contact_id, self.bearer)
         self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)
-        pay_one_order(self.client, self.order_id, self.bearer)
+        pay_one_order(self.client, self.order_id, self.bearer, self.user_id)
 
     def cancel_last_order_with_no_refund(self):
         cancel_one_order(

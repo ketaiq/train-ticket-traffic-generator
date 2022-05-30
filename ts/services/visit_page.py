@@ -15,9 +15,10 @@ def visit_home(client: HttpSession, request_id: str):
 
 def visit_client_login(client: HttpSession):
     client.get("/client_login.html", name="visit client login page")
+    logging.info(f"user visits the client ticket book page")
 
 
-def visit_client_ticket_book(client: HttpSession, bearer: str):
+def visit_client_ticket_book(client: HttpSession, bearer: str, user_id: str):
     client.get(
         url="/client_ticket_book.html?tripId=D1345&from=Shang%20Hai&to=Su%20Zhou&seatType=2&seat_price=50.0&date=2022-02-11",
         headers={
@@ -27,3 +28,4 @@ def visit_client_ticket_book(client: HttpSession, bearer: str):
         },
         name="visit client ticket book page",
     )
+    logging.info(f"user {user_id} visits the client ticket book page")

@@ -23,34 +23,34 @@ locust.stats.PERCENTILES_TO_REPORT = [
 ]
 
 
-class UserNoLogin(HttpUser):
-    weight = 50
-    wait_time = constant(1)
+# class UserNoLogin(HttpUser):
+#     weight = 50
+#     wait_time = constant(1)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
+#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
 
-    @task
-    def perfom_task(self):
-        ts_request = IndependentRequest(self.client)
-        logging.debug(f"""Running user "no login" with id {ts_request.request_id}...""")
+#     @task
+#     def perfom_task(self):
+#         ts_request = TrainTicketRequest(self.client)
+#         logging.debug(f"""Running user "no login" with id {ts_request.request_id}...""")
 
-        ts_request.visit_home()
-        self.search_departure(ts_request)
-        self.search_return(ts_request)
+#         ts_request.visit_home()
+#         self.search_departure(ts_request)
+#         self.search_return(ts_request)
 
-    def search_departure(self, ts_request: IndependentRequest):
-        now = datetime.datetime.now().strftime("%Y-%m-%d")
-        ts_request.search_ticket(now, "Shang Hai", "Su Zhou")
+#     def search_departure(self, ts_request: TrainTicketRequest):
+#         now = datetime.datetime.now().strftime("%Y-%m-%d")
+#         ts_request.search_ticket(now, "Shang Hai", "Su Zhou")
 
-    def search_return(self, ts_request: IndependentRequest):
-        now = datetime.datetime.now().strftime("%Y-%m-%d")
-        ts_request.search_ticket(now, "Su Zhou", "Shang Hai")
+#     def search_return(self, ts_request: TrainTicketRequest):
+#         now = datetime.datetime.now().strftime("%Y-%m-%d")
+#         ts_request.search_ticket(now, "Su Zhou", "Shang Hai")
 
 
-class UserBooking(HttpUser):
+class UserLogin(HttpUser):
     weight = 50
     wait_time = constant(1)
 
@@ -61,13 +61,11 @@ class UserBooking(HttpUser):
 
     @task
     def perform_task(self):
-        ts_request = DependentRequest(self.client)
-        logging.debug(
-            f"""Running user "no booking" with id {ts_request.request_id}..."""
-        )
+        ts_request = TrainTicketRequest(self.client)
+        logging.debug(f"""Running user "login" with id {ts_request.request_id}...""")
 
         ts_request.create_and_login_user()
         ts_request.book()
-        ts_request.cancel_last_order_with_no_refund()
-        ts_request.get_voucher_of_last_order()
+        # ts_request.cancel_last_order_with_no_refund()
+        # ts_request.get_voucher_of_last_order()
         ts_request.pick_up_ticket()

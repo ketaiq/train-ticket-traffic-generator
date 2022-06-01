@@ -8,14 +8,12 @@ from locust.clients import HttpSession
 
 def visit_home(client: HttpSession, request_id: str):
     client.get("/index.html", name="visit home page")
-    logging.info(
-        f"user {request_id} visits the home page of train ticket system by running GET /index.html"
-    )
+    logging.info(f"user request {request_id} visits the home page")
 
 
-def visit_client_login(client: HttpSession):
+def visit_client_login(client: HttpSession, request_id: str):
     client.get("/client_login.html", name="visit client login page")
-    logging.info(f"user visits the client ticket book page")
+    logging.info(f"user request {request_id} visits the client ticket book page")
 
 
 def visit_client_ticket_book(client: HttpSession, bearer: str, user_id: str):

@@ -8,13 +8,27 @@ from ts.services.contacts_service import get_contacts_by_account_id, add_one_con
 from ts.services.preserve_service import reserve_one_ticket
 from ts.services.order_service import get_orders_by_login_id
 from ts.services.inside_payment_service import pay_one_order
-from ts.services.cancel_service import cancel_one_order
+from ts.services.cancel_service import cancel_one_order, get_refund_amount
 from ts.services.voucher_service import get_one_voucher
 from ts.services.consign_service import (
     add_one_consign_by_order_id,
     get_one_consign_by_order_id,
     update_one_consign_by_order_id,
 )
+from ts.services.travel_plan_service import (
+    get_cheapest_travel_plans,
+    get_quickest_travel_plans,
+    get_min_station_travel_plans,
+)
+from ts.services.travel_service import search_ticket
+from ts.services.visit_page import (
+    visit_home,
+    visit_client_login,
+    visit_client_ticket_book,
+)
+
+from datetime import datetime
+import random
 
 
 class TrainTicketRequest:
@@ -24,6 +38,23 @@ class TrainTicketRequest:
         self.user_id = None
         self.order_id = None
         self.request_id = str(uuid.uuid4())
+
+    def _gen_random_date(after=random.randint(100, 20000000)) -> str:
+        # getting the timestamp
+        ts = datetime.timestamp(datetime.now())
+        return datetime.fromtimestamp(after + ts).strftime("%Y-%m-%d")
+
+    def visit_without_login(self, page: str):
+        if page == "home":
+            visit_home(self.client, self.request_id)
+        elif page == "client login":
+            visit_client_login(self.client, self.request_id)
+
+    def search_departure_and_return(self):
+        departure_time = self._gen_random_date(random.randint(100, 5000))
+        return_time = self._gen_random_date(random.randint(200000, 20000000))
+        search_ticket(departure_time, "Shang Hai", "Su Zhou")
+        search_ticket(return_time, "Su Zhou", "Shang Hai")
 
     def _create_user(self):
         """
@@ -101,6 +132,13 @@ class TrainTicketRequest:
         pay_one_order(self.client, self.order_id, self.bearer, self.user_id)
 
     def cancel_last_order_with_no_refund(self):
+        get_refund_amount(
+            self.client,
+            self.bearer,
+            self.order_id,
+            self.user_id,
+            "calculate refund",
+        )
         cancel_one_order(
             self.client,
             self.bearer,
@@ -119,4 +157,12 @@ class TrainTicketRequest:
         get_one_consign_by_order_id(self.client, self.bearer, self.order_id)
         update_one_consign_by_order_id(
             self.client, self.bearer, self.user_id, self.order_id
+        )
+
+    def get_travel_plans(self):
+        departure_time = self._gen_random_date()
+        get_cheapest_travel_plans(self.client, "Nan Jing", "Shang Hai", departure_time)
+        get_quickest_travel_plans(self.client, "Nan Jing", "Shang Hai", departure_time)
+        get_min_station_travel_plans(
+            self.client, "Nan Jing", "Shang Hai", departure_time
         )

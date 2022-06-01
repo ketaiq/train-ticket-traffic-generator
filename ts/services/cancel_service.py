@@ -34,3 +34,36 @@ def cancel_one_order(
             )
         else:
             logging.info(f"user {user_id} cancels the order {order_id}")
+
+
+def get_refund_amount(
+    client: HttpSession, bearer: str, order_id: str, user_id: str, description: str
+):
+    with client.get(
+        url="/api/v1/cancelservice/cancel/refound/" + order_id,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": bearer,
+        },
+        name=description,
+    ) as response:
+        if "Success" not in response.json()["msg"]:
+            response.failure(
+                f"user {user_id} tries to calculate refund amount of order {order_id} but gets wrong response"
+            )
+            logging.error(
+                f"user {user_id} tries to calculate refund amount of order {order_id} but gets wrong response {response.json()}"
+            )
+        elif response.elapsed.total_seconds() > 10:
+            response.failure(
+                f"user {user_id} tries to calculate refund amount of order {order_id} but request takes too long!"
+            )
+            logging.warning(
+                f"user {user_id} tries to calculate refund amount of order {order_id} but request takes too long!"
+            )
+        else:
+            refund = response.json()["data"]
+            logging.info(
+                f"user {user_id} calculates refund amount of order {order_id} and gets {refund}"
+            )

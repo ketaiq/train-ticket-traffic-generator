@@ -1,5 +1,7 @@
 # train-ticket-analysis
 
+Run `locust` to start sending requests.
+
 ## Environment Configuration
 
 1. Install all required packages by running `conda create -n train-ticket-test --channel=conda-forge python locust`.
@@ -97,8 +99,16 @@ We can call service API without visiting pages. For example, we can call login s
 
 ### 14. ts-travel-plan-service
 
-| Operation                         | Method | API                                               | Return                 | Require | Dependency |
-| --------------------------------- | ------ | ------------------------------------------------- | ---------------------- | ------- | ---------- |
-| Get cheapest travel plans         | POST   | `/api/v1/travelplanservice/travelPlan/cheapest`   | Cheapest Plans         | None    | None       |
-| Get quickest travel plans         | POST   | `/api/v1/travelplanservice/travelPlan/quickest`   | Quickest Plans         | None    | None       |
-| Get minimum stations travel plans | POST   | `/api/v1/travelplanservice/travelPlan/minStation` | Minimum Stations Plans | None    | None       |
+| Operation                         | Method   | API                                                      | Return                 | Require | Dependency |
+| --------------------------------- | -------- | -------------------------------------------------------- | ---------------------- | ------- | ---------- |
+| Get cheapest travel plans         | POST     | `/api/v1/travelplanservice/travelPlan/cheapest`          | Cheapest Plans         | None    | None       |
+| Get quickest travel plans         | POST     | `/api/v1/travelplanservice/travelPlan/quickest`          | Quickest Plans         | None    | None       |
+| Get minimum stations travel plans | POST     | `/api/v1/travelplanservice/travelPlan/minStation`        | Minimum Stations Plans | None    | None       |
+| ~~Get transfer search result~~    | ~~POST~~ | ~~`api/v1/travelplanservice/travelPlan/transferResult`~~ | Service Not Available  |
+
+### 15. ts-station-service
+
+| Operation          | Method | API                               | Return         | Require               | Dependency          |
+| ------------------ | ------ | --------------------------------- | -------------- | --------------------- | ------------------- |
+| Get train stations | GET    | `/api/v1/stationservice/stations` | Train Stations | **Admin** Login Token | **ts-auth-service** |
+|                    |

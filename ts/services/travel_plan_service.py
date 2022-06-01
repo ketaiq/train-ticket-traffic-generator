@@ -42,7 +42,7 @@ def get_cheapest_travel_plans(
 
 
 def get_quickest_travel_plans(
-    client: HttpSession, startingPlace: str, endPlace: str, departure_time: str
+    client: HttpSession, starting_place: str, end_place: str, departure_time: str
 ):
     with client.post(
         url="/api/v1/travelplanservice/travelPlan/quickest",
@@ -51,8 +51,8 @@ def get_quickest_travel_plans(
             "Content-Type": "application/json",
         },
         json={
-            "startingPlace": startingPlace,
-            "endPlace": endPlace,
+            "startingPlace": starting_place,
+            "endPlace": end_place,
             "departureTime": departure_time,
         },
         name="get quickest travel plans",
@@ -77,7 +77,7 @@ def get_quickest_travel_plans(
 
 
 def get_min_station_travel_plans(
-    client: HttpSession, startingPlace: str, endPlace: str, departure_time: str
+    client: HttpSession, starting_place: str, end_place: str, departure_time: str
 ):
     with client.post(
         url="/api/v1/travelplanservice/travelPlan/minStation",
@@ -86,26 +86,20 @@ def get_min_station_travel_plans(
             "Content-Type": "application/json",
         },
         json={
-            "startingPlace": startingPlace,
-            "endPlace": endPlace,
+            "startingPlace": starting_place,
+            "endPlace": end_place,
             "departureTime": departure_time,
         },
         name="get minimum stations travel plans",
     ) as response:
         if response.json()["msg"] != "Success":
-            response.failure(
-                f"user tries to get minimum stations travel plans on {departure_time} but gets wrong response"
-            )
-            logging.error(
-                f"user tries to get minimum stations travel plans on {departure_time} but gets wrong response {response.json()}"
-            )
+            log = f"user tries to get minimum stations travel plans on {departure_time} but gets wrong response"
+            response.failure(log)
+            logging.error(f"{log} {response.json()}")
         elif response.elapsed.total_seconds() > 10:
-            response.failure(
-                f"user tries to get minimum stations travel plans on {departure_time} but request takes too long!"
-            )
-            logging.warning(
-                f"user tries to get minimum stations travel plans on {departure_time} but request takes too long!"
-            )
+            log = f"user tries to get minimum stations travel plans on {departure_time} but request takes too long!"
+            response.failure(log)
+            logging.warning(log)
         else:
             plans = response.json()["data"]
             logging.info(

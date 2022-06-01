@@ -37,7 +37,7 @@ class UserNoLogin(HttpUser):
         ts_request = TrainTicketRequest(self.client)
         logging.debug(f"""Running user "no login" with id {ts_request.request_id}...""")
 
-        ts_request.visit_without_login()
+        ts_request.visit_without_login("home")
         ts_request.search_departure_and_return()
 
 

@@ -1,7 +1,6 @@
 import uuid
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import add_one_user
-from ts.services.visit_page import visit_client_login, visit_client_ticket_book
 from ts.services.assurance_service import get_assurance_types
 from ts.services.food_service import get_food_menu
 from ts.services.contacts_service import get_contacts_by_account_id, add_one_contact
@@ -39,10 +38,10 @@ class TrainTicketRequest:
         self.order_id = None
         self.request_id = str(uuid.uuid4())
 
-    def _gen_random_date(after=random.randint(100, 20000000)) -> str:
+    def _gen_random_date(after: int=random.randint(100, 20000000)) -> str:
         # getting the timestamp
-        ts = datetime.timestamp(datetime.now())
-        return datetime.fromtimestamp(after + ts).strftime("%Y-%m-%d")
+        timestamp = datetime.timestamp(datetime.now())
+        return datetime.fromtimestamp(after + timestamp).strftime("%Y-%m-%d")
 
     def visit_without_login(self, page: str):
         if page == "home":
@@ -51,8 +50,10 @@ class TrainTicketRequest:
             visit_client_login(self.client, self.request_id)
 
     def search_departure_and_return(self):
-        departure_time = self._gen_random_date(random.randint(100, 5000))
-        return_time = self._gen_random_date(random.randint(200000, 20000000))
+        departure_int = random.randint(100, 5000)
+        return_int = random.randint(200000, 20000000)
+        departure_time = self._gen_random_date(departure_int)
+        return_time = self._gen_random_date(return_int)
         search_ticket(departure_time, "Shang Hai", "Su Zhou")
         search_ticket(return_time, "Su Zhou", "Shang Hai")
 
@@ -87,7 +88,7 @@ class TrainTicketRequest:
         and then send a POST request of login the new user.
         """
         user_name = self._create_user()
-        visit_client_login(self.client)
+        visit_client_login(self.client, self.request_id)
         self.bearer, self.user_id = login_user(
             self.client,
             username=user_name,

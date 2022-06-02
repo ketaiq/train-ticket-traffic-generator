@@ -102,11 +102,11 @@ def delete_one_route(admin_bearer: str, request_id: str, route_id: str):
 
 
 if __name__ == "__main__":
-    from auth_service import login_user
+    from auth_service import login_user_request
     import uuid
 
     request_id = str(uuid.uuid4())
-    admin_bearer, user_id = login_user(
+    admin_bearer, user_id = login_user_request(
         username="admin", password="222222", request_id=request_id
     )
 

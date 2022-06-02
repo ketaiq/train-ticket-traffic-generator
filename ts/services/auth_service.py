@@ -43,7 +43,9 @@ def login_user(
     return admin_bearer, user_id
 
 
-def login_user(username: str, password: str, request_id: str) -> Tuple[str, str]:
+def login_user_request(
+    username: str, password: str, request_id: str
+) -> Tuple[str, str]:
     operation = "log in"
     admin_bearer = ""
     user_id = ""
@@ -77,7 +79,7 @@ def login_user(username: str, password: str, request_id: str) -> Tuple[str, str]
 
 
 if __name__ == "__main__":
-    admin_bearer, user_id = login_user(
+    admin_bearer, user_id = login_user_request(
         username="admin", password="222222", request_id=str(uuid.uuid4())
     )
     print(f"admin_bearer: {admin_bearer}, user_id: {user_id}")

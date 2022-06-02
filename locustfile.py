@@ -2,7 +2,6 @@ import logging
 from requests.adapters import HTTPAdapter
 import locust.stats
 from locust import HttpUser, task, constant
-import datetime
 
 from ts.requests import *
 

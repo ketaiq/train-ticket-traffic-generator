@@ -38,7 +38,7 @@ class TrainTicketRequest:
         self.order_id = None
         self.request_id = str(uuid.uuid4())
 
-    def _gen_random_date(after: int=random.randint(100, 20000000)) -> str:
+    def _gen_random_date(self, after: int = random.randint(100, 20000000)) -> str:
         # getting the timestamp
         timestamp = datetime.timestamp(datetime.now())
         return datetime.fromtimestamp(after + timestamp).strftime("%Y-%m-%d")
@@ -54,8 +54,8 @@ class TrainTicketRequest:
         return_int = random.randint(200000, 20000000)
         departure_time = self._gen_random_date(departure_int)
         return_time = self._gen_random_date(return_int)
-        search_ticket(departure_time, "Shang Hai", "Su Zhou")
-        search_ticket(return_time, "Su Zhou", "Shang Hai")
+        search_ticket(self.client, departure_time, "Shang Hai", "Su Zhou", self.request_id)
+        search_ticket(self.client, return_time, "Su Zhou", "Shang Hai", self.request_id)
 
     def _create_user(self):
         """

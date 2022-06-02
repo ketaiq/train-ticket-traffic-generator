@@ -22,9 +22,12 @@ We can call service API without visiting pages. For example, we can call login s
 
 ### 2. ts-travel-service
 
-| Operation     | Method | API                                | Return      | Require |
-| ------------- | ------ | ---------------------------------- | ----------- | ------- |
-| Search Ticket | POST   | `/api/v1/travelservice/trips/left` | Ticket Info | None    |
+| Operation       | Method   | API                                | Return                | Require |
+| --------------- | -------- | ---------------------------------- | --------------------- | ------- |
+| Search Ticket   | POST     | `/api/v1/travelservice/trips/left` | Ticket Info           | None    |
+| ~~Create Trip~~ | ~~POST~~ | ~~`/api/v1/travelservice/trips`~~  | Service Not Available |
+| ~~Update Trip~~ | ~~PUT~~  | ~~`/api/v1/travelservice/trips`~~  | Service Not Available |
+| ~~Get Trip~~    | ~~GET~~  | ~~`/api/v1/travelservice/trips`~~  | Service Not Available |
 
 ### 3. ts-auth-service
 
@@ -108,7 +111,17 @@ We can call service API without visiting pages. For example, we can call login s
 
 ### 15. ts-station-service
 
-| Operation          | Method | API                               | Return         | Require               | Dependency          |
-| ------------------ | ------ | --------------------------------- | -------------- | --------------------- | ------------------- |
-| Get train stations | GET    | `/api/v1/stationservice/stations` | Train Stations | **Admin** Login Token | **ts-auth-service** |
-|                    |
+| Operation            | Method | API                               | Return         | Require               | Dependency          |
+| -------------------- | ------ | --------------------------------- | -------------- | --------------------- | ------------------- |
+| Get train stations   | GET    | `/api/v1/stationservice/stations` | Train Stations | **Admin** Login Token | **ts-auth-service** |
+| Add train station    | POST   | `/api/v1/stationservice/stations` | Train Station  | **Admin** Login Token | **ts-auth-service** |
+| Update train station | PUT    | `/api/v1/stationservice/stations` | Train Station  | **Admin** Login Token | **ts-auth-service** |
+| Delete train station | DELETE | `/api/v1/stationservice/stations` | Train Station  | **Admin** Login Token | **ts-auth-service** |
+
+### 16. ts-admin-route-service
+
+| Operation  | Method | API                                              | Return | Require               | Dependency                                |
+| ---------- | ------ | ------------------------------------------------ | ------ | --------------------- | ----------------------------------------- |
+| Get routes | GET    | `/api/v1/adminrouteservice/adminroute`           | Routes | **Admin** Login Token | **ts-auth-service**, **ts-route-service** |
+| Get routes | POST   | `/api/v1/adminrouteservice/adminroute`           | Routes | **Admin** Login Token | **ts-auth-service**, **ts-route-service** |
+| Get routes | DELETE | `/api/v1/adminrouteservice/adminroute/{routeId}` | Routes | **Admin** Login Token | **ts-auth-service**, **ts-route-service** |

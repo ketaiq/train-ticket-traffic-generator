@@ -3,12 +3,23 @@ This module includes all API calls provided by ts-consign-service.
 """
 
 import logging
-from locust.clients import HttpSession
+import random
+import uuid
+from ts.util import gen_random_phone_number
 
 
-def add_one_consign_by_order_id(
-    client: HttpSession, bearer: str, user_id: str, order_id: str
-):
+class Consign:
+    """
+    According to https://github.com/FudanSELab/train-ticket/blob/master/ts-preserve-service/src/main/java/preserve/entity/Consign.java
+    """
+
+    def __init__(self, name: str, phone: str, weight: float):
+        self.name = name
+        self.phone = phone
+        self.weight = weight
+
+
+def add_one_consign_by_order_id(client, bearer: str, user_id: str, order_id: str):
     with client.post(
         url="/api/v1/consignservice/consigns",
         name="add a consign",
@@ -48,7 +59,7 @@ def add_one_consign_by_order_id(
             logging.info(f"user {user_id} consigns a ticket")
 
 
-def get_one_consign_by_order_id(client: HttpSession, bearer: str, order_id: str):
+def get_one_consign_by_order_id(client, bearer: str, order_id: str):
     with client.get(
         url="/api/v1/consignservice/consigns/order/" + order_id,
         headers={
@@ -79,9 +90,7 @@ def get_one_consign_by_order_id(client: HttpSession, bearer: str, order_id: str)
             )
 
 
-def update_one_consign_by_order_id(
-    client: HttpSession, bearer: str, user_id: str, order_id: str
-):
+def update_one_consign_by_order_id(client, bearer: str, user_id: str, order_id: str):
     with client.put(
         url="/api/v1/consignservice/consigns",
         name="update a consign",
@@ -121,3 +130,14 @@ def update_one_consign_by_order_id(
             logging.info(
                 f"user {user_id} update a consigned ticket by order id {order_id}"
             )
+
+
+def gen_random_consign() -> Consign:
+    need_consign = random.randint(0, 1)
+    if need_consign == 0:
+        return Consign("", "", 0)
+    else:
+        name = str(uuid.uuid4())
+        phone_number = gen_random_phone_number()
+        weight = round(random.uniform(1, 100), 2)
+        return Consign(name, phone_number, weight)

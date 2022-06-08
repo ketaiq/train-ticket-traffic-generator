@@ -1,10 +1,10 @@
 import uuid
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import add_one_user
-from ts.services.assurance_service import get_assurance_types
-from ts.services.food_service import get_food_menu
-from ts.services.contacts_service import get_contacts_by_account_id, add_one_contact
-from ts.services.preserve_service import reserve_one_ticket
+from ts.services.assurance_service import get_assurance_types, AssuranceType
+from ts.services.food_service import get_food_menu, gen_random_food
+from ts.services.contacts_service import get_contacts_by_account_id, add_one_contact, update_one_contact, gen_random_contact
+from ts.services.preserve_service import reserve_one_ticket, SeatType
 from ts.services.order_service import get_orders_by_login_id
 from ts.services.inside_payment_service import pay_one_order
 from ts.services.cancel_service import cancel_one_order, get_refund_amount
@@ -13,6 +13,7 @@ from ts.services.consign_service import (
     add_one_consign_by_order_id,
     get_one_consign_by_order_id,
     update_one_consign_by_order_id,
+    gen_random_consign,
 )
 from ts.services.travel_plan_service import (
     get_cheapest_travel_plans,
@@ -26,7 +27,7 @@ from ts.services.visit_page import (
     visit_client_ticket_book,
 )
 
-from datetime import datetime
+from ts.util import gen_random_date
 import random
 
 
@@ -38,11 +39,6 @@ class TrainTicketRequest:
         self.order_id = None
         self.request_id = str(uuid.uuid4())
 
-    def _gen_random_date(self, after: int = random.randint(90000, 50000000)) -> str:
-        # getting the timestamp
-        timestamp = datetime.timestamp(datetime.now())
-        return datetime.fromtimestamp(after + timestamp).strftime("%Y-%m-%d")
-
     def visit_without_login(self, page: str):
         if page == "home":
             visit_home(self.client, self.request_id)
@@ -52,8 +48,8 @@ class TrainTicketRequest:
     def search_departure_and_return(self):
         departure_int = random.randint(90000, 100000)
         return_int = random.randint(200000, 20000000)
-        departure_time = self._gen_random_date(departure_int)
-        return_time = self._gen_random_date(return_int)
+        departure_time = gen_random_date(departure_int)
+        return_time = gen_random_date(return_int)
         search_ticket(
             self.client, departure_time, "Shang Hai", "Su Zhou", self.request_id
         )
@@ -128,9 +124,25 @@ class TrainTicketRequest:
         """
         visit_client_ticket_book(self.client, self.bearer, self.user_id)
         get_assurance_types(self.client, self.bearer, self.user_id)
-        get_food_menu(self.client, self.bearer, self.user_id)
+        food_menu = get_food_menu(self.client, self.bearer, self.user_id)
+        food = gen_random_food(food_menu)
+        consign = gen_random_consign()
         contact_id = self.get_a_contact()
-        reserve_one_ticket(self.client, self.user_id, contact_id, self.bearer)
+        departure_int = random.randint(90000, 100000)
+        departure_time = gen_random_date(departure_int)
+        reserve_one_ticket(
+            self.client,
+            self.bearer,
+            self.user_id,
+            contact_id,
+            SeatType.FIRST_CLASS.value,
+            departure_time,
+            "Shang Hai",
+            "Su Zhou",
+            AssuranceType.NONE.value,
+            food,
+            consign,
+        )
         self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)
         pay_one_order(self.client, self.order_id, self.bearer, self.user_id)
 
@@ -153,7 +165,7 @@ class TrainTicketRequest:
     def get_voucher_of_last_order(self):
         get_one_voucher(self.client, self.bearer, self.order_id)
 
-    def pick_up_ticket(self):
+    def consign_ticket(self):
         add_one_consign_by_order_id(
             self.client, self.bearer, self.user_id, self.order_id
         )
@@ -163,9 +175,15 @@ class TrainTicketRequest:
         )
 
     def get_travel_plans(self):
-        departure_time = self._gen_random_date()
+        departure_time = gen_random_date()
         get_cheapest_travel_plans(self.client, "Nan Jing", "Shang Hai", departure_time)
         get_quickest_travel_plans(self.client, "Nan Jing", "Shang Hai", departure_time)
         get_min_station_travel_plans(
             self.client, "Nan Jing", "Shang Hai", departure_time
         )
+
+    def update_contact(self):
+        contact_id = self.get_a_contact()
+        new_contact = gen_random_contact(contact_id, self.user_id)
+        update_one_contact(self.client, self.bearer, new_contact)
+

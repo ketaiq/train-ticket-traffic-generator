@@ -3,10 +3,38 @@ This module includes all API calls provided by ts-food-service.
 """
 
 import logging
-from locust.clients import HttpSession
+from enum import IntEnum
+import requests
+from json import JSONDecodeError
+import random
 
 
-def get_food_menu(client: HttpSession, bearer: str, user_id: str):
+class FoodType(IntEnum):
+    NONE = 0
+    TRAIN_FOOD = 1
+    STATION_FOOD_STORES = 2
+
+
+class Food:
+    """
+    According to https://github.com/FudanSELab/train-ticket/blob/master/ts-preserve-service/src/main/java/preserve/entity/FoodOrder.java
+    """
+
+    def __init__(self, name: str, type: int, station: str, store: str, price: float):
+        self.name = name
+        self.type = type
+        if type == FoodType.STATION_FOOD_STORES:
+            self.station = station
+            self.store = store
+        else:
+            self.station = ""
+            self.store = ""
+
+        self.price = price
+
+
+def get_food_menu(client, bearer: str, user_id: str) -> dict:
+    food_menu = dict()
     # get food
     with client.get(
         url="/api/v1/foodservice/foods/2022-02-11/Shang%20Hai/Su%20Zhou/D1345",
@@ -32,9 +60,87 @@ def get_food_menu(client: HttpSession, bearer: str, user_id: str):
                 f"user {user_id} tries to get food menu but request takes too long!"
             )
         else:
-            data = response.json()["data"]
-            food_list = data["trainFoodList"]
-            food_store_map = data["foodStoreListMap"]
-            logging.info(
-                f"user {user_id} get food menu {food_list} and {food_store_map}"
+            food_menu = response.json()["data"]
+            logging.info(f"user {user_id} get food menu {food_menu}")
+
+    return food_menu
+
+
+def get_food_menu_request(request_id: str, bearer: str):
+    operation = "get food menu"
+    r = requests.get(
+        url="http://35.238.101.76:8080/api/v1/foodservice/foods/2022-02-11/Shang%20Hai/Su%20Zhou/D1345",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": bearer,
+        },
+    )
+    try:
+        key = "msg"
+        msg = r.json()["msg"]
+        if msg != "Get All Food Success":
+            print(
+                f"request {request_id} tries to {operation} but gets wrong response {msg}"
             )
+        else:
+            key = "data"
+            food = r.json()["data"]
+            return food
+    except JSONDecodeError:
+        print("Response could not be decoded as JSON")
+    except KeyError:
+        print(f"Response did not contain expected key '{key}'")
+
+def gen_random_food(food_menu: dict) -> Food:
+    food_type = random.randint(
+        FoodType.NONE.value, FoodType.STATION_FOOD_STORES.value
+    )
+    if food_type == FoodType.TRAIN_FOOD:
+        train_food = food_menu["trainFoodList"][0]
+        chosen_food_index = random.randint(0, len(train_food["foodList"]) - 1)
+        chosen_food = train_food["foodList"][chosen_food_index]
+        return Food(
+                chosen_food["foodName"],
+                food_type,
+                "",
+                "",
+                chosen_food["price"],
+            )
+    elif food_type == FoodType.STATION_FOOD_STORES:
+        station_food = food_menu["foodStoreListMap"]
+        station = random.randint(0, 1)
+        if station == 0:
+            station_food = station_food["shanghai"]
+        else:
+            station_food = station_food["suzhou"]
+        station_food_index = random.randint(0, len(station_food) - 1)
+        station_food = station_food[station_food_index]
+        chosen_food_index = random.randint(0, len(station_food["foodList"]) - 1)
+        chosen_food = station_food["foodList"][chosen_food_index]
+        return Food(
+                chosen_food["foodName"],
+                food_type,
+                station_food["stationId"],
+                station_food["storeName"],
+                chosen_food["price"],
+            )
+    else:
+        return Food(
+                "",
+                food_type,
+                "",
+                "",
+                0,
+            )
+
+if __name__ == "__main__":
+    from auth_service import login_user_request
+    import uuid
+
+    request_id = str(uuid.uuid4())
+    bearer, user_id = login_user_request(
+        username="fdse_microservice", password="111111", request_id=request_id
+    )
+    food_menu = get_food_menu_request(request_id, bearer)
+    print(gen_random_food(food_menu).__dict__)

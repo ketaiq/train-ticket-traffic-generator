@@ -125,3 +125,10 @@ We can call service API without visiting pages. For example, we can call login s
 | Get routes       | GET    | `/api/v1/adminrouteservice/adminroute`           | Routes | **Admin** Login Token | **ts-auth-service**, **ts-route-service** |
 | Add one route    | POST   | `/api/v1/adminrouteservice/adminroute`           | Routes | **Admin** Login Token | **ts-auth-service**, **ts-route-service** |
 | Delete one route | DELETE | `/api/v1/adminrouteservice/adminroute/{routeId}` | Routes | **Admin** Login Token | **ts-auth-service**, **ts-route-service** |
+
+### 17. ts-admin-travel-service
+
+| Operation              | Method | API                                      | Return  | Require               | Dependency                                 |
+| ---------------------- | ------ | ---------------------------------------- | ------- | --------------------- | ------------------------------------------ |
+| Get travel information | GET    | `/api/v1/admintravelservice/admintravel` | Travels | **Admin** Login Token | **ts-auth-service**, **ts-travel-service** |
+| Add one travel         | POST   | `/api/v1/admintravelservice/admintravel` | None    | **Admin** Login Token | **ts-auth-service**, **ts-travel-service** |

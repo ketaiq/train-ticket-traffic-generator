@@ -40,23 +40,24 @@ class UserNoLogin(HttpUser):
         ts_request.search_departure_and_return()
 
 
-# class UserLogin(HttpUser):
-#     weight = 50
-#     wait_time = constant(1)
+class UserLogin(HttpUser):
+    weight = 50
+    wait_time = constant(1)
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
+        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
 
-#     @task
-#     def perform_task(self):
-#         ts_request = TrainTicketRequest(self.client)
-#         logging.debug(f"""Running user "login" with id {ts_request.request_id}...""")
+    @task
+    def perform_task(self):
+        ts_request = TrainTicketRequest(self.client)
+        logging.debug(f"""Running user "login" with id {ts_request.request_id}...""")
 
-#         ts_request.create_and_login_user()
-#         ts_request.book()
-#         ts_request.cancel_last_order_with_no_refund()
-#         ts_request.get_voucher_of_last_order()
-#         ts_request.pick_up_ticket()
-#         ts_request.get_travel_plans()
+        ts_request.create_and_login_user()
+        ts_request.book()
+        ts_request.cancel_last_order_with_no_refund()
+        ts_request.get_voucher_of_last_order()
+        ts_request.consign_ticket()
+        ts_request.get_travel_plans()
+        ts_request.update_contact()

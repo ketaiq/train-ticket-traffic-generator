@@ -3,6 +3,7 @@ from datetime import datetime
 import uuid
 import string
 
+
 def gen_random_phone_number() -> str:
     first = str(random.randint(100, 999))
     second = str(random.randint(1, 999)).zfill(3)
@@ -19,11 +20,16 @@ def gen_random_date(after: int = random.randint(90000, 50000000)) -> str:
 def gen_random_document_number() -> str:
     return str(uuid.uuid4())[:8].upper()
 
+
 def gen_random_name() -> str:
     first_name_len = random.randint(3, 8)
-    first_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(first_name_len)).capitalize()
+    first_name = "".join(
+        random.choice(string.ascii_lowercase) for _ in range(first_name_len)
+    ).capitalize()
     last_name_len = random.randint(3, 8)
-    last_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(last_name_len)).capitalize()
+    last_name = "".join(
+        random.choice(string.ascii_lowercase) for _ in range(last_name_len)
+    ).capitalize()
     return f"{first_name} {last_name}"
 
 

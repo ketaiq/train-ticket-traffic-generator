@@ -14,6 +14,22 @@ import string
 
 STATION_SERVICE_URL = "http://35.238.101.76:8080/api/v1/stationservice/stations"
 
+ORIGINAL_STATIONS = [
+    {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},
+    {"id": "shanghaihongqiao", "name": "Shang Hai Hong Qiao", "stayTime": 10},
+    {"id": "taiyuan", "name": "Tai Yuan", "stayTime": 5},
+    {"id": "beijing", "name": "Bei Jing", "stayTime": 10},
+    {"id": "nanjing", "name": "Nan Jing", "stayTime": 8},
+    {"id": "shijiazhuang", "name": "Shi Jia Zhuang", "stayTime": 8},
+    {"id": "xuzhou", "name": "Xu Zhou", "stayTime": 7},
+    {"id": "jinan", "name": "Ji Nan", "stayTime": 5},
+    {"id": "hangzhou", "name": "Hang Zhou", "stayTime": 9},
+    {"id": "jiaxingnan", "name": "Jia Xing Nan", "stayTime": 2},
+    {"id": "zhenjiang", "name": "Zhen Jiang", "stayTime": 2},
+    {"id": "wuxi", "name": "Wu Xi", "stayTime": 3},
+    {"id": "suzhou", "name": "Su Zhou", "stayTime": 3},
+]
+
 
 class Station:
     """
@@ -35,7 +51,7 @@ def get_all_stations(client, admin_bearer: str, admin_user_id: str) -> list:
             "Content-Type": "application/json",
             "Authorization": admin_bearer,
         },
-        name="get all stations",
+        name=operation,
     ) as response:
         if response.json()["msg"] != "Find all content":
             log_wrong_response_warning(admin_user_id, operation, response)
@@ -48,7 +64,7 @@ def get_all_stations(client, admin_bearer: str, admin_user_id: str) -> list:
 
 
 def get_all_stations_request(admin_user_id: str, admin_bearer: str) -> list:
-    operation = "get food menu"
+    operation = "get all stations"
     r = requests.get(
         url=STATION_SERVICE_URL,
         headers={
@@ -82,7 +98,7 @@ def add_one_new_station(
     new_station_name: str,
     stay_time: int,
 ):
-    operation = "add a new station"
+    operation = "add one station"
     with client.post(
         url="/api/v1/stationservice/stations",
         headers={
@@ -132,7 +148,7 @@ def add_one_new_station_request(
     new_station_name: str,
     stay_time: int,
 ) -> dict:
-    operation = "add a new station"
+    operation = "add one station"
     r = requests.post(
         url=STATION_SERVICE_URL,
         headers={
@@ -189,7 +205,7 @@ def update_one_station(
     new_station_name: str,
     new_station_stay_time: int,
 ):
-    operation = "update a station"
+    operation = "update one station"
     with client.put(
         url="/api/v1/stationservice/stations",
         headers={
@@ -220,7 +236,7 @@ def update_one_station_request(
     new_station_name: str,
     new_station_stay_time: int,
 ) -> dict:
-    operation = "update a station"
+    operation = "update one station"
     r = requests.put(
         url=STATION_SERVICE_URL,
         headers={
@@ -258,7 +274,7 @@ def delete_one_station(
     station_id: str,
     station_name: str,
 ):
-    operation = "delete a station"
+    operation = "delete one station"
     with client.delete(
         url="/api/v1/stationservice/stations",
         headers={
@@ -287,7 +303,7 @@ def delete_one_station_request(
     station_id: str,
     station_name: str,
 ) -> dict:
-    operation = "update a station"
+    operation = "delete one station"
     r = requests.delete(
         url=STATION_SERVICE_URL,
         headers={
@@ -368,13 +384,10 @@ def gen_updated_station(station: Station) -> Station:
     return Station(station.id, name, random.randint(1, 20))
 
 
-def pick_random_station(
-    client, admin_bearer: str, admin_user_id: str, original_stations: list
-) -> Station:
-    stations = get_all_stations(client, admin_bearer, admin_user_id)
-    picked_station = random.choice(stations)
+def pick_random_station(all_stations: list, original_stations: list) -> Station:
+    picked_station = random.choice(all_stations)
     while picked_station in original_stations:
-        picked_station = random.choice(stations)
+        picked_station = random.choice(all_stations)
     return Station(
         picked_station["id"], picked_station["name"], picked_station["stayTime"]
     )

@@ -3,7 +3,7 @@ from requests.adapters import HTTPAdapter
 import locust.stats
 from locust import HttpUser, task, constant
 
-from ts.ts_requests import *
+from ts.ts_requests import TrainTicketRequest
 from ts.requests.rail_traffic_controller import RailTrafficControllerRequest
 
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
@@ -79,7 +79,7 @@ class RailTrafficController(HttpUser):
 
     @task(3)
     def add_station(self):
-        self.request.add_one_new_station()
+        self.request.add_one_station()
 
     @task(6)
     def update_station(self):
@@ -88,3 +88,15 @@ class RailTrafficController(HttpUser):
     @task(1)
     def delete_station(self):
         self.request.delete_one_station()
+
+    @task(3)
+    def add_route(self):
+        self.request.add_one_route()
+
+    @task(6)
+    def update_route(self):
+        self.request.update_one_route()
+
+    @task(1)
+    def delete_route(self):
+        self.request.delete_one_route()

@@ -3,16 +3,86 @@ import unittest
 
 
 class ServiceRequestTestCase(unittest.TestCase):
-    @unittest.skip("skipping")
+    # @unittest.skip("skipping")
     def test_contacts_service(self):
-        from ts.services.contacts_service import gen_random_contact
+        from ts.services.auth_service import login_user_request
+        from ts.services.contacts_service import (
+            gen_random_contact,
+            get_all_contacts_request,
+            add_one_contact_request,
+            delete_one_contact_request,
+        )
 
         def test_gen_random_contact():
             print("Test gen_random_contact")
             print(gen_random_contact(str(uuid.uuid4()), str(uuid.uuid4())).__dict__)
 
+        def test_get_all_contacts_request():
+            print("Test get_all_contacts_request")
+            contacts = get_all_contacts_request(request_id, admin_bearer)
+            print(contacts[:10])
+            self.assertIsInstance(contacts, list)
+
+        def test_add_one_contact_request():
+            print("Test add_one_contact_request")
+            new_contact = gen_random_contact(
+                None, "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"
+            )
+            added_contact = add_one_contact_request(
+                request_id, admin_bearer, new_contact
+            )
+            print(added_contact)
+
+        def test_delete_one_contact_request():
+            print("Test delete_one_contact_request")
+            contacts = get_all_contacts_request(request_id, admin_bearer)
+            contact_id = contacts[-1]["id"]
+            deleted_contact_id = delete_one_contact_request(
+                request_id, admin_bearer, contact_id
+            )
+            print(deleted_contact_id)
+            self.assertEqual(deleted_contact_id, contact_id)
+
+        def restore_original_contacts():
+            print("Restore original contacts")
+            contacts = get_all_contacts_request(request_id, admin_bearer)
+            original_contacts = [
+                {
+                    "id": "b80f4344-eca8-455e-89c2-82f5f096ce9d",
+                    "accountId": "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f",
+                    "name": "Contacts_One",
+                    "documentType": 1,
+                    "documentNumber": "DocumentNumber_One",
+                    "phoneNumber": "ContactsPhoneNum_One",
+                },
+                {
+                    "id": "c7f61d22-6514-4c81-9dd7-c444b0a42dc4",
+                    "accountId": "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f",
+                    "name": "Contacts_Two",
+                    "documentType": 1,
+                    "documentNumber": "DocumentNumber_Two",
+                    "phoneNumber": "ContactsPhoneNum_Two",
+                },
+            ]
+            for contact in contacts:
+                if contact not in original_contacts:
+                    deleted_contact_id = delete_one_contact_request(
+                        request_id, admin_bearer, contact["id"]
+                    )
+                    self.assertEqual(deleted_contact_id, contact["id"])
+                    print(f"Delete contact {deleted_contact_id}")
+            print(get_all_contacts_request(request_id, admin_bearer))
+
         print("\n\nTest contacts_service")
-        test_gen_random_contact()
+        request_id = str(uuid.uuid4())
+        admin_bearer, admin_user_id = login_user_request(
+            username="admin", password="222222", request_id=request_id
+        )
+        # test_gen_random_contact()
+        # test_get_all_contacts_request()
+        # test_add_one_contact_request()
+        # test_delete_one_contact_request()
+        restore_original_contacts()
 
     @unittest.skip("skipping")
     def test_auth_service(self):
@@ -102,9 +172,10 @@ class ServiceRequestTestCase(unittest.TestCase):
             ]
             for station in stations:
                 if station not in original_stations:
-                    delete_one_station_request(
+                    deleted_station = delete_one_station_request(
                         admin_bearer, admin_user_id, station["id"], station["name"]
                     )
+                    print(f"Delete station {deleted_station}")
             stations = get_all_stations_request(admin_user_id, admin_bearer)
             print(stations)
 

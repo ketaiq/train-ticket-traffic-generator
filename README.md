@@ -56,10 +56,11 @@ We can call service API without visiting pages. For example, we can call login s
 
 ### 7. ts-contacts-servic
 
-| Operation                             | Method | API                                       | Return     | Require     | Dependency          |
-| ------------------------------------- | ------ | ----------------------------------------- | ---------- | ----------- | ------------------- |
-| GET Contact Information Of An Account | GET    | `/api/v1/contactservice/contacts/account` | Contact ID | Login Token | **ts-auth-service** |
-| Add Contact Information               | POST   | `/api/v1/contactservice/contacts`         | Contact ID | Login Token | **ts-auth-service** |
+| Operation                             | Method | API                                       | Return                      | Require     | Dependency          |
+| ------------------------------------- | ------ | ----------------------------------------- | --------------------------- | ----------- | ------------------- |
+| GET Contact Information Of An Account | GET    | `/api/v1/contactservice/contacts/account` | Contact ID                  | Login Token | **ts-auth-service** |
+| Add Contact Information               | POST   | `/api/v1/contactservice/contacts`         | Contact ID                  | Login Token | **ts-auth-service** |
+| Update Contact Information            | PUT    | `api/v1/contactservice/contacts`          | Deleted Contact Information | Login Token | **ts-auth-service** |
 
 ### 8. ts-preserve-service
 

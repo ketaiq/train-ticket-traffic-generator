@@ -3,6 +3,7 @@ This module includes all API calls provided by ts-contacts-service.
 """
 
 import logging
+import requests
 from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
     log_timeout_warning,
@@ -11,12 +12,15 @@ from ts.log_syntax.locust_response import (
 from enum import IntEnum
 from ts.util import gen_random_name, gen_random_document_number, gen_random_phone_number
 import random
+from json import JSONDecodeError
+
+CONTACTS_SERVICE_URL = "http://35.238.101.76:8080/api/v1/contactservice/contacts"
 
 
 class Contact:
     def __init__(
         self,
-        id: str,
+        id: str | None,
         name: str,
         user_id: str,
         document_number: str,
@@ -75,6 +79,33 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
     return data
 
 
+def get_all_contacts_request(request_id: str, bearer: str):
+    operation = "get all contacts"
+    r = requests.get(
+        url=CONTACTS_SERVICE_URL,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": bearer,
+        },
+    )
+    try:
+        key = "msg"
+        msg = r.json()["msg"]
+        if msg != "Success":
+            print(
+                f"request {request_id} tries to {operation} but gets wrong response {msg}"
+            )
+        else:
+            key = "data"
+            contacts = r.json()["data"]
+            return contacts
+    except JSONDecodeError:
+        print("Response could not be decoded as JSON")
+    except KeyError:
+        print(f"Response did not contain expected key '{key}'")
+
+
 def add_one_contact(
     client, bearer: str, name: str, user_id: str, document_number: str
 ) -> dict:
@@ -113,6 +144,43 @@ def add_one_contact(
     return data
 
 
+def add_one_contact_request(
+    request_id: str, admin_bearer: str, contact: Contact
+) -> dict:
+    operation = "delete one contact"
+    r = requests.post(
+        url=CONTACTS_SERVICE_URL,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+        json={
+            "name": contact.name,
+            "accountId": contact.user_id,
+            "documentType": contact.document_type,
+            "documentNumber": contact.document_number,
+            "phoneNumber": contact.phone_number,
+        },
+    )
+    try:
+        key = "msg"
+        msg = r.json()["msg"]
+        if "success" not in msg.lower():
+            logging.warning(
+                f"request {request_id} tries to {operation} but gets wrong response {msg}"
+            )
+        else:
+            key = "data"
+            added_contact = r.json()["data"]
+            logging.info(f"request {request_id} {operation} {added_contact}")
+            return added_contact
+    except JSONDecodeError:
+        logging.error("Response could not be decoded as JSON")
+    except KeyError:
+        logging.error(f"Response did not contain expected key '{key}'")
+
+
 def update_one_contact(client, bearer: str, contact: Contact):
     operation = "update a contact"
     with client.put(
@@ -142,7 +210,37 @@ def update_one_contact(client, bearer: str, contact: Contact):
             log_response_info(contact.user_id, operation, log)
 
 
-def gen_random_contact(contact_id: str, user_id: str) -> Contact:
+def delete_one_contact_request(
+    request_id: str, admin_bearer: str, contact_id: str
+) -> str:
+    operation = "delete one contact"
+    r = requests.delete(
+        url=CONTACTS_SERVICE_URL + "/" + contact_id,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+    )
+    try:
+        key = "msg"
+        msg = r.json()["msg"]
+        if "success" not in msg.lower():
+            logging.warning(
+                f"request {request_id} tries to {operation} but gets wrong response {msg}"
+            )
+        else:
+            key = "data"
+            deleted_contact_id = r.json()["data"]
+            logging.info(f"request {request_id} {operation} {deleted_contact_id}")
+            return deleted_contact_id
+    except JSONDecodeError:
+        logging.error("Response could not be decoded as JSON")
+    except KeyError:
+        logging.error(f"Response did not contain expected key '{key}'")
+
+
+def gen_random_contact(contact_id: str | None, user_id: str) -> Contact:
     name = gen_random_name()
     document_number = gen_random_document_number()
     document_type = random.choice(list(DocumentType)).value

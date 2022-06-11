@@ -50,7 +50,7 @@ def login_user_request(
     admin_bearer = ""
     user_id = ""
     r = requests.post(
-        url="http://35.238.101.76:8080/api/v1/users/login",
+        url="http://34.98.120.134/api/v1/users/login",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

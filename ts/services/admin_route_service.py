@@ -14,9 +14,7 @@ from ts.services.station_service import get_all_stations
 import random
 import uuid
 
-ADMIN_ROUTE_SERVICE_URL = (
-    "http://35.238.101.76:8080/api/v1/adminrouteservice/adminroute"
-)
+ADMIN_ROUTE_SERVICE_URL = "http://34.98.120.134/api/v1/adminrouteservice/adminroute"
 
 ORIGINAL_ROUTES = [
     {

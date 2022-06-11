@@ -14,7 +14,7 @@ from ts.util import gen_random_name, gen_random_document_number, gen_random_phon
 import random
 from json import JSONDecodeError
 
-CONTACTS_SERVICE_URL = "http://35.238.101.76:8080/api/v1/contactservice/contacts"
+CONTACTS_SERVICE_URL = "http://34.98.120.134/api/v1/contactservice/contacts"
 
 
 class Contact:
@@ -208,6 +208,64 @@ def update_one_contact(client, bearer: str, contact: Contact):
             old_contact = response.json()["data"]
             log = f"from {old_contact} to {contact}"
             log_response_info(contact.user_id, operation, log)
+
+
+def update_one_contact_request(
+    request_id: str, admin_bearer: str, contact: Contact
+) -> dict:
+    operation = "update one contact"
+    r = requests.put(
+        url=CONTACTS_SERVICE_URL,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+        json={
+            "id": contact.id,
+            "name": contact.name,
+            "accountId": contact.user_id,
+            "documentType": contact.document_type,
+            "documentNumber": contact.document_number,
+            "phoneNumber": contact.phone_number,
+        },
+    )
+    try:
+        key = "msg"
+        msg = r.json()["msg"]
+        if "success" not in msg.lower():
+            logging.warning(
+                f"request {request_id} tries to {operation} but gets wrong response {msg}"
+            )
+        else:
+            key = "data"
+            contact = r.json()["data"]
+            logging.info(f"request {request_id} {operation} {contact}")
+            return contact
+    except JSONDecodeError:
+        logging.error("Response could not be decoded as JSON")
+    except KeyError:
+        logging.error(f"Response did not contain expected key '{key}'")
+
+
+def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id: str):
+    operation = "delete one contact"
+    with client.delete(
+        url=f"/api/v1/contactservice/contacts/{contact_id}",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+        name=operation,
+    ) as response:
+        if response.json()["msg"] != "Delete success":
+            log_wrong_response_warning(admin_user_id, operation, response)
+        elif response.elapsed.total_seconds() > 10:
+            log_timeout_warning(admin_user_id, operation, response)
+        else:
+            deleted_contact_id = response.json()["data"]
+            log_response_info(admin_user_id, operation, deleted_contact_id)
 
 
 def delete_one_contact_request(

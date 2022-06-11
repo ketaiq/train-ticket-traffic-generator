@@ -12,7 +12,7 @@ from json import JSONDecodeError
 import random
 import string
 
-STATION_SERVICE_URL = "http://35.238.101.76:8080/api/v1/stationservice/stations"
+STATION_SERVICE_URL = "http://34.98.120.134/api/v1/stationservice/stations"
 
 ORIGINAL_STATIONS = [
     {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},

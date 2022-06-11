@@ -69,7 +69,7 @@ def get_food_menu(client, bearer: str, user_id: str) -> dict:
 def get_food_menu_request(request_id: str, bearer: str):
     operation = "get food menu"
     r = requests.get(
-        url="http://35.238.101.76:8080/api/v1/foodservice/foods/2022-02-11/Shang%20Hai/Su%20Zhou/D1345",
+        url="http://34.98.120.134/api/v1/foodservice/foods/2022-02-11/Shang%20Hai/Su%20Zhou/D1345",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -92,21 +92,20 @@ def get_food_menu_request(request_id: str, bearer: str):
     except KeyError:
         print(f"Response did not contain expected key '{key}'")
 
+
 def gen_random_food(food_menu: dict) -> Food:
-    food_type = random.randint(
-        FoodType.NONE.value, FoodType.STATION_FOOD_STORES.value
-    )
+    food_type = random.randint(FoodType.NONE.value, FoodType.STATION_FOOD_STORES.value)
     if food_type == FoodType.TRAIN_FOOD:
         train_food = food_menu["trainFoodList"][0]
         chosen_food_index = random.randint(0, len(train_food["foodList"]) - 1)
         chosen_food = train_food["foodList"][chosen_food_index]
         return Food(
-                chosen_food["foodName"],
-                food_type,
-                "",
-                "",
-                chosen_food["price"],
-            )
+            chosen_food["foodName"],
+            food_type,
+            "",
+            "",
+            chosen_food["price"],
+        )
     elif food_type == FoodType.STATION_FOOD_STORES:
         station_food = food_menu["foodStoreListMap"]
         station = random.randint(0, 1)
@@ -119,20 +118,21 @@ def gen_random_food(food_menu: dict) -> Food:
         chosen_food_index = random.randint(0, len(station_food["foodList"]) - 1)
         chosen_food = station_food["foodList"][chosen_food_index]
         return Food(
-                chosen_food["foodName"],
-                food_type,
-                station_food["stationId"],
-                station_food["storeName"],
-                chosen_food["price"],
-            )
+            chosen_food["foodName"],
+            food_type,
+            station_food["stationId"],
+            station_food["storeName"],
+            chosen_food["price"],
+        )
     else:
         return Food(
-                "",
-                food_type,
-                "",
-                "",
-                0,
-            )
+            "",
+            food_type,
+            "",
+            "",
+            0,
+        )
+
 
 if __name__ == "__main__":
     from auth_service import login_user_request

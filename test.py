@@ -11,6 +11,7 @@ class ServiceRequestTestCase(unittest.TestCase):
             get_all_contacts_request,
             add_one_contact_request,
             delete_one_contact_request,
+            update_one_contact_request,
         )
 
         def test_gen_random_contact():
@@ -32,6 +33,23 @@ class ServiceRequestTestCase(unittest.TestCase):
                 request_id, admin_bearer, new_contact
             )
             print(added_contact)
+
+        def test_update_one_contact_request():
+            print("Test update_one_contact_request")
+            contacts = get_all_contacts_request(request_id, admin_bearer)
+            contact = contacts[-1]
+            new_contact = gen_random_contact(contact["id"], contact["accountId"])
+            updated_contact = update_one_contact_request(
+                request_id, admin_bearer, new_contact
+            )
+            self.assertEqual(updated_contact["id"], new_contact.id)
+            self.assertEqual(updated_contact["accountId"], new_contact.user_id)
+            self.assertEqual(updated_contact["name"], new_contact.name)
+            self.assertEqual(updated_contact["documentType"], new_contact.document_type)
+            self.assertEqual(
+                updated_contact["documentNumber"], new_contact.document_number
+            )
+            self.assertEqual(updated_contact["phoneNumber"], new_contact.phone_number)
 
         def test_delete_one_contact_request():
             print("Test delete_one_contact_request")
@@ -78,11 +96,12 @@ class ServiceRequestTestCase(unittest.TestCase):
         admin_bearer, admin_user_id = login_user_request(
             username="admin", password="222222", request_id=request_id
         )
-        # test_gen_random_contact()
-        # test_get_all_contacts_request()
+        test_gen_random_contact()
+        test_get_all_contacts_request()
         # test_add_one_contact_request()
+        # test_update_one_contact_request()
         # test_delete_one_contact_request()
-        restore_original_contacts()
+        # restore_original_contacts()
 
     @unittest.skip("skipping")
     def test_auth_service(self):

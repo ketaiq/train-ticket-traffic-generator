@@ -44,7 +44,7 @@ def get_assurance_types(client, bearer: str, user_id: str):
 def get_assurance_types_request(request_id: str, bearer: str):
     operation = "get assurance types"
     r = requests.get(
-        url="http://35.238.101.76:8080/api/v1/assuranceservice/assurances/types",
+        url="http://34.98.120.134/api/v1/assuranceservice/assurances/types",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

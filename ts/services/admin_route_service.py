@@ -13,6 +13,7 @@ from ts.log_syntax.locust_response import (
 from ts.services.station_service import get_all_stations
 import random
 import uuid
+import math
 
 ADMIN_ROUTE_SERVICE_URL = "http://34.98.120.134/api/v1/adminrouteservice/adminroute"
 
@@ -328,7 +329,7 @@ def gen_random_route(all_stations: list) -> Route:
     return Route(None, picked_stations, distances)
 
 
-def gen_random_route_from_original_stations() -> Route:
+def _gen_random_route_from_original_stations() -> Route:
     stations = [
         {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},
         {"id": "shanghaihongqiao", "name": "Shang Hai Hong Qiao", "stayTime": 10},
@@ -354,6 +355,37 @@ def gen_random_route_from_original_stations() -> Route:
         distances.append(distances[-1] + distance)
 
     return Route(str(uuid.uuid4()), picked_stations, distances)
+
+
+def _gen_random_route_from_sbb_stations(
+    id: str, stations: list, km_start: float, km_end: float
+) -> Route:
+    distances = [0]
+    distance_interval = km_end - km_start
+    minimum_distance = 1
+    distance_avg = int(max(minimum_distance, distance_interval / (len(stations) - 1)))
+    for i in range(1, len(stations)):
+        distance = random.randint(minimum_distance, distance_avg)
+        if i == len(stations) - 1:
+            if math.ceil(distance_interval) > distances[-1]:
+                distances.append(math.ceil(distance_interval))
+            else:
+                distances.append(distances[-1] + 1)
+        else:
+            distances.append(distances[-1] + distance)
+    return Route(id, stations, distances)
+
+
+def gen_random_route(
+    id: str = str(uuid.uuid4()),
+    stations: list = [],
+    km_start: float = 0,
+    km_end: float = 0,
+) -> Route:
+    if stations:
+        return _gen_random_route_from_sbb_stations(id, stations, km_start, km_end)
+    else:
+        return _gen_random_route_from_original_stations()
 
 
 def gen_updated_route(route: Route, all_stations: list) -> Route:

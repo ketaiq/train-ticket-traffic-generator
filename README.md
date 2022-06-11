@@ -4,7 +4,7 @@ Run `locust` to start sending requests.
 
 ## Environment Configuration
 
-1. Install all required packages by running `conda create -n train-ticket-test --channel=conda-forge python locust`.
+1. Install all required packages by running `conda create -n train-ticket-test --channel=conda-forge python locust pandas`.
 2. Activate the conda environment by running `conda activate train-ticket-test`.
 
 ## Dependency Inspection

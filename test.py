@@ -126,7 +126,7 @@ class ServiceRequestTestCase(unittest.TestCase):
         from ts.services.auth_service import login_user_request
         from ts.services.station_service import (
             get_all_stations_request,
-            add_one_new_station_request,
+            add_one_station_request,
             update_one_station_request,
             delete_one_station_request,
             gen_random_station,
@@ -140,7 +140,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         def test_add_one_new_station_request():
             print("Test add_one_new_station_request")
-            added_station = add_one_new_station_request(
+            added_station = add_one_station_request(
                 admin_bearer, admin_user_id, "lugano", "Lugano", 5
             )
             print(added_station)
@@ -217,7 +217,7 @@ class ServiceRequestTestCase(unittest.TestCase):
         from ts.services.admin_route_service import (
             get_routes_request,
             add_or_update_one_route_request,
-            gen_random_route_from_original_stations,
+            gen_random_route,
             delete_one_route_request,
             gen_updated_route,
             Route,
@@ -261,7 +261,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         def test_gen_random_route():
             print("Test gen_random_route")
-            route = gen_random_route_from_original_stations()
+            route = gen_random_route()
             print(route.__dict__)
             self.assertIsInstance(route, Route)
             self.assertEqual(len(route.stations), len(route.distances))

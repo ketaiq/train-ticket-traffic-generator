@@ -141,7 +141,7 @@ def add_one_new_station(
             log_wrong_response_warning(admin_user_id, operation, response)
 
 
-def add_one_new_station_request(
+def add_one_station_request(
     admin_bearer: str,
     admin_user_id: str,
     new_station_id: str,
@@ -180,7 +180,7 @@ def add_one_new_station_request(
             else:
                 new_station_id = id_separated_by_space[0] + " 1"
                 new_station_name = id_separated_by_space[0].capitalize() + " 1"
-            return add_one_new_station_request(
+            return add_one_station_request(
                 admin_bearer,
                 admin_user_id,
                 new_station_id,
@@ -333,7 +333,7 @@ def delete_one_station_request(
         print(f"Response did not contain expected key '{key}'")
 
 
-def gen_random_station() -> Station:
+def _gen_random_station() -> Station:
     name_1_len = random.randint(3, 8)
     name_1 = "".join(
         random.choice(string.ascii_lowercase) for _ in range(name_1_len)
@@ -360,6 +360,17 @@ def gen_random_station() -> Station:
         name = name_1
 
     return Station(name.lower(), name, random.randint(1, 20))
+
+
+def _gen_random_station_by_name(name: str) -> Station:
+    return Station(name.lower(), name, random.randint(1, 20))
+
+
+def gen_random_station(name: str = "") -> Station:
+    if name == "":
+        return _gen_random_station()
+    else:
+        return _gen_random_station_by_name(name)
 
 
 def gen_updated_station(station: Station) -> Station:

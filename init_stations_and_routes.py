@@ -83,13 +83,15 @@ def main():
     all_stations = extract_stations(df)
     all_routes = extract_routes(df)
     request_id = str(uuid.uuid4())
-    admin_bearer, admin_user_id = login_user_request(
-        username="admin", password="222222", request_id=request_id
-    )
-    add_stations(admin_bearer, admin_user_id, all_stations)
-    add_routes(request_id, admin_bearer, admin_user_id, all_routes)
+    # admin_bearer, admin_user_id = login_user_request(
+    #     username="admin", password="222222", request_id=request_id
+    # )
+    # add_stations(admin_bearer, admin_user_id, all_stations)
+    # add_routes(request_id, admin_bearer, admin_user_id, all_routes)
 
 
 if __name__ == "__main__":
     # main()
-    print("Main is commented because stations and routes are already imported to train ticket system!")
+    print(
+        "Main is commented because all stations () and routes (414) are already imported to train ticket system!"
+    )

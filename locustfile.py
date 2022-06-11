@@ -64,39 +64,39 @@ locust.stats.PERCENTILES_TO_REPORT = [
 #         ts_request.update_contact()
 
 
-class RailTrafficController(HttpUser):
-    wait_time = constant(1)
-    weight = 1
+# class RailTrafficController(HttpUser):
+#     wait_time = constant(1)
+#     weight = 1
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-        self.request = RailTrafficControllerRequest(self.client)
-        logging.debug(
-            f"""Running "RailTrafficController" with id {self.request.request_id}..."""
-        )
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
+#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+#         self.request = RailTrafficControllerRequest(self.client)
+#         logging.debug(
+#             f"""Running "RailTrafficController" with id {self.request.request_id}..."""
+#         )
 
-    @task(3)
-    def add_station(self):
-        self.request.add_one_station()
+#     @task(3)
+#     def add_station(self):
+#         self.request.add_one_station()
 
-    @task(6)
-    def update_station(self):
-        self.request.update_one_station()
+#     @task(6)
+#     def update_station(self):
+#         self.request.update_one_station()
 
-    @task(1)
-    def delete_station(self):
-        self.request.delete_one_station()
+#     @task(1)
+#     def delete_station(self):
+#         self.request.delete_one_station()
 
-    @task(3)
-    def add_route(self):
-        self.request.add_one_route()
+#     @task(3)
+#     def add_route(self):
+#         self.request.add_one_route()
 
-    @task(6)
-    def update_route(self):
-        self.request.update_one_route()
+#     @task(6)
+#     def update_route(self):
+#         self.request.update_one_route()
 
-    @task(1)
-    def delete_route(self):
-        self.request.delete_one_route()
+#     @task(1)
+#     def delete_route(self):
+#         self.request.delete_one_route()

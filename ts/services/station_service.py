@@ -333,6 +333,16 @@ def delete_one_station_request(
         print(f"Response did not contain expected key '{key}'")
 
 
+def restore_original_stations(admin_user_id: str, admin_bearer: str):
+    stations = get_all_stations_request(admin_user_id, admin_bearer)
+    for station in stations:
+        if station not in ORIGINAL_STATIONS:
+            deleted_station = delete_one_station_request(
+                admin_bearer, admin_user_id, station["id"], station["name"]
+            )
+            print(f"Delete station {deleted_station}")
+
+
 def _gen_random_station() -> Station:
     name_1_len = random.randint(3, 8)
     name_1 = "".join(

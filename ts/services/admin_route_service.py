@@ -10,7 +10,6 @@ from ts.log_syntax.locust_response import (
     log_timeout_warning,
     log_wrong_response_warning,
 )
-from ts.services.station_service import get_all_stations
 import random
 import uuid
 import math
@@ -314,6 +313,15 @@ def delete_one_route_request(admin_bearer: str, request_id: str, route_id: str) 
         logging.error("Response could not be decoded as JSON")
     except KeyError:
         logging.error(f"Response did not contain expected key '{key}'")
+
+def restore_original_routes(admin_bearer: str, request_id: str):
+    routes = get_routes_request(admin_bearer, request_id)
+    for route in routes:
+        if route not in ORIGINAL_ROUTES:
+            deleted_route_id = delete_one_route_request(
+                admin_bearer, request_id, route["id"]
+            )
+            print(f"Delete route {deleted_route_id}")
 
 
 def gen_random_route(all_stations: list) -> Route:

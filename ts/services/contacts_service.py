@@ -15,6 +15,24 @@ import random
 from json import JSONDecodeError
 
 CONTACTS_SERVICE_URL = "http://34.98.120.134/api/v1/contactservice/contacts"
+ORIGINAL_CONTACTS = [
+    {
+        "id": "3fcb512a-339d-4cf2-ad62-744558353adb",
+        "accountId": "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f",
+        "name": "Contacts_One",
+        "documentType": 1,
+        "documentNumber": "DocumentNumber_One",
+        "phoneNumber": "ContactsPhoneNum_One",
+    },
+    {
+        "id": "014acb13-6433-4ca4-9246-d38b1d493638",
+        "accountId": "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f",
+        "name": "Contacts_Two",
+        "documentType": 1,
+        "documentNumber": "DocumentNumber_Two",
+        "phoneNumber": "ContactsPhoneNum_Two",
+    },
+]
 
 
 class Contact:
@@ -296,6 +314,16 @@ def delete_one_contact_request(
         logging.error("Response could not be decoded as JSON")
     except KeyError:
         logging.error(f"Response did not contain expected key '{key}'")
+
+
+def restore_original_contacts(request_id: str, admin_bearer: str):
+    contacts = get_all_contacts_request(request_id, admin_bearer)
+    for contact in contacts:
+        if contact not in ORIGINAL_CONTACTS:
+            deleted_contact_id = delete_one_contact_request(
+                request_id, admin_bearer, contact["id"]
+            )
+            print(f"Delete contact {deleted_contact_id}")
 
 
 def gen_random_contact(contact_id: str | None, user_id: str) -> Contact:

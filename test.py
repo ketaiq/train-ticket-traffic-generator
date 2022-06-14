@@ -60,6 +60,45 @@ class ServiceRequestTestCase(unittest.TestCase):
             self.assertEqual,
         )
 
+    @unittest.skip("skipping")
+    def test_admin_travel_service(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_admin_travel_service import test_all
+
+        print("\n\nTest admin_travel_service")
+        request_id = str(uuid.uuid4())
+        admin_bearer, admin_user_id = login_user_request(
+            username="admin", password="222222", request_id=request_id
+        )
+
+        test_all(admin_bearer, request_id, self.assertIsInstance, self.assertEqual)
+
+    @unittest.skip("skipping")
+    def test_train_service(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_train_service import test_all
+
+        print("\n\nTest train_service")
+        request_id = str(uuid.uuid4())
+        admin_bearer, admin_user_id = login_user_request(
+            username="admin", password="222222", request_id=request_id
+        )
+
+        test_all(admin_bearer, request_id, self.assertIsInstance, self.assertEqual)
+
+    @unittest.skip("skipping")
+    def test_admin_basic_service(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_admin_basic_service import test_all
+
+        print("\n\nTest admin_basic_service")
+        request_id = str(uuid.uuid4())
+        admin_bearer, admin_user_id = login_user_request(
+            username="admin", password="222222", request_id=request_id
+        )
+
+        test_all(admin_bearer, request_id, self.assertIsInstance, self.assertEqual)
+
 
 if __name__ == "__main__":
     unittest.main()

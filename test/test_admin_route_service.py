@@ -124,8 +124,8 @@ def _test_gen_updated_route(assertIsInstance, assertEqual):
     assertEqual(len(updated_route.stations), len(updated_route.distances))
 
 
-# def _test_restore_original_routes(admin_bearer: str, request_id: str, assertEqual):
-#     print("Test restore_original_routes")
-#     restore_original_routes(admin_bearer, request_id)
-#     routes = get_routes_request(admin_bearer, request_id)
-#     assertEqual(routes, ORIGINAL_ROUTES)
+def _test_restore_original_routes(admin_bearer: str, request_id: str, assertEqual):
+    print("Test restore_original_routes")
+    restore_original_routes(admin_bearer, request_id)
+    routes = get_routes_request(admin_bearer, request_id)
+    assertEqual(routes, ORIGINAL_ROUTES)

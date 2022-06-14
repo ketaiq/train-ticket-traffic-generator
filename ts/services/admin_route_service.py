@@ -3,6 +3,7 @@ This module includes all API calls provided by ts-admin-route-service.
 """
 
 import logging
+import sys
 import requests
 from json import JSONDecodeError
 from ts.log_syntax.locust_response import (
@@ -314,6 +315,7 @@ def delete_one_route_request(admin_bearer: str, request_id: str, route_id: str) 
     except KeyError:
         logging.error(f"Response did not contain expected key '{key}'")
 
+
 def restore_original_routes(admin_bearer: str, request_id: str):
     routes = get_routes_request(admin_bearer, request_id)
     for route in routes:
@@ -365,7 +367,7 @@ def _gen_random_route_from_original_stations() -> Route:
     return Route(str(uuid.uuid4()), picked_stations, distances)
 
 
-def _gen_random_route_from_sbb_stations(
+def _gen_route_from_sbb_data(
     id: str, stations: list, km_start: float, km_end: float
 ) -> Route:
     distances = [0]
@@ -384,14 +386,31 @@ def _gen_random_route_from_sbb_stations(
     return Route(id, stations, distances)
 
 
+def _gen_route_from_euro_data(id: str, stations: list, distances: list):
+    return Route(id, stations, distances)
+
+
 def gen_random_route(
     id: str = str(uuid.uuid4()),
     stations: list = [],
-    km_start: float = 0,
-    km_end: float = 0,
+    distances: list = [],
+    km_start: float = sys.float_info.max,
+    km_end: float = sys.float_info.max,
 ) -> Route:
-    if stations:
-        return _gen_random_route_from_sbb_stations(id, stations, km_start, km_end)
+    if (
+        stations
+        and not distances
+        and km_start != sys.float_info.max
+        and km_end != sys.float_info.max
+    ):
+        return _gen_route_from_sbb_data(id, stations, km_start, km_end)
+    elif (
+        stations
+        and distances
+        and km_start == sys.float_info.max
+        and km_end == sys.float_info.max
+    ):
+        return _gen_route_from_euro_data(id, stations, distances)
     else:
         return _gen_random_route_from_original_stations()
 
@@ -419,8 +438,10 @@ def gen_updated_route(route: Route, all_stations: list) -> Route:
 
 def get_reverse_route(route: Route) -> Route:
     stations = route.stations[::-1]
-    distances = route.distances
-    return Route(None, stations, distances)
+    distances = [0]
+    for i in range(len(route.distances) - 1, 0, -1):
+        distances.append(distances[-1] + route.distances[i] - route.distances[i - 1])
+    return Route(str(uuid.uuid4()), stations, distances)
 
 
 def pick_random_route(all_routes: list, original_routes: list) -> Route:
@@ -430,3 +451,18 @@ def pick_random_route(all_routes: list, original_routes: list) -> Route:
     return Route(
         picked_route["id"], picked_route["stations"], picked_route["distances"]
     )
+
+
+def add_routes(
+    request_id: str, admin_bearer: str, admin_user_id: str, all_routes: list
+):
+    for route in all_routes:
+        new_route = add_or_update_one_route_request(
+            admin_bearer,
+            request_id,
+            admin_user_id,
+            route.id,
+            route.stations,
+            route.distances,
+        )
+        print(f"Add route {new_route}")

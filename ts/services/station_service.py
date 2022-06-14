@@ -372,15 +372,21 @@ def _gen_random_station() -> Station:
     return Station(name.lower(), name, random.randint(1, 20))
 
 
-def _gen_random_station_by_name(name: str) -> Station:
-    return Station(name.lower(), name, random.randint(1, 20))
+def _gen_random_station_by_name(
+    name: str, minimum_stay_time: int, maximum_stay_time: int
+) -> Station:
+    return Station(
+        name.lower(), name, random.randint(minimum_stay_time, maximum_stay_time)
+    )
 
 
-def gen_random_station(name: str = "") -> Station:
+def gen_random_station(
+    name: str = "", minimum_stay_time: int = 1, maximum_stay_time: int = 20
+) -> Station:
     if name == "":
         return _gen_random_station()
     else:
-        return _gen_random_station_by_name(name)
+        return _gen_random_station_by_name(name, minimum_stay_time, maximum_stay_time)
 
 
 def gen_updated_station(station: Station) -> Station:
@@ -412,3 +418,10 @@ def pick_random_station(all_stations: list, original_stations: list) -> Station:
     return Station(
         picked_station["id"], picked_station["name"], picked_station["stayTime"]
     )
+
+def add_stations(admin_bearer: str, admin_user_id: str, all_stations: list):
+    for station in all_stations:
+        new_station = add_one_station_request(
+            admin_bearer, admin_user_id, station.id, station.name, station.stay_time
+        )
+        print(f"Add station {new_station}")

@@ -27,8 +27,8 @@ locust.stats.PERCENTILES_TO_REPORT = [
 
 @events.init.add_listener
 def on_locust_init(environment, **kwargs):
-    from ts.services.admin_route_service import european_routes, get_all_routes_request
-    from ts.services.station_service import european_stations, get_all_stations_request
+    from ts.services.admin_route_service import init_european_routes
+    from ts.services.station_service import init_european_stations
     from ts.services.auth_service import login_user_request
 
     print("Fetch shared data, including routes, stations")
@@ -36,8 +36,8 @@ def on_locust_init(environment, **kwargs):
     admin_bearer, admin_user_id = login_user_request(
         username="admin", password="222222", request_id=request_id
     )
-    european_routes.extend(get_all_routes_request(admin_bearer, request_id))
-    european_stations.extend(get_all_stations_request(admin_user_id, admin_bearer))
+    init_european_routes(admin_bearer, request_id)
+    init_european_stations(admin_user_id, admin_bearer)
 
 
 class PassengerWithoutLogin(HttpUser):

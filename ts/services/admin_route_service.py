@@ -471,7 +471,7 @@ def add_routes(
         print(f"Add route {new_route}")
 
 
-def pick_two_random_stations_in_one_route() -> list:
+def pick_two_random_stations_in_one_route() -> tuple[str, str]:
     from ts.services.station_service import european_stations
 
     results = []
@@ -483,6 +483,12 @@ def pick_two_random_stations_in_one_route() -> list:
                 results.append(station["name"])
                 break
     if len(results) == 2:
-        return results
+        return results[0], results[1]
     else:
         raise UndesirableResultError(results, ["station A", "station B"])
+
+def init_european_routes(admin_bearer: str, request_id: str):
+    all_routes = get_all_routes_request(admin_bearer, request_id)
+    for route in ORIGINAL_ROUTES:
+        all_routes.remove(route)
+    european_routes.extend(all_routes)

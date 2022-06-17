@@ -13,6 +13,8 @@ class PassengerRequest:
         self.user_id = None
         self.order_id = None
         self.request_id = str(uuid.uuid4())
+        self.from_station = None
+        self.to_station = None
 
     def visit_without_login(self, page: str):
         if page == "home":
@@ -25,12 +27,12 @@ class PassengerRequest:
         return_int = random.randint(200000, 20000000)
         departure_time = gen_random_date(departure_int)
         return_time = gen_random_date(return_int)
-        stations = pick_two_random_stations_in_one_route()
+        self.from_station, self.to_station = pick_two_random_stations_in_one_route()
         search_ticket(
-            self.client, departure_time, stations[0], stations[1], self.request_id
+            self.client, departure_time, self.from_station, self.to_station, self.request_id
         )
         search_ticket(
-            self.client, return_time, stations[1], stations[0], self.request_id
+            self.client, return_time, self.to_station, self.from_station, self.request_id
         )
 
     

@@ -429,3 +429,10 @@ def add_stations(admin_bearer: str, admin_user_id: str, all_stations: list):
             admin_bearer, admin_user_id, station.id, station.name, station.stay_time
         )
         print(f"Add station {new_station}")
+
+
+def init_european_stations(admin_user_id: str, admin_bearer: str):
+    all_stations = get_all_stations_request(admin_user_id, admin_bearer)
+    for station in ORIGINAL_STATIONS:
+        all_stations.remove(station)
+    european_stations.extend(all_stations)

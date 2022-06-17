@@ -17,7 +17,7 @@ def search_ticket(
     from_station: str,
     to_station: str,
     request_id: str,
-):
+) -> list:
     """
     Send a POST request of seaching tickets to the ts-travel-service to get left trip tickets.
     """
@@ -43,7 +43,8 @@ def search_ticket(
             data = response.json()["data"]
             res = ""
             if data and len(data) > 0:
-                res = data[0]
+                res = f"{len(data)} trips"
             else:
                 res = "No tickets"
             log_response_info(request_id, operation, res, name="request")
+            return data

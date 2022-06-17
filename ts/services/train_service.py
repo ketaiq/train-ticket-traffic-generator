@@ -3,6 +3,44 @@ import logging
 from json import JSONDecodeError
 
 TRAIN_SERVICE_URL = "http://34.98.120.134/api/v1/adminbasicservice/adminbasic/trains"
+ORIGINAL_TRAINS = [
+    {
+        "id": "GaoTieOne",
+        "economyClass": 2147483647,
+        "confortClass": 2147483647,
+        "averageSpeed": 250,
+    },
+    {
+        "id": "GaoTieTwo",
+        "economyClass": 2147483647,
+        "confortClass": 2147483647,
+        "averageSpeed": 200,
+    },
+    {
+        "id": "DongCheOne",
+        "economyClass": 2147483647,
+        "confortClass": 2147483647,
+        "averageSpeed": 180,
+    },
+    {
+        "id": "ZhiDa",
+        "economyClass": 2147483647,
+        "confortClass": 2147483647,
+        "averageSpeed": 120,
+    },
+    {
+        "id": "TeKuai",
+        "economyClass": 2147483647,
+        "confortClass": 2147483647,
+        "averageSpeed": 120,
+    },
+    {
+        "id": "KuaiSu",
+        "economyClass": 2147483647,
+        "confortClass": 2147483647,
+        "averageSpeed": 90,
+    },
+]
 
 
 class Train:
@@ -101,7 +139,20 @@ def gen_random_train(id: str) -> Train:
     return Train(id, 2147483647, 2147483647, 250)
 
 
+def restore_original_trains(
+    admin_bearer: str,
+    request_id: str,
+):
+    trains = get_all_trains_request(admin_bearer, request_id)
+    for train in trains:
+        if train not in ORIGINAL_TRAINS:
+            result = delete_one_train_request(admin_bearer, request_id, train["id"])
+            if result:
+                print(f"Delete train {train}")
+
+
 def add_trains(request_id: str, admin_bearer: str, all_trains: list):
+    restore_original_trains(admin_bearer, request_id)
     for train in all_trains:
         add_one_train_request(admin_bearer, request_id, train)
         print(f"Add train {train.__dict__}")

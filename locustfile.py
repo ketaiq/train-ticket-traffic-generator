@@ -4,6 +4,7 @@ import locust.stats
 from locust import HttpUser, task, constant
 
 from ts.ts_requests import TrainTicketRequest
+from ts.requests.passenger import PassengerRequest
 from ts.requests.rail_traffic_controller import RailTrafficControllerRequest
 
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
@@ -23,22 +24,28 @@ locust.stats.PERCENTILES_TO_REPORT = [
 ]
 
 
-# class UserNoLogin(HttpUser):
-#     weight = 1
-#     wait_time = constant(1)
+class PassengerWithoutLogin(HttpUser):
+    weight = 1
+    wait_time = constant(1)
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
+        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+        self.request = PassengerRequest(self.client)
+        logging.debug(f"""Running user "no login" with id {self.request.request_id}...""")
 
-#     @task
-#     def perfom_task(self):
-#         ts_request = TrainTicketRequest(self.client)
-#         logging.debug(f"""Running user "no login" with id {ts_request.request_id}...""")
+    @task(1)
+    def visit_home(self):
+        self.request.visit_without_login("home")
+    
+    @task(1)
+    def visit_home(self):
+        self.request.visit_without_login("client login")
 
-#         ts_request.visit_without_login("home")
-#         ts_request.search_departure_and_return()
+    @task(5)
+    def perfom_task(self):
+        self.request.search_departure_and_return()
 
 
 # class UserLogin(HttpUser):

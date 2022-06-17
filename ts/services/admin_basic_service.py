@@ -1,5 +1,10 @@
+"""
+This module includes all API calls provided by ts-admin-basic-service.
+"""
+
 import requests
 from json import JSONDecodeError
+import random
 
 ADMIN_PRICE_SERVICE_URL = (
     "http://34.98.120.134/api/v1/adminbasicservice/adminbasic/prices"
@@ -215,10 +220,17 @@ def restore_original_prices(admin_bearer: str, request_id: str):
 
 
 def add_prices(request_id: str, admin_bearer: str, all_travels: list):
+    restore_original_prices(admin_bearer, request_id)
     for travel in all_travels:
         new_price = add_one_price_request(
             admin_bearer,
             request_id,
-            Price(None, 1, 2, travel.route_id, travel.train_type_id),
+            Price(
+                None,
+                round(random.uniform(0.3, 1), 2),
+                round(random.uniform(1, 3), 2),
+                travel.route_id,
+                travel.train_type_id,
+            ),
         )
         print(f"Add price {new_price}")

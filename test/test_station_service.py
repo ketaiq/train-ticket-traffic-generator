@@ -32,7 +32,7 @@ def _test_add_one_new_station_request(
 ):
     print("Test add_one_new_station_request")
     added_station = add_one_station_request(
-        admin_bearer, admin_user_id, "lugano", "Lugano", 5
+        admin_bearer, admin_user_id, "teststation", "Test Station", 5
     )
     print(added_station)
     assertIsInstance(added_station, dict)
@@ -43,7 +43,7 @@ def _test_update_one_station_request(
 ):
     print("Test update_one_station_request")
     updated_station = update_one_station_request(
-        admin_bearer, admin_user_id, "lugano", "New Lugano", 10
+        admin_bearer, admin_user_id, "teststation", "New Test Station", 10
     )
     print(updated_station)
     assertIsInstance(updated_station, dict)
@@ -54,7 +54,7 @@ def _test_delete_one_station_request(
 ):
     print("Test delete_one_station_request")
     deleted_station = delete_one_station_request(
-        admin_bearer, admin_user_id, "lugano", "New Lugano"
+        admin_bearer, admin_user_id, "teststation", "New Test Station"
     )
     print(deleted_station)
     assertIsInstance(deleted_station, dict)
@@ -65,8 +65,8 @@ def _test_gen_random_station():
     print(gen_random_station().__dict__)
 
 
-# def _test_restore_original_stations(admin_bearer: str, admin_user_id: str, assertEqual):
-#     print("Test restore_original_stations")
-#     restore_original_stations(admin_user_id, admin_bearer)
-#     stations = get_all_stations_request(admin_user_id, admin_bearer)
-#     assertEqual(stations, ORIGINAL_STATIONS)
+def _test_restore_original_stations(admin_bearer: str, admin_user_id: str, assertEqual):
+    print("Test restore_original_stations")
+    restore_original_stations(admin_user_id, admin_bearer)
+    stations = get_all_stations_request(admin_user_id, admin_bearer)
+    assertEqual(stations, ORIGINAL_STATIONS)

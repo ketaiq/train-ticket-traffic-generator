@@ -419,7 +419,9 @@ def pick_random_station(all_stations: list, original_stations: list) -> Station:
         picked_station["id"], picked_station["name"], picked_station["stayTime"]
     )
 
+
 def add_stations(admin_bearer: str, admin_user_id: str, all_stations: list):
+    restore_original_stations(admin_user_id, admin_bearer)
     for station in all_stations:
         new_station = add_one_station_request(
             admin_bearer, admin_user_id, station.id, station.name, station.stay_time

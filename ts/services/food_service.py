@@ -7,6 +7,9 @@ from enum import IntEnum
 import requests
 from json import JSONDecodeError
 import random
+import urllib.parse
+
+FOOD_SERVICE_URL = "http://34.98.120.134/api/v1/foodservice/foods"
 
 
 class FoodType(IntEnum):
@@ -66,10 +69,25 @@ def get_food_menu(client, bearer: str, user_id: str) -> dict:
     return food_menu
 
 
-def get_food_menu_request(request_id: str, bearer: str):
+def get_all_train_and_store_food_request(
+    request_id: str,
+    bearer: str,
+    date: str,
+    from_station: str,
+    to_station: str,
+    trip_id: str,
+) -> dict:
     operation = "get food menu"
     r = requests.get(
-        url="http://34.98.120.134/api/v1/foodservice/foods/2022-02-11/Shang%20Hai/Su%20Zhou/D1345",
+        url=FOOD_SERVICE_URL
+        + "/"
+        + urllib.parse.quote(date)
+        + "/"
+        + urllib.parse.quote(from_station)
+        + "/"
+        + urllib.parse.quote(to_station)
+        + "/"
+        + urllib.parse.quote(trip_id),
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -93,7 +111,7 @@ def get_food_menu_request(request_id: str, bearer: str):
         print(f"Response did not contain expected key '{key}'")
 
 
-def gen_random_food(food_menu: dict) -> Food:
+def pick_random_food(food_menu: dict) -> Food:
     food_type = random.randint(FoodType.NONE.value, FoodType.STATION_FOOD_STORES.value)
     if food_type == FoodType.TRAIN_FOOD:
         train_food = food_menu["trainFoodList"][0]
@@ -132,15 +150,3 @@ def gen_random_food(food_menu: dict) -> Food:
             "",
             0,
         )
-
-
-if __name__ == "__main__":
-    from auth_service import login_user_request
-    import uuid
-
-    request_id = str(uuid.uuid4())
-    bearer, user_id = login_user_request(
-        username="fdse_microservice", password="111111", request_id=request_id
-    )
-    food_menu = get_food_menu_request(request_id, bearer)
-    print(gen_random_food(food_menu).__dict__)

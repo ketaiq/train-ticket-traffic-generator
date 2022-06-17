@@ -14,6 +14,7 @@ from ts.services.auth_service import login_user_request
 from ts.services.train_service import gen_random_train, add_trains
 from ts.services.admin_travel_service import Travel, add_travels
 from ts.services.admin_basic_service import add_prices
+from ts.services.food_map_service import add_food
 
 
 def init_dataframe() -> pd.DataFrame:
@@ -32,6 +33,44 @@ def init_dataframe() -> pd.DataFrame:
     routes_series = df.apply(extract_routes_from_series, axis=1)
     reversed_routes_series = routes_series.apply(get_reverse_route)
     df = df.assign(routes=routes_series, reversed_routes=reversed_routes_series)
+    df["tripname"] = [
+        "RailjetXpress",
+        "InterCity",
+        "EuroCity311",
+        "EuroCity151",
+        "Nightjet402",
+        "Nightjet40470",
+        "ICE102",
+        "EuroCity",
+        "ICE74",
+        "ICE70",
+        "ICE104",
+        "EuroCity163",
+        "Nightjet465",
+        "RailjetXpress",
+        "EuroCity",
+        "TGV",
+        "EuroNight40465",
+        "EuroCity151",
+        "EuroCity",
+        "TGV",
+        "TGV",
+        "EuroNight40467",
+        "TGV",
+        "EuroCity327",
+        "RailjetXpress",
+        "EuroCity52",
+        "EuroCity",
+        "Nightjet467",
+        "EuroCity",
+        "EuroCity",
+        "EuroCity",
+        "EuroCity307",
+        "ICE",
+        "EuroNight50467",
+        "EuroCity",
+        "Nightjet470",
+    ]
     return df.drop(columns=["vias"])
 
 
@@ -86,12 +125,12 @@ def extract_trains(df: pd.DataFrame) -> list:
 def extract_travels_from_series(row: pd.Series) -> list:
     return [
         Travel(
-            str(row["id"]) + " " + row["name"],
+            str(row["id"]) + row["tripname"],
             "G-" + row["name"].split()[0],
             row["routes"].id,
         ),
         Travel(
-            str(row["id"]) + "R " + row["name"],
+            str(row["id"]) + "R" + row["tripname"],
             "G-" + row["name"].split()[0],
             row["reversed_routes"].id,
         ),
@@ -114,11 +153,12 @@ def main():
     admin_bearer, admin_user_id = login_user_request(
         username="admin", password="222222", request_id=request_id
     )
-    # add_stations(admin_bearer, admin_user_id, all_stations)
-    # add_routes(request_id, admin_bearer, admin_user_id, all_routes)
-    # add_trains(request_id, admin_bearer, all_trains)
-    # add_prices(request_id, admin_bearer, all_travels)
-    # add_travels(request_id, admin_bearer, all_travels)
+    add_stations(admin_bearer, admin_user_id, all_stations)
+    add_routes(request_id, admin_bearer, admin_user_id, all_routes)
+    add_trains(request_id, admin_bearer, all_trains)
+    add_prices(request_id, admin_bearer, all_travels)
+    add_travels(request_id, admin_bearer, all_travels)
+    add_food(all_travels, all_stations)
 
 
 if __name__ == "__main__":

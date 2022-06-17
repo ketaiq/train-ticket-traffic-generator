@@ -2,8 +2,13 @@ import uuid
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import add_one_user
 from ts.services.assurance_service import get_assurance_types, AssuranceType
-from ts.services.food_service import get_food_menu, gen_random_food
-from ts.services.contacts_service import get_contacts_by_account_id, add_one_contact, update_one_contact, gen_random_contact
+from ts.services.food_service import get_food_menu, pick_random_food
+from ts.services.contacts_service import (
+    get_contacts_by_account_id,
+    add_one_contact,
+    update_one_contact,
+    gen_random_contact,
+)
 from ts.services.preserve_service import reserve_one_ticket, SeatType
 from ts.services.order_service import get_orders_by_login_id
 from ts.services.inside_payment_service import pay_one_order
@@ -125,7 +130,7 @@ class TrainTicketRequest:
         visit_client_ticket_book(self.client, self.bearer, self.user_id)
         get_assurance_types(self.client, self.bearer, self.user_id)
         food_menu = get_food_menu(self.client, self.bearer, self.user_id)
-        food = gen_random_food(food_menu)
+        food = pick_random_food(food_menu)
         consign = gen_random_consign()
         contact_id = self.get_a_contact()
         departure_int = random.randint(90000, 100000)
@@ -186,4 +191,3 @@ class TrainTicketRequest:
         contact_id = self.get_a_contact()
         new_contact = gen_random_contact(contact_id, self.user_id)
         update_one_contact(self.client, self.bearer, new_contact)
-

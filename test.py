@@ -99,6 +99,41 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         test_all(admin_bearer, request_id, self.assertIsInstance, self.assertEqual)
 
+    @unittest.skip("skipping")
+    def test_food_service(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_food_service import test_all
+
+        print("\n\nTest food_service")
+        request_id = str(uuid.uuid4())
+        bearer, user_id = login_user_request(
+            username="fdse_microservice", password="111111", request_id=request_id
+        )
+
+        test_all(bearer, request_id, self.assertIsInstance, self.assertEqual)
+
+    @unittest.skip("skipping")
+    def test_food_map_service(self):
+        from test.test_food_map_service import test_all
+
+        print("\n\nTest food_map_service")
+        request_id = str(uuid.uuid4())
+
+        test_all(request_id, self.assertIsInstance, self.assertEqual)
+
+    @unittest.skip("skipping")
+    def test_preserve_service(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_preserve_service import test_all
+
+        print("\n\nTest preserve_service")
+        request_id = str(uuid.uuid4())
+        bearer, user_id = login_user_request(
+            username="fdse_microservice", password="111111", request_id=request_id
+        )
+
+        test_all(request_id, bearer, user_id, self.assertIsInstance, self.assertEqual)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,13 +6,13 @@ from ts.services.station_service import (
     gen_updated_station,
     pick_random_station,
     delete_one_station,
+    get_all_stations,
     ORIGINAL_STATIONS,
 )
 from ts.services.auth_service import login_user
 from ts.services.admin_route_service import (
     ORIGINAL_ROUTES,
     gen_random_route,
-    get_all_stations,
     add_one_route,
     get_all_routes,
     get_reverse_route,

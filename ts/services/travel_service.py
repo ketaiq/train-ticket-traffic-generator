@@ -2,8 +2,12 @@
 This module includes all API calls provided by ts-travel-service.
 """
 
-import logging
 from locust.clients import HttpSession
+from ts.log_syntax.locust_response import (
+    log_wrong_response_warning,
+    log_timeout_warning,
+    log_response_info,
+)
 
 
 def search_ticket(
@@ -16,6 +20,7 @@ def search_ticket(
     """
     Send a POST request of seaching tickets to the ts-travel-service to get left trip tickets.
     """
+    operation = "search tickets"
     with client.post(
         url="/api/v1/travelservice/trips/left",
         headers={"Accept": "application/json", "Content-Type": "application/json"},
@@ -25,18 +30,19 @@ def search_ticket(
             "departureTime": departure_date,
         },
         catch_response=True,
-        name="search ticket",
+        name=operation,
     ) as response:
         msg = response.json()["msg"]
+        operation += f" from {from_station} to {to_station} on {departure_date}"
         if msg != "Success":
-            log = f"request {request_id} tries to search train tickets from {from_station} to {to_station} on {departure_date} but got wrong response"
-            logging.warning(f"{log}: {msg}")
-            response.failure(f"{log}: {msg}")
+            log_wrong_response_warning(request_id, operation, response, name="request")
         elif response.elapsed.total_seconds() > 10:
-            log = f"request {request_id} tries to search train tickets from {from_station} to {to_station} on {departure_date} but request took too long"
-            response.failure(log)
-            logging.warning(log)
+            log_timeout_warning(request_id, operation, response, name="request")
         else:
-            logging.info(
-                f"request {request_id} searches train tickets from {from_station} to {to_station} on {departure_date} by running POST /api/v1/travelservice/trips/left"
-            )
+            data = response.json()["data"]
+            res = ""
+            if data and len(data) > 0:
+                res = data[0]
+            else:
+                res = "No tickets"
+            log_response_info(request_id, operation, res, name="request")

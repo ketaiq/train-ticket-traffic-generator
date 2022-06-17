@@ -16,7 +16,6 @@ import uuid
 import math
 
 ADMIN_ROUTE_SERVICE_URL = "http://34.98.120.134/api/v1/adminrouteservice/adminroute"
-
 ORIGINAL_ROUTES = [
     {
         "id": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
@@ -89,7 +88,6 @@ ORIGINAL_ROUTES = [
         "terminalStationId": "suzhou",
     },
 ]
-
 
 class Route:
     """
@@ -456,6 +454,7 @@ def pick_random_route(all_routes: list, original_routes: list) -> Route:
 def add_routes(
     request_id: str, admin_bearer: str, admin_user_id: str, all_routes: list
 ):
+    restore_original_routes(admin_bearer, request_id)
     for route in all_routes:
         new_route = add_or_update_one_route_request(
             admin_bearer,

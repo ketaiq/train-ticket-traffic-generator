@@ -5,6 +5,8 @@ This module includes all API calls provided by ts-cancel-service.
 import logging
 from locust.clients import HttpSession
 
+from ts import TIMEOUT_MAX
+
 
 def cancel_one_order(
     client: HttpSession, bearer: str, order_id: str, user_id: str, description: str
@@ -25,7 +27,7 @@ def cancel_one_order(
             logging.error(
                 f"user {user_id} tries to cancel the order {order_id} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user {user_id} tries to cancel the order {order_id} but request takes too long!"
             )
@@ -55,7 +57,7 @@ def get_refund_amount(
             logging.error(
                 f"user {user_id} tries to calculate refund amount of order {order_id} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user {user_id} tries to calculate refund amount of order {order_id} but request takes too long!"
             )

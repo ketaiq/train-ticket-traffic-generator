@@ -13,6 +13,7 @@ from enum import IntEnum
 from ts.util import gen_random_name, gen_random_document_number, gen_random_phone_number
 import random
 from json import JSONDecodeError
+from ts import TIMEOUT_MAX
 
 CONTACTS_SERVICE_URL = "http://34.98.120.134/api/v1/contactservice/contacts"
 ORIGINAL_CONTACTS = [
@@ -77,7 +78,7 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
     ) as response:
         if response.json()["msg"] != "Success":
             log_wrong_response_warning(user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(user_id, operation, response)
         else:
             data = response.json()["data"]
@@ -147,7 +148,7 @@ def add_one_contact(
     ) as response:
         if response.json()["msg"] != "Create contacts success":
             log_wrong_response_warning(user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(user_id, operation, response)
         else:
             data = response.json()["data"]
@@ -220,7 +221,7 @@ def update_one_contact(client, bearer: str, contact: Contact):
     ) as response:
         if response.json()["msg"] != "Modify success":
             log_wrong_response_warning(contact.user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(contact.user_id, operation, response)
         else:
             old_contact = response.json()["data"]
@@ -279,7 +280,7 @@ def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id
     ) as response:
         if response.json()["msg"] != "Delete success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             deleted_contact_id = response.json()["data"]

@@ -8,6 +8,7 @@ import requests
 from json import JSONDecodeError
 import random
 import urllib.parse
+from ts import TIMEOUT_MAX
 
 FOOD_SERVICE_URL = "http://34.98.120.134/api/v1/foodservice/foods"
 
@@ -55,7 +56,7 @@ def get_food_menu(client, bearer: str, user_id: str) -> dict:
             logging.error(
                 f"user {user_id} tries to get food menu but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user {user_id} tries to get food menu but request takes too long!"
             )

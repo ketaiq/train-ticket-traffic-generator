@@ -1,7 +1,8 @@
 import logging
+import uuid
 from requests.adapters import HTTPAdapter
 import locust.stats
-from locust import HttpUser, task, constant
+from locust import HttpUser, task, constant, events
 
 from ts.ts_requests import TrainTicketRequest
 from ts.requests.passenger import PassengerRequest
@@ -24,6 +25,21 @@ locust.stats.PERCENTILES_TO_REPORT = [
 ]
 
 
+@events.init.add_listener
+def on_locust_init(environment, **kwargs):
+    from ts.services.admin_route_service import european_routes, get_all_routes_request
+    from ts.services.station_service import european_stations, get_all_stations_request
+    from ts.services.auth_service import login_user_request
+
+    print("Fetch shared data, including routes, stations")
+    request_id = str(uuid.uuid4())
+    admin_bearer, admin_user_id = login_user_request(
+        username="admin", password="222222", request_id=request_id
+    )
+    european_routes.extend(get_all_routes_request(admin_bearer, request_id))
+    european_stations.extend(get_all_stations_request(admin_user_id, admin_bearer))
+
+
 class PassengerWithoutLogin(HttpUser):
     weight = 1
     wait_time = constant(1)
@@ -33,12 +49,14 @@ class PassengerWithoutLogin(HttpUser):
         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
         self.request = PassengerRequest(self.client)
-        logging.debug(f"""Running user "no login" with id {self.request.request_id}...""")
+        logging.debug(
+            f"""Running user "no login" with id {self.request.request_id}..."""
+        )
 
     @task(1)
     def visit_home(self):
         self.request.visit_without_login("home")
-    
+
     @task(1)
     def visit_home(self):
         self.request.visit_without_login("client login")

@@ -8,6 +8,7 @@ from ts.log_syntax.locust_response import (
     log_timeout_warning,
     log_response_info,
 )
+from ts import TIMEOUT_MAX
 
 
 def search_ticket(
@@ -36,7 +37,7 @@ def search_ticket(
         operation += f" from {from_station} to {to_station} on {departure_date}"
         if msg != "Success":
             log_wrong_response_warning(request_id, operation, response, name="request")
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(request_id, operation, response, name="request")
         else:
             data = response.json()["data"]

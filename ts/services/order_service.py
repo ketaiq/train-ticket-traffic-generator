@@ -4,6 +4,7 @@ This module includes all API calls provided by ts-order-service.
 
 import logging
 from locust.clients import HttpSession
+from ts import TIMEOUT_MAX
 
 
 def get_orders_by_login_id(client: HttpSession, user_id: str, bearer: str) -> str:
@@ -34,7 +35,7 @@ def get_orders_by_login_id(client: HttpSession, user_id: str, bearer: str) -> st
             logging.error(
                 f"user {user_id} tries to get orders by login id {user_id} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user {user_id} tries to get orders by login id {user_id} but request takes too long!"
             )

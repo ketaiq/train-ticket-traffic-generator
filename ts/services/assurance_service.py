@@ -4,6 +4,7 @@ This module includes all API calls provided by ts-assurance-service.
 
 import requests
 from json import JSONDecodeError
+from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
     log_timeout_warning,
@@ -34,7 +35,7 @@ def get_assurance_types(client, bearer: str, user_id: str):
     ) as response:
         if response.json()["msg"] != "Find All Assurance":
             log_wrong_response_warning(user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(user_id, operation, response)
         else:
             assurance_types = response.json()["data"]

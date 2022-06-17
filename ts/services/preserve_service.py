@@ -11,6 +11,7 @@ from ts.log_syntax.locust_response import (
 )
 import requests
 from json import JSONDecodeError
+from ts import TIMEOUT_MAX
 
 PRESERVE_SERVICE_URL = "http://34.98.120.134/api/v1/preserveservice/preserve"
 
@@ -72,7 +73,7 @@ def reserve_one_ticket(
     ) as response:
         if response.json()["msg"] != "Success.":
             log_wrong_response_warning(user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(user_id, operation, response)
         else:
             log_response_info(user_id, operation, response.json()["data"])

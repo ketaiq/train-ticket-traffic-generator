@@ -8,6 +8,8 @@ import requests
 from typing import Tuple
 from json import JSONDecodeError
 
+from ts import TIMEOUT_MAX
+
 
 def login_user(
     client, username: str, password: str, description: str
@@ -25,7 +27,7 @@ def login_user(
             log = f"user {username} tries to {operation} but gets wrong response"
             logging.warning(f"{log} {response.json()}")
             response.failure(log)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log = f"user {username} tries to {operation} but request takes too long!"
             logging.warning(log)
             response.failure(log)

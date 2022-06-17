@@ -4,6 +4,7 @@ This module includes all API calls provided by ts-travel-plan-service.
 
 import logging
 from locust.clients import HttpSession
+from ts import TIMEOUT_MAX
 
 
 def get_cheapest_travel_plans(
@@ -29,7 +30,7 @@ def get_cheapest_travel_plans(
             logging.error(
                 f"user tries to get cheapest travel plans on {departure_time} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user tries to get cheapest travel plans on {departure_time} but request takes too long!"
             )
@@ -64,7 +65,7 @@ def get_quickest_travel_plans(
             logging.error(
                 f"user tries to get quickest travel plans on {departure_time} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user tries to get quickest travel plans on {departure_time} but request takes too long!"
             )
@@ -96,7 +97,7 @@ def get_min_station_travel_plans(
             log = f"user tries to get minimum stations travel plans on {departure_time} but gets wrong response"
             response.failure(log)
             logging.error(f"{log} {response.json()}")
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log = f"user tries to get minimum stations travel plans on {departure_time} but request takes too long!"
             response.failure(log)
             logging.warning(log)

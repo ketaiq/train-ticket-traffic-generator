@@ -6,11 +6,13 @@ import logging
 import sys
 import requests
 from json import JSONDecodeError
+from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
     log_response_info,
     log_timeout_warning,
     log_wrong_response_warning,
 )
+from ts.errors import UndesirableResultError
 import random
 import uuid
 import math
@@ -88,6 +90,8 @@ ORIGINAL_ROUTES = [
         "terminalStationId": "suzhou",
     },
 ]
+european_routes = []
+
 
 class Route:
     """
@@ -113,7 +117,7 @@ def get_all_routes(client, admin_bearer: str, admin_user_id: str) -> list:
     ) as response:
         if response.json()["msg"] != "Success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             routes = response.json()["data"]
@@ -121,7 +125,7 @@ def get_all_routes(client, admin_bearer: str, admin_user_id: str) -> list:
             return routes
 
 
-def get_routes_request(admin_bearer: str, request_id: str) -> list:
+def get_all_routes_request(admin_bearer: str, request_id: str) -> list:
     operation = "get all routes"
     r = requests.get(
         url=ADMIN_ROUTE_SERVICE_URL,
@@ -173,7 +177,7 @@ def add_one_route(
     ) as response:
         if response.json()["msg"] != "Save Success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             new_route = response.json()["data"]
@@ -209,7 +213,7 @@ def update_one_route(
     ) as response:
         if response.json()["msg"] != "Modify success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             new_route = response.json()["data"]
@@ -278,7 +282,7 @@ def delete_one_route(
     ) as response:
         if response.json()["msg"] != "Delete Success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             deleted_route_id = response.json()["data"]
@@ -315,7 +319,7 @@ def delete_one_route_request(admin_bearer: str, request_id: str, route_id: str) 
 
 
 def restore_original_routes(admin_bearer: str, request_id: str):
-    routes = get_routes_request(admin_bearer, request_id)
+    routes = get_all_routes_request(admin_bearer, request_id)
     for route in routes:
         if route not in ORIGINAL_ROUTES:
             deleted_route_id = delete_one_route_request(
@@ -465,3 +469,20 @@ def add_routes(
             route.distances,
         )
         print(f"Add route {new_route}")
+
+
+def pick_two_random_stations_in_one_route() -> list:
+    from ts.services.station_service import european_stations
+
+    results = []
+    picked_route = random.choice(european_routes)
+    picked_stations = random.sample(picked_route["stations"], k=2)
+    for picked_station in picked_stations:
+        for station in european_stations:
+            if station["id"] == picked_station:
+                results.append(station["name"])
+                break
+    if len(results) == 2:
+        return results
+    else:
+        raise UndesirableResultError(results, ["station A", "station B"])

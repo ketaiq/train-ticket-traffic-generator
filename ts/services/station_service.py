@@ -11,6 +11,7 @@ from ts.log_syntax.locust_response import (
 from json import JSONDecodeError
 import random
 import string
+from ts import TIMEOUT_MAX
 
 STATION_SERVICE_URL = "http://34.98.120.134/api/v1/stationservice/stations"
 
@@ -29,6 +30,7 @@ ORIGINAL_STATIONS = [
     {"id": "wuxi", "name": "Wu Xi", "stayTime": 3},
     {"id": "suzhou", "name": "Su Zhou", "stayTime": 3},
 ]
+european_stations = []
 
 
 class Station:
@@ -55,7 +57,7 @@ def get_all_stations(client, admin_bearer: str, admin_user_id: str) -> list:
     ) as response:
         if response.json()["msg"] != "Find all content":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             stations = response.json()["data"]
@@ -135,7 +137,7 @@ def add_one_new_station(
                 new_station_name,
                 stay_time,
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             log_wrong_response_warning(admin_user_id, operation, response)
@@ -222,7 +224,7 @@ def update_one_station(
     ) as response:
         if response.json()["msg"] != "Update success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             updated_station = response.json()["data"]
@@ -290,7 +292,7 @@ def delete_one_station(
     ) as response:
         if response.json()["msg"] != "Delete success":
             log_wrong_response_warning(admin_user_id, operation, response)
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(admin_user_id, operation, response)
         else:
             deleted_station = response.json()["data"]

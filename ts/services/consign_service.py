@@ -6,6 +6,7 @@ import logging
 import random
 import uuid
 from ts.util import gen_random_phone_number
+from ts import TIMEOUT_MAX
 
 
 class Consign:
@@ -48,7 +49,7 @@ def add_one_consign_by_order_id(client, bearer: str, user_id: str, order_id: str
             logging.error(
                 f"user {user_id} tries to consign a ticket but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user {user_id} tries to consign a ticket but request takes too long!"
             )
@@ -76,7 +77,7 @@ def get_one_consign_by_order_id(client, bearer: str, order_id: str):
             logging.error(
                 f"user tries to get a consigned ticket by order id {order_id} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user tries to get a consigned ticket by order id {order_id} but request takes too long!"
             )
@@ -119,7 +120,7 @@ def update_one_consign_by_order_id(client, bearer: str, user_id: str, order_id: 
             logging.error(
                 f"user {user_id} tries to update a consigned ticket by order id {order_id} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user {user_id} tries to update a consigned ticket by order id {order_id} but request takes too long!"
             )

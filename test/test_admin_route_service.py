@@ -1,7 +1,7 @@
 import uuid
 from ts.services.station_service import ORIGINAL_STATIONS
 from ts.services.admin_route_service import (
-    get_routes_request,
+    get_all_routes_request,
     restore_original_routes,
     ORIGINAL_ROUTES,
     add_or_update_one_route_request,
@@ -36,7 +36,7 @@ def test_all(
 
 def _test_get_routes(admin_bearer: str, request_id: str, assertIsInstance):
     print("Test get_routes")
-    routes = get_routes_request(admin_bearer, request_id)
+    routes = get_all_routes_request(admin_bearer, request_id)
     print(routes)
     assertIsInstance(routes, list)
 
@@ -127,5 +127,5 @@ def _test_gen_updated_route(assertIsInstance, assertEqual):
 def _test_restore_original_routes(admin_bearer: str, request_id: str, assertEqual):
     print("Test restore_original_routes")
     restore_original_routes(admin_bearer, request_id)
-    routes = get_routes_request(admin_bearer, request_id)
+    routes = get_all_routes_request(admin_bearer, request_id)
     assertEqual(routes, ORIGINAL_ROUTES)

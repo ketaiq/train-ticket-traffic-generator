@@ -4,7 +4,7 @@ This module includes all API calls provided by ts-voucher-service.
 
 import logging
 from locust.clients import HttpSession
-
+from ts import TIMEOUT_MAX
 
 def get_one_voucher(client: HttpSession, bearer: str, order_id: str):
     with client.post(
@@ -24,7 +24,7 @@ def get_one_voucher(client: HttpSession, bearer: str, order_id: str):
             logging.error(
                 f"user tries to get one voucher by order id {order_id} but gets wrong response {response.json()}"
             )
-        elif response.elapsed.total_seconds() > 10:
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             response.failure(
                 f"user tries to get one voucher by order id {order_id} but request takes too long!"
             )

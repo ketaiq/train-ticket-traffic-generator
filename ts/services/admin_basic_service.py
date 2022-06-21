@@ -7,7 +7,7 @@ from json import JSONDecodeError
 import random
 
 ADMIN_PRICE_SERVICE_URL = (
-    "http://34.98.120.134/api/v1/adminbasicservice/adminbasic/prices"
+    "http://130.211.196.121:8080/api/v1/adminbasicservice/adminbasic/prices"
 )
 
 ORIGINAL_PRICES = [

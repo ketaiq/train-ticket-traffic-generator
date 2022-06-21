@@ -10,7 +10,7 @@ import random
 import urllib.parse
 from ts import TIMEOUT_MAX
 
-FOOD_SERVICE_URL = "http://34.98.120.134/api/v1/foodservice/foods"
+FOOD_SERVICE_URL = "http://130.211.196.121:8080/api/v1/foodservice/foods"
 
 
 class FoodType(IntEnum):

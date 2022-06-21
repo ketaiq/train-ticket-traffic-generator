@@ -8,7 +8,9 @@ import time
 import random
 from json import JSONDecodeError
 
-ADMIN_TRAVEL_SERVICE_URL = "http://34.98.120.134/api/v1/admintravelservice/admintravel"
+ADMIN_TRAVEL_SERVICE_URL = (
+    "http://130.211.196.121:8080/api/v1/admintravelservice/admintravel"
+)
 ORIGINAL_TRAVELS = [
     {
         "trip": {
@@ -133,6 +135,131 @@ ORIGINAL_TRAVELS = [
             "distances": [0, 50],
             "startStationId": "shanghai",
             "terminalStationId": "suzhou",
+        },
+    },
+    {
+        "trip": {
+            "tripId": {"type": "Z", "number": "1234"},
+            "trainTypeId": "ZhiDa",
+            "routeId": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
+            "startingStationId": "shanghai",
+            "stationsId": "nanjing",
+            "terminalStationId": "beijing",
+            "startingTime": 1367632312000,
+            "endTime": 1367653912000,
+        },
+        "trainType": {
+            "id": "ZhiDa",
+            "economyClass": 2147483647,
+            "confortClass": 2147483647,
+            "averageSpeed": 120,
+        },
+        "route": {
+            "id": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
+            "stations": ["shanghai", "nanjing", "shijiazhuang", "taiyuan"],
+            "distances": [0, 350, 1000, 1300],
+            "startStationId": "shanghai",
+            "terminalStationId": "taiyuan",
+        },
+    },
+    {
+        "trip": {
+            "tripId": {"type": "Z", "number": "1235"},
+            "trainTypeId": "ZhiDa",
+            "routeId": "9fc9c261-3263-4bfa-82f8-bb44e06b2f52",
+            "startingStationId": "shanghai",
+            "stationsId": "nanjing",
+            "terminalStationId": "beijing",
+            "startingTime": 1367638312000,
+            "endTime": 1367661112000,
+        },
+        "trainType": {
+            "id": "ZhiDa",
+            "economyClass": 2147483647,
+            "confortClass": 2147483647,
+            "averageSpeed": 120,
+        },
+        "route": {
+            "id": "9fc9c261-3263-4bfa-82f8-bb44e06b2f52",
+            "stations": ["nanjing", "xuzhou", "jinan", "beijing"],
+            "distances": [0, 500, 700, 1200],
+            "startStationId": "nanjing",
+            "terminalStationId": "beijing",
+        },
+    },
+    {
+        "trip": {
+            "tripId": {"type": "Z", "number": "1236"},
+            "trainTypeId": "ZhiDa",
+            "routeId": "d693a2c5-ef87-4a3c-bef8-600b43f62c68",
+            "startingStationId": "shanghai",
+            "stationsId": "nanjing",
+            "terminalStationId": "beijing",
+            "startingTime": 1367622352000,
+            "endTime": 1367643112000,
+        },
+        "trainType": {
+            "id": "ZhiDa",
+            "economyClass": 2147483647,
+            "confortClass": 2147483647,
+            "averageSpeed": 120,
+        },
+        "route": {
+            "id": "d693a2c5-ef87-4a3c-bef8-600b43f62c68",
+            "stations": ["taiyuan", "shijiazhuang", "nanjing", "shanghai"],
+            "distances": [0, 300, 950, 1300],
+            "startStationId": "taiyuan",
+            "terminalStationId": "shanghai",
+        },
+    },
+    {
+        "trip": {
+            "tripId": {"type": "T", "number": "1235"},
+            "trainTypeId": "TeKuai",
+            "routeId": "20eb7122-3a11-423f-b10a-be0dc5bce7db",
+            "startingStationId": "shanghai",
+            "stationsId": "nanjing",
+            "terminalStationId": "beijing",
+            "startingTime": 1367627512000,
+            "endTime": 1367659312000,
+        },
+        "trainType": {
+            "id": "TeKuai",
+            "economyClass": 2147483647,
+            "confortClass": 2147483647,
+            "averageSpeed": 120,
+        },
+        "route": {
+            "id": "20eb7122-3a11-423f-b10a-be0dc5bce7db",
+            "stations": ["shanghai", "taiyuan"],
+            "distances": [0, 1300],
+            "startStationId": "shanghai",
+            "terminalStationId": "taiyuan",
+        },
+    },
+    {
+        "trip": {
+            "tripId": {"type": "K", "number": "1345"},
+            "trainTypeId": "KuaiSu",
+            "routeId": "1367db1f-461e-4ab7-87ad-2bcc05fd9cb7",
+            "startingStationId": "shanghai",
+            "stationsId": "nanjing",
+            "terminalStationId": "beijing",
+            "startingTime": 1367625112000,
+            "endTime": 1367668792000,
+        },
+        "trainType": {
+            "id": "KuaiSu",
+            "economyClass": 2147483647,
+            "confortClass": 2147483647,
+            "averageSpeed": 90,
+        },
+        "route": {
+            "id": "1367db1f-461e-4ab7-87ad-2bcc05fd9cb7",
+            "stations": ["shanghaihongqiao", "jiaxingnan", "hangzhou"],
+            "distances": [0, 150, 300],
+            "startStationId": "shanghaihongqiao",
+            "terminalStationId": "hangzhou",
         },
     },
 ]

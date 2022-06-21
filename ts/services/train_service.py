@@ -2,7 +2,9 @@ import requests
 import logging
 from json import JSONDecodeError
 
-TRAIN_SERVICE_URL = "http://34.98.120.134/api/v1/adminbasicservice/adminbasic/trains"
+TRAIN_SERVICE_URL = (
+    "http://130.211.196.121:8080/api/v1/adminbasicservice/adminbasic/trains"
+)
 ORIGINAL_TRAINS = [
     {
         "id": "GaoTieOne",

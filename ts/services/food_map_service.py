@@ -7,6 +7,178 @@ from ts.util import gen_random_phone_number
 
 FOOD_MAP_SERVICE_URL = "http://35.222.140.129:18855/api/v1/foodmapservice"
 
+ORIGINAL_TRAINFOODS = [
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.TrainFood",
+        "tripId": "G1234",
+        "foodList": [
+            {"foodName": "Pork Chop with rice", "price": 9.5},
+            {"foodName": "Egg Soup", "price": 3.2},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.TrainFood",
+        "tripId": "G1235",
+        "foodList": [
+            {"foodName": "Beef with rice", "price": 9.5},
+            {"foodName": "Soup", "price": 3.7},
+            {"foodName": "Pork pickled mustard green noodles", "price": 10.0},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.TrainFood",
+        "tripId": "G1236",
+        "foodList": [
+            {"foodName": "Seafood noodles", "price": 9.5},
+            {"foodName": "Glutinous rice", "price": 0.9},
+            {"foodName": "Dumplings", "price": 5.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.TrainFood",
+        "tripId": "G1237",
+        "foodList": [
+            {"foodName": "Spring rolls", "price": 1.5},
+            {"foodName": "Vegetable soup", "price": 0.8},
+            {"foodName": "Rice and vegetable roll", "price": 1.0},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.TrainFood",
+        "tripId": "D1345",
+        "foodList": [
+            {"foodName": "Spicy hot noodles", "price": 5.0},
+            {"foodName": "Soup", "price": 3.7},
+            {"foodName": "Oily bean curd", "price": 2.0},
+        ],
+    },
+]
+ORIGINAL_STORES = [
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "shanghai",
+        "storeName": "KFC",
+        "telephone": "01-234567",
+        "businessTime": "10:00-20:00",
+        "deliveryFee": 20.0,
+        "foodList": [
+            {"foodName": "Hamburger", "price": 5.0},
+            {"foodName": "Cola", "price": 2.0},
+            {"foodName": "Chicken", "price": 10.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "shanghai",
+        "storeName": "Good Taste",
+        "telephone": "6228480012",
+        "businessTime": "08:00-21:00",
+        "deliveryFee": 10.0,
+        "foodList": [
+            {"foodName": "Rice", "price": 1.2},
+            {"foodName": "Chicken Soup", "price": 2.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "nanjing",
+        "storeName": "Burger King",
+        "telephone": "88348215681",
+        "businessTime": "08:00-23:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "Big Burger", "price": 1.2},
+            {"foodName": "Bone Soup", "price": 2.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "nanjing",
+        "storeName": "Pizza Hut",
+        "telephone": "2382614",
+        "businessTime": "08:00-23:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "Big Burger", "price": 1.2},
+            {"foodName": "Bone Soup", "price": 2.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "nanjing",
+        "storeName": "McDonald's",
+        "telephone": "2836485",
+        "businessTime": "08:00-23:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "Big Mac", "price": 2.2},
+            {"foodName": "McChicken", "price": 1.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "suzhou",
+        "storeName": "Roman Holiday",
+        "telephone": "3769464",
+        "businessTime": "09:00-23:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "Big Burger", "price": 1.2},
+            {"foodName": "Bone Soup", "price": 2.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "beijing",
+        "storeName": "Perfect",
+        "telephone": "975335664",
+        "businessTime": "08:00-23:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "French Fries", "price": 1.2},
+            {"foodName": "Vegetable Seafood Soup", "price": 2.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "beijing",
+        "storeName": "Delicious",
+        "telephone": "237452946",
+        "businessTime": "08:00-21:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "Hot Chocolate", "price": 1.2},
+            {"foodName": "Pineapple Pie", "price": 2.5},
+        ],
+    },
+    {
+        "_id": str(uuid.uuid4()),
+        "_class": "food.entity.FoodStore",
+        "stationId": "taiyuan",
+        "storeName": "GOODWILL",
+        "telephone": "23753855",
+        "businessTime": "08:00-21:00",
+        "deliveryFee": 15.0,
+        "foodList": [
+            {"foodName": "Karubi Beef", "price": 1.2},
+            {"foodName": " Low Fat Yogurt Blackberry", "price": 2.5},
+        ],
+    },
+]
+
 
 def get_all_food_stores_request(
     request_id: str,
@@ -62,6 +234,19 @@ def get_train_food_in_one_trip_request(request_id: str, trip_id: str) -> list:
         print(f"Response did not contain expected key '{key}'")
 
 
+def print_all_food_from_mongo():
+    client = MongoClient("mongodb://35.232.87.32:27017/")
+    db = client["ts"]
+    trainfoods = db["trainfoods"]
+    stores = db["stores"]
+    print("trainfoods")
+    for train_food in trainfoods.find():
+        print(train_food)
+    print("stores")
+    for store in stores.find():
+        print(store)
+
+
 def _gen_random_food_list(food_choices) -> list:
     food_names = random.sample(food_choices, k=random.randint(1, len(food_choices)))
     return [
@@ -100,7 +285,7 @@ def _gen_random_store_record(food_choices, store_choices, station) -> dict:
 
 
 def add_food(all_travels, all_stations):
-    client = MongoClient("mongodb://35.188.139.242:27017/")
+    client = MongoClient("mongodb://35.232.87.32:27017/")
     db = client["ts"]
     trainfoods = db["trainfoods"]
     trainfoods.delete_many({})
@@ -182,7 +367,9 @@ def add_food(all_travels, all_stations):
         _gen_random_store_record(food_choices, store_choices, station)
         for station in all_stations
     ]
+    trainfoods.insert_many(ORIGINAL_TRAINFOODS)
     trainfoods.insert_many(all_train_food_records)
+    stores.insert_many(ORIGINAL_STORES)
     stores.insert_many(all_store_records)
 
     for train_food in trainfoods.find():

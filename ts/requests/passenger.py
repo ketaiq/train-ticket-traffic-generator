@@ -1,9 +1,11 @@
 import random
 import uuid
+from ts.services.admin_user_service import add_one_user
 from ts.services.travel_service import search_ticket
 from ts.services.visit_page import visit_client_login, visit_home
 from ts.services.admin_route_service import pick_two_random_stations_in_one_route
-from ts.util import gen_random_date
+from ts.services.auth_service import login_user
+from ts.util import gen_random_date, gen_random_document_number
 
 
 class PassengerRequest:
@@ -29,10 +31,43 @@ class PassengerRequest:
         return_time = gen_random_date(return_int)
         self.from_station, self.to_station = pick_two_random_stations_in_one_route()
         search_ticket(
-            self.client, departure_time, self.from_station, self.to_station, self.request_id
+            self.client,
+            departure_time,
+            self.from_station,
+            self.to_station,
+            self.request_id,
         )
         search_ticket(
-            self.client, return_time, self.to_station, self.from_station, self.request_id
+            self.client,
+            return_time,
+            self.to_station,
+            self.from_station,
+            self.request_id,
         )
 
-    
+    def create_and_login_user(self):
+        """
+        Send requests of creating a new user and navigating to the client login page
+        and then send a POST request of login the new user.
+        """
+        admin_bearer, _ = login_user(
+            self.client,
+            username="admin",
+            password="222222",
+            description="login admin user",
+        )
+        user_name = str(uuid.uuid4())
+        add_one_user(
+            self.client,
+            admin_bearer,
+            gen_random_document_number(),
+            username=user_name,
+            password=user_name,
+        )
+        visit_client_login(self.client, self.request_id)
+        self.bearer, self.user_id = login_user(
+            client=self.client,
+            username=user_name,
+            password=user_name,
+            description="login common user",
+        )

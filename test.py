@@ -112,7 +112,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         test_all(bearer, request_id, self.assertIsInstance, self.assertEqual)
 
-    @unittest.skip("skipping")
+    # @unittest.skip("skipping")
     def test_food_map_service(self):
         from test.test_food_map_service import test_all
 

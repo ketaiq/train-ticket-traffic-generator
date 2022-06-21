@@ -12,12 +12,15 @@ from ts.log_syntax.locust_response import (
     log_timeout_warning,
     log_wrong_response_warning,
 )
+from ts.services.station_service import ORIGINAL_STATIONS
 from ts.errors import UndesirableResultError
 import random
 import uuid
 import math
 
-ADMIN_ROUTE_SERVICE_URL = "http://34.98.120.134/api/v1/adminrouteservice/adminroute"
+ADMIN_ROUTE_SERVICE_URL = (
+    "http://130.211.196.121:8080/api/v1/adminrouteservice/adminroute"
+)
 ORIGINAL_ROUTES = [
     {
         "id": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
@@ -342,25 +345,10 @@ def gen_random_route(all_stations: list) -> Route:
 
 
 def _gen_random_route_from_original_stations() -> Route:
-    stations = [
-        {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},
-        {"id": "shanghaihongqiao", "name": "Shang Hai Hong Qiao", "stayTime": 10},
-        {"id": "taiyuan", "name": "Tai Yuan", "stayTime": 5},
-        {"id": "beijing", "name": "Bei Jing", "stayTime": 10},
-        {"id": "nanjing", "name": "Nan Jing", "stayTime": 8},
-        {"id": "shijiazhuang", "name": "Shi Jia Zhuang", "stayTime": 8},
-        {"id": "xuzhou", "name": "Xu Zhou", "stayTime": 7},
-        {"id": "jinan", "name": "Ji Nan", "stayTime": 5},
-        {"id": "hangzhou", "name": "Hang Zhou", "stayTime": 9},
-        {"id": "jiaxingnan", "name": "Jia Xing Nan", "stayTime": 2},
-        {"id": "zhenjiang", "name": "Zhen Jiang", "stayTime": 2},
-        {"id": "wuxi", "name": "Wu Xi", "stayTime": 3},
-        {"id": "suzhou", "name": "Su Zhou", "stayTime": 3},
-    ]
     route_len = random.randint(2, 30)
-    while route_len > len(stations):
+    while route_len > len(ORIGINAL_STATIONS):
         route_len = random.randint(2, 30)
-    picked_stations = random.sample(stations, k=route_len)
+    picked_stations = random.sample(ORIGINAL_STATIONS, k=route_len)
     distances = [0]
     for _ in range(1, route_len):
         distance = random.randint(1, 1000)
@@ -486,6 +474,7 @@ def pick_two_random_stations_in_one_route() -> tuple[str, str]:
         return results[0], results[1]
     else:
         raise UndesirableResultError(results, ["station A", "station B"])
+
 
 def init_european_routes(admin_bearer: str, request_id: str):
     all_routes = get_all_routes_request(admin_bearer, request_id)

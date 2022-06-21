@@ -15,7 +15,7 @@ import random
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
 
-CONTACTS_SERVICE_URL = "http://34.98.120.134/api/v1/contactservice/contacts"
+CONTACTS_SERVICE_URL = "http://130.211.196.121:8080/api/v1/contactservice/contacts"
 ORIGINAL_CONTACTS = [
     {
         "id": "3fcb512a-339d-4cf2-ad62-744558353adb",

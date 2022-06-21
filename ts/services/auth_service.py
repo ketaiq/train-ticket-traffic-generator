@@ -2,12 +2,10 @@
 This module includes all API calls provided by ts-auth-service.
 """
 
-import uuid
 import logging
 import requests
 from typing import Tuple
 from json import JSONDecodeError
-
 from ts import TIMEOUT_MAX
 
 
@@ -52,7 +50,7 @@ def login_user_request(
     admin_bearer = ""
     user_id = ""
     r = requests.post(
-        url="http://34.98.120.134/api/v1/users/login",
+        url="http://130.211.196.121:8080/api/v1/users/login",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -78,10 +76,3 @@ def login_user_request(
         logging.error("Response could not be decoded as JSON")
     except KeyError:
         logging.error(f"Response did not contain expected key '{key}'")
-
-
-if __name__ == "__main__":
-    admin_bearer, user_id = login_user_request(
-        username="admin", password="222222", request_id=str(uuid.uuid4())
-    )
-    print(f"admin_bearer: {admin_bearer}, user_id: {user_id}")

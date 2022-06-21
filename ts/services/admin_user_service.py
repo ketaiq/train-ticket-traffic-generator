@@ -3,7 +3,6 @@ This module includes all API calls provided by ts-admin-user-service.
 """
 
 import logging
-from locust.clients import HttpSession
 import requests
 from json import JSONDecodeError
 
@@ -11,7 +10,7 @@ ADMIN_USER_SERVICE_URL = "http://130.211.196.121:8080/api/v1/adminuserservice/us
 
 
 def add_one_user(
-    client: HttpSession,
+    client,
     admin_bearer: str,
     document_num: str,
     username: str,

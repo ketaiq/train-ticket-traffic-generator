@@ -112,7 +112,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         test_all(bearer, request_id, self.assertIsInstance, self.assertEqual)
 
-    # @unittest.skip("skipping")
+    @unittest.skip("skipping")
     def test_food_map_service(self):
         from test.test_food_map_service import test_all
 
@@ -133,6 +133,18 @@ class ServiceRequestTestCase(unittest.TestCase):
         )
 
         test_all(request_id, bearer, user_id, self.assertIsInstance, self.assertEqual)
+
+    def test_admin_user_service(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_admin_user_service import test_all
+
+        print("\n\nTest admin_user_service")
+        request_id = str(uuid.uuid4())
+        bearer, user_id = login_user_request(
+            username="admin", password="222222", request_id=request_id
+        )
+
+        test_all(request_id, bearer, self.assertIsInstance, self.assertEqual)
 
 
 if __name__ == "__main__":

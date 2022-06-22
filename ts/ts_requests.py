@@ -2,7 +2,7 @@ import uuid
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import add_one_user
 from ts.services.assurance_service import get_assurance_types, AssuranceType
-from ts.services.food_service import get_food_menu, pick_random_food
+from ts.services.food_service import search_food_on_trip, pick_random_food
 from ts.services.contacts_service import (
     get_contacts_by_account_id,
     add_one_contact,
@@ -29,7 +29,7 @@ from ts.services.travel_service import search_ticket
 from ts.services.visit_page import (
     visit_home,
     visit_client_login,
-    visit_client_ticket_book,
+    visit_ticket_book,
 )
 
 from ts.util import gen_random_date
@@ -127,9 +127,9 @@ class TrainTicketRequest:
 
         Dependence: book --> login
         """
-        visit_client_ticket_book(self.client, self.bearer, self.user_id)
+        visit_ticket_book(self.client, self.bearer, self.user_id)
         get_assurance_types(self.client, self.bearer, self.user_id)
-        food_menu = get_food_menu(self.client, self.bearer, self.user_id)
+        food_menu = search_food_on_trip(self.client, self.bearer, self.user_id)
         food = pick_random_food(food_menu)
         consign = gen_random_consign()
         contact_id = self.get_a_contact()

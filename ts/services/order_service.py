@@ -2,16 +2,19 @@
 This module includes all API calls provided by ts-order-service.
 """
 
-import logging
-from locust.clients import HttpSession
 from ts import TIMEOUT_MAX
+from ts.log_syntax.locust_response import (
+    log_wrong_response_warning,
+    log_timeout_warning,
+    log_response_info,
+)
 
 
-def get_orders_by_login_id(client: HttpSession, user_id: str, bearer: str) -> str:
-    order_id = ""
+def get_orders_by_login_id(client, user_id: str, bearer: str) -> list:
+    operation = "search orders"
     with client.post(
         url="/api/v1/orderservice/order/refresh",
-        name="get an order",
+        name=operation,
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -29,33 +32,10 @@ def get_orders_by_login_id(client: HttpSession, user_id: str, bearer: str) -> st
         },
     ) as response:
         if response.json()["msg"] != "Query Orders For Refresh Success":
-            response.failure(
-                f"user {user_id} tries to get orders by login id {user_id} but gets wrong response"
-            )
-            logging.error(
-                f"user {user_id} tries to get orders by login id {user_id} but gets wrong response {response.json()}"
-            )
+            log_wrong_response_warning(user_id, operation, response)
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            response.failure(
-                f"user {user_id} tries to get orders by login id {user_id} but request takes too long!"
-            )
-            logging.warning(
-                f"user {user_id} tries to get orders by login id {user_id} but request takes too long!"
-            )
+            log_timeout_warning(user_id, operation, response)
         else:
-            data = response.json()["data"]
-            if data is not None:
-                if len(data) > 0:
-                    order_id = data[0]["id"]
-                    logging.info(
-                        f"user {user_id} gets orders by login id {user_id}, its order id is {order_id}"
-                    )
-                else:
-                    logging.info(
-                        f"user {user_id} tries to get orders by login id {user_id}, but there is no this order"
-                    )
-            else:
-                logging.error(
-                    f"user {user_id} fails to get orders by login id {user_id} because there is no response data"
-                )
-    return order_id
+            orders = response.json()["data"]
+            log_response_info(user_id, operation, orders)
+            return orders

@@ -12,6 +12,7 @@ from ts.log_syntax.locust_response import (
 import requests
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+import random
 
 PRESERVE_SERVICE_URL = "http://130.211.196.121:8080/api/v1/preserveservice/preserve"
 
@@ -30,6 +31,7 @@ def reserve_one_ticket(
     bearer: str,
     user_id: str,
     contact_id: str,
+    trip_id: str,
     seat_type: str,
     date: str,
     from_station: str,
@@ -38,7 +40,7 @@ def reserve_one_ticket(
     food: Food,
     consign: Consign,
 ):
-    operation = "reserve a ticket"
+    operation = "reserve ticket"
     with client.post(
         url="/api/v1/preserveservice/preserve",
         headers={
@@ -49,7 +51,7 @@ def reserve_one_ticket(
         json={
             "accountId": user_id,
             "contactsId": contact_id,
-            "tripId": "D1345",
+            "tripId": trip_id,
             "seatType": seat_type,
             "date": date,
             "from": from_station,
@@ -68,8 +70,7 @@ def reserve_one_ticket(
             "consigneePhone": consign.phone,
             "consigneeWeight": consign.weight,
         },
-        catch_response=True,
-        name="reserve a ticket",
+        name=operation,
     ) as response:
         if response.json()["msg"] != "Success.":
             log_wrong_response_warning(user_id, operation, response)
@@ -140,3 +141,7 @@ def reserve_one_ticket_request(
         print("Response could not be decoded as JSON")
     except KeyError:
         print(f"Response did not contain expected key '{key}'")
+
+
+def pick_random_seat_type() -> str:
+    return random.choice(list(SeatType)).value

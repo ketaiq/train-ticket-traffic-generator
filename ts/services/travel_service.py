@@ -2,17 +2,17 @@
 This module includes all API calls provided by ts-travel-service.
 """
 
-from locust.clients import HttpSession
 from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
     log_timeout_warning,
     log_response_info,
 )
 from ts import TIMEOUT_MAX
+import random
 
 
 def search_ticket(
-    client: HttpSession,
+    client,
     departure_date: str,
     from_station: str,
     to_station: str,
@@ -48,3 +48,7 @@ def search_ticket(
                 res = "No tickets"
             log_response_info(request_id, operation, res, name="request")
             return data
+
+
+def pick_random_travel(trips: list) -> dict:
+    return random.choice(trips)

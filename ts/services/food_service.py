@@ -2,13 +2,17 @@
 This module includes all API calls provided by ts-food-service.
 """
 
-import logging
 from enum import IntEnum
 import requests
 from json import JSONDecodeError
 import random
 import urllib.parse
 from ts import TIMEOUT_MAX
+from ts.log_syntax.locust_response import (
+    log_wrong_response_warning,
+    log_timeout_warning,
+    log_response_info,
+)
 
 FOOD_SERVICE_URL = "http://130.211.196.121:8080/api/v1/foodservice/foods"
 
@@ -24,7 +28,14 @@ class Food:
     According to https://github.com/FudanSELab/train-ticket/blob/master/ts-preserve-service/src/main/java/preserve/entity/FoodOrder.java
     """
 
-    def __init__(self, name: str, type: int, station: str, store: str, price: float):
+    def __init__(
+        self,
+        name: str = "",
+        type: int = 0,
+        station: str = "",
+        store: str = "",
+        price: float = 0,
+    ):
         self.name = name
         self.type = type
         if type == FoodType.STATION_FOOD_STORES:
@@ -33,41 +44,45 @@ class Food:
         else:
             self.station = ""
             self.store = ""
-
         self.price = price
 
 
-def get_food_menu(client, bearer: str, user_id: str) -> dict:
-    food_menu = dict()
-    # get food
+def search_food_on_trip(
+    client,
+    bearer: str,
+    user_id: str,
+    date: str,
+    from_station: str,
+    to_station: str,
+    trip_id: str,
+) -> dict | None:
+    operation = "search food on trip"
     with client.get(
-        url="/api/v1/foodservice/foods/2022-02-11/Shang%20Hai/Su%20Zhou/D1345",
+        url="/api/v1/foodservice/foods/"
+        + urllib.parse.quote(date)
+        + "/"
+        + urllib.parse.quote(from_station)
+        + "/"
+        + urllib.parse.quote(to_station)
+        + "/"
+        + urllib.parse.quote(trip_id),
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": bearer,
         },
-        name="get all food",
+        name=operation,
     ) as response:
+        if response.json()["msg"] == "Get All Food Failed":
+            return None
         if response.json()["msg"] != "Get All Food Success":
-            response.failure(
-                f"user {user_id} tries to get food menu but gets wrong response"
-            )
-            logging.error(
-                f"user {user_id} tries to get food menu but gets wrong response {response.json()}"
-            )
+            log_wrong_response_warning(user_id, operation, response)
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            response.failure(
-                f"user {user_id} tries to get food menu but request takes too long!"
-            )
-            logging.warning(
-                f"user {user_id} tries to get food menu but request takes too long!"
-            )
+            log_timeout_warning(user_id, operation, response)
         else:
-            food_menu = response.json()["data"]
-            logging.info(f"user {user_id} get food menu {food_menu}")
-
-    return food_menu
+            all_food = response.json()["data"]
+            log_response_info(user_id, operation, all_food)
+            return all_food
 
 
 def get_all_train_and_store_food_request(
@@ -113,7 +128,7 @@ def get_all_train_and_store_food_request(
 
 
 def pick_random_food(food_menu: dict) -> Food:
-    food_type = random.randint(FoodType.NONE.value, FoodType.STATION_FOOD_STORES.value)
+    food_type = random.randint(FoodType.TRAIN_FOOD.value, FoodType.STATION_FOOD_STORES.value)
     if food_type == FoodType.TRAIN_FOOD:
         train_food = food_menu["trainFoodList"][0]
         chosen_food_index = random.randint(0, len(train_food["foodList"]) - 1)
@@ -125,29 +140,17 @@ def pick_random_food(food_menu: dict) -> Food:
             "",
             chosen_food["price"],
         )
-    elif food_type == FoodType.STATION_FOOD_STORES:
-        station_food = food_menu["foodStoreListMap"]
-        station = random.randint(0, 1)
-        if station == 0:
-            station_food = station_food["shanghai"]
-        else:
-            station_food = station_food["suzhou"]
-        station_food_index = random.randint(0, len(station_food) - 1)
-        station_food = station_food[station_food_index]
-        chosen_food_index = random.randint(0, len(station_food["foodList"]) - 1)
-        chosen_food = station_food["foodList"][chosen_food_index]
+    else:
+        all_station_food = food_menu["foodStoreListMap"]
+        station_food = all_station_food[random.choice(list(all_station_food.keys()))]
+        store_index = random.randint(0, len(station_food) - 1)
+        store_food = station_food[store_index]
+        chosen_food_index = random.randint(0, len(store_food["foodList"]) - 1)
+        chosen_food = store_food["foodList"][chosen_food_index]
         return Food(
             chosen_food["foodName"],
             food_type,
-            station_food["stationId"],
-            station_food["storeName"],
+            store_food["stationId"],
+            store_food["storeName"],
             chosen_food["price"],
-        )
-    else:
-        return Food(
-            "",
-            food_type,
-            "",
-            "",
-            0,
         )

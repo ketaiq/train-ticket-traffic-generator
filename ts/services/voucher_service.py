@@ -2,11 +2,16 @@
 This module includes all API calls provided by ts-voucher-service.
 """
 
-import logging
-from locust.clients import HttpSession
 from ts import TIMEOUT_MAX
+from ts.log_syntax.locust_response import (
+    log_wrong_response_warning,
+    log_timeout_warning,
+    log_response_info,
+)
 
-def get_one_voucher(client: HttpSession, bearer: str, order_id: str):
+
+def get_one_voucher(client, bearer: str, user_id: str, order_id: str):
+    operation = "print voucher"
     with client.post(
         url="/getVoucher",
         headers={
@@ -15,22 +20,12 @@ def get_one_voucher(client: HttpSession, bearer: str, order_id: str):
             "Authorization": bearer,
         },
         json={"orderId": order_id, "type": 1},
-        name="get voucher",
+        name=operation,
     ) as response:
-        if response.json()["order_id"] != order_id:
-            response.failure(
-                f"user tries to get one voucher by order id {order_id} but gets wrong response"
-            )
-            logging.error(
-                f"user tries to get one voucher by order id {order_id} but gets wrong response {response.json()}"
-            )
+        if response.json()["order_id"] == order_id:
+            voucher = response.json()
+            log_response_info(user_id, operation, voucher)
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            response.failure(
-                f"user tries to get one voucher by order id {order_id} but request takes too long!"
-            )
-            logging.warning(
-                f"user tries to get one voucher by order id {order_id} but request takes too long!"
-            )
+            log_timeout_warning(user_id, operation, response)
         else:
-            price = response.json()["price"]
-            logging.info(f"user gets one voucher worth {price} by order id {order_id}")
+            log_wrong_response_warning(user_id, operation, response)

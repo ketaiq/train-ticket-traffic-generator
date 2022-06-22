@@ -2,14 +2,23 @@
 This module includes all API calls provided by ts-travel-plan-service.
 """
 
-import logging
-from locust.clients import HttpSession
 from ts import TIMEOUT_MAX
+from ts.log_syntax.locust_response import (
+    log_wrong_response_warning,
+    log_timeout_warning,
+    log_response_info,
+)
+import random
 
 
 def get_cheapest_travel_plans(
-    client: HttpSession, startingPlace: str, endPlace: str, departure_time: str
-):
+    client,
+    request_id: str,
+    startingPlace: str,
+    endPlace: str,
+    departure_time: str,
+) -> list:
+    operation = "search cheapest travel plans"
     with client.post(
         url="/api/v1/travelplanservice/travelPlan/cheapest",
         headers={
@@ -21,30 +30,26 @@ def get_cheapest_travel_plans(
             "endPlace": endPlace,
             "departureTime": departure_time,
         },
-        name="get cheapest travel plans",
+        name=operation,
     ) as response:
         if response.json()["msg"] != "Success":
-            response.failure(
-                f"user tries to get cheapest travel plans on {departure_time} but gets wrong response"
-            )
-            logging.error(
-                f"user tries to get cheapest travel plans on {departure_time} but gets wrong response {response.json()}"
-            )
+            log_wrong_response_warning(request_id, operation, response, name="request")
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            response.failure(
-                f"user tries to get cheapest travel plans on {departure_time} but request takes too long!"
-            )
-            logging.warning(
-                f"user tries to get cheapest travel plans on {departure_time} but request takes too long!"
-            )
+            log_timeout_warning(request_id, operation, response, name="request")
         else:
             plans = response.json()["data"]
-            logging.info(f"user gets cheapest travel plans {plans} on {departure_time}")
+            log_response_info(request_id, operation, plans, name="request")
+            return plans
 
 
 def get_quickest_travel_plans(
-    client: HttpSession, starting_place: str, end_place: str, departure_time: str
-):
+    client,
+    request_id: str,
+    starting_place: str,
+    end_place: str,
+    departure_time: str,
+) -> list:
+    operation = "search quickest travel plans"
     with client.post(
         url="/api/v1/travelplanservice/travelPlan/quickest",
         headers={
@@ -56,30 +61,26 @@ def get_quickest_travel_plans(
             "endPlace": end_place,
             "departureTime": departure_time,
         },
-        name="get quickest travel plans",
+        name=operation,
     ) as response:
         if response.json()["msg"] != "Success":
-            response.failure(
-                f"user tries to get quickest travel plans on {departure_time} but gets wrong response"
-            )
-            logging.error(
-                f"user tries to get quickest travel plans on {departure_time} but gets wrong response {response.json()}"
-            )
+            log_wrong_response_warning(request_id, operation, response, name="request")
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            response.failure(
-                f"user tries to get quickest travel plans on {departure_time} but request takes too long!"
-            )
-            logging.warning(
-                f"user tries to get quickest travel plans on {departure_time} but request takes too long!"
-            )
+            log_timeout_warning(request_id, operation, response, name="request")
         else:
             plans = response.json()["data"]
-            logging.info(f"user gets quickest travel plans {plans} on {departure_time}")
+            log_response_info(request_id, operation, plans, name="request")
+            return plans
 
 
 def get_min_station_travel_plans(
-    client: HttpSession, starting_place: str, end_place: str, departure_time: str
-):
+    client,
+    request_id: str,
+    starting_place: str,
+    end_place: str,
+    departure_time: str,
+) -> list:
+    operation = "search minimum stations travel plans"
     with client.post(
         url="/api/v1/travelplanservice/travelPlan/minStation",
         headers={
@@ -91,18 +92,35 @@ def get_min_station_travel_plans(
             "endPlace": end_place,
             "departureTime": departure_time,
         },
-        name="get minimum stations travel plans",
+        name=operation,
     ) as response:
         if response.json()["msg"] != "Success":
-            log = f"user tries to get minimum stations travel plans on {departure_time} but gets wrong response"
-            response.failure(log)
-            logging.error(f"{log} {response.json()}")
+            log_wrong_response_warning(request_id, operation, response, name="request")
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log = f"user tries to get minimum stations travel plans on {departure_time} but request takes too long!"
-            response.failure(log)
-            logging.warning(log)
+            log_timeout_warning(request_id, operation, response, name="request")
         else:
             plans = response.json()["data"]
-            logging.info(
-                f"user gets minimum stations travel plans {plans} on {departure_time}"
-            )
+            log_response_info(request_id, operation, plans, name="request")
+            return plans
+
+
+def pick_random_strategy_and_search(
+    client,
+    request_id: str,
+    from_station: str,
+    to_station: str,
+    departure_date: str,
+) -> list:
+    strategy = random.randint(0, 2)
+    if strategy == 0:
+        return get_cheapest_travel_plans(
+            client, request_id, from_station, to_station, departure_date
+        )
+    elif strategy == 1:
+        return get_quickest_travel_plans(
+            client, request_id, from_station, to_station, departure_date
+        )
+    else:
+        return get_min_station_travel_plans(
+            client, request_id, from_station, to_station, departure_date
+        )

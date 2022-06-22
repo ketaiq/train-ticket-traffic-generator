@@ -65,7 +65,7 @@ class DocumentType(IntEnum):
 
 
 def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
-    operation = "get a contact by user id"
+    operation = "search contacts"
     data = []
     with client.get(
         url="/api/v1/contactservice/contacts/account/" + user_id,
@@ -82,20 +82,8 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
             log_timeout_warning(user_id, operation, response)
         else:
             data = response.json()["data"]
-            if data is not None:
-                if len(data) > 0:
-                    contact_id = data[0]["id"]
-                    log_response_info(user_id, operation, contact_id)
-                else:
-                    logging.warning(
-                        f"user {user_id} tries to get a contact by account id {user_id}, but there is no this contact"
-                    )
-            else:
-                logging.warning(
-                    f"user {user_id} fails to get a contact by account id {user_id} because there is no response data"
-                )
-
-    return data
+            log_response_info(user_id, operation, data)
+            return data
 
 
 def get_all_contacts_request(request_id: str, bearer: str):
@@ -152,15 +140,9 @@ def add_one_contact(
             log_timeout_warning(user_id, operation, response)
         else:
             data = response.json()["data"]
-            if data is not None:
-                contact_id = data["id"]
-                log_response_info(user_id, operation, contact_id)
-            else:
-                logging.warning(
-                    f"user fails to add a new contact because there is no response data"
-                )
-
-    return data
+            contact_id = data["id"]
+            log_response_info(user_id, operation, contact_id)
+            return data
 
 
 def add_one_contact_request(

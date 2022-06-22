@@ -3,6 +3,7 @@ This module includes all API calls provided by ts-assurance-service.
 """
 
 import requests
+import random
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
@@ -22,8 +23,8 @@ class AssuranceType(Enum):
     TRAFFIC_ACCIDENT = "1"
 
 
-def get_assurance_types(client, bearer: str, user_id: str):
-    operation = "get assurance types"
+def get_assurance_types(client, bearer: str, user_id: str) -> list:
+    operation = "search assurance types"
     with client.get(
         url="/api/v1/assuranceservice/assurances/types",
         headers={
@@ -40,6 +41,7 @@ def get_assurance_types(client, bearer: str, user_id: str):
         else:
             assurance_types = response.json()["data"]
             log_response_info(user_id, operation, assurance_types)
+            return assurance_types
 
 
 def get_assurance_types_request(request_id: str, bearer: str):
@@ -69,13 +71,5 @@ def get_assurance_types_request(request_id: str, bearer: str):
         print(f"Response did not contain expected key '{key}'")
 
 
-if __name__ == "__main__":
-    from auth_service import login_user_request
-    import uuid
-
-    request_id = str(uuid.uuid4())
-    bearer, user_id = login_user_request(
-        username="fdse_microservice", password="111111", request_id=request_id
-    )
-
-    print(get_assurance_types_request(request_id, bearer))
+def pick_random_assurance_type(all_assurance_types: list) -> str:
+    return str(random.choice(all_assurance_types)["index"])

@@ -14,7 +14,7 @@ class Consign:
     According to https://github.com/FudanSELab/train-ticket/blob/master/ts-preserve-service/src/main/java/preserve/entity/Consign.java
     """
 
-    def __init__(self, name: str, phone: str, weight: float):
+    def __init__(self, name: str = "", phone: str = "", weight: float = 0):
         self.name = name
         self.phone = phone
         self.weight = weight
@@ -134,11 +134,7 @@ def update_one_consign_by_order_id(client, bearer: str, user_id: str, order_id: 
 
 
 def gen_random_consign() -> Consign:
-    need_consign = random.randint(0, 1)
-    if need_consign == 0:
-        return Consign("", "", 0)
-    else:
-        name = str(uuid.uuid4())
-        phone_number = gen_random_phone_number()
-        weight = round(random.uniform(1, 100), 2)
-        return Consign(name, phone_number, weight)
+    name = str(uuid.uuid4())
+    phone_number = gen_random_phone_number()
+    weight = round(random.uniform(1, 100), 2)
+    return Consign(name, phone_number, weight)

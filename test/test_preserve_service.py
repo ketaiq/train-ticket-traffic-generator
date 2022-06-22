@@ -14,7 +14,7 @@ def _test_reserve_one_ticket_request(
         request_id,
         bearer,
         user_id,
-        "3fcb512a-339d-4cf2-ad62-744558353adb",
+        "2df7d46f-55a1-4391-8200-1a68294ec8d3",
         "G-37EuroCity151",
         "2",
         "2022-10-17",

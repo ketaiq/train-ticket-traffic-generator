@@ -121,7 +121,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         test_all(request_id, self.assertIsInstance, self.assertEqual)
 
-    @unittest.skip("skipping")
+    # @unittest.skip("skipping")
     def test_preserve_service(self):
         from ts.services.auth_service import login_user_request
         from test.test_preserve_service import test_all
@@ -134,6 +134,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         test_all(request_id, bearer, user_id, self.assertIsInstance, self.assertEqual)
 
+    @unittest.skip("skipping")
     def test_admin_user_service(self):
         from ts.services.auth_service import login_user_request
         from test.test_admin_user_service import test_all
@@ -142,6 +143,19 @@ class ServiceRequestTestCase(unittest.TestCase):
         request_id = str(uuid.uuid4())
         bearer, user_id = login_user_request(
             username="admin", password="222222", request_id=request_id
+        )
+
+        test_all(request_id, bearer, self.assertIsInstance, self.assertEqual)
+
+    @unittest.skip("skipping")
+    def test_visit_page(self):
+        from ts.services.auth_service import login_user_request
+        from test.test_visit_page import test_all
+
+        print("\n\nTest visit_page")
+        request_id = str(uuid.uuid4())
+        bearer, user_id = login_user_request(
+            username="fdse_microservice", password="111111", request_id=request_id
         )
 
         test_all(request_id, bearer, self.assertIsInstance, self.assertEqual)

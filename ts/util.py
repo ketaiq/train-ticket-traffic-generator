@@ -11,7 +11,9 @@ def gen_random_phone_number() -> str:
     return "{}-{}-{}".format(first, second, last)
 
 
-def gen_random_date(after: int = random.randint(90000, 50000000)) -> str:
+def gen_random_date(
+    after: int = random.randint(24 * 60 * 60, 100 * 24 * 60 * 60)
+) -> str:
     # getting the timestamp
     timestamp = datetime.timestamp(datetime.now())
     return datetime.fromtimestamp(after + timestamp).strftime("%Y-%m-%d")
@@ -33,6 +35,27 @@ def gen_random_name() -> str:
     return f"{first_name} {last_name}"
 
 
+def gen_random_email() -> str:
+    local_part = "".join(
+        random.choice(string.ascii_lowercase + string.digits)
+        for _ in range(random.randint(3, 20))
+    )
+    domain = "".join(
+        random.choice(string.ascii_lowercase + string.digits)
+        for _ in range(random.randint(3, 10))
+    )
+    return f"{local_part}@{domain}.com"
+
+
+def gen_random_gender() -> str:
+    return random.randint(1, 3)
+
+
+def gen_random_document_type() -> str:
+    return random.randint(1, 3)
+
+
 if __name__ == "__main__":
     print(gen_random_document_number())
     print(gen_random_name())
+    print(gen_random_email())

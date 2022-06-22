@@ -1,12 +1,14 @@
-import logging
 import uuid
 from requests.adapters import HTTPAdapter
 import locust.stats
-from locust import HttpUser, task, constant, events
+from locust import HttpUser, task, constant, events, between
 
-from ts.ts_requests import TrainTicketRequest
-from ts.requests.passenger import PassengerRequest
-from ts.requests.rail_traffic_controller import RailTrafficControllerRequest
+from ts.requests.irregular_budget import IrregularBudgetRequest
+from ts.requests.irregular_normal import IrregularNormalRequest
+from ts.requests.irregular_comfort import IrregularComfortRequest
+from ts.requests.regular import RegularRequest
+from ts.requests.cancel_without_refund import CancelWithoutRefundRequest
+from ts.requests.cancel_with_refund import CancelWithRefundRequest
 
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
 locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 10
@@ -40,30 +42,54 @@ def on_locust_init(environment, **kwargs):
     init_european_stations(admin_user_id, admin_bearer)
 
 
-class PassengerWithoutLogin(HttpUser):
+class Passenger(HttpUser):
     weight = 1
-    wait_time = constant(1)
+    wait_time = between(2 * 60 * 60, 24 * 60 * 60)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-        self.request = PassengerRequest(self.client)
-        logging.debug(
-            f"""Running user "no login" with id {self.request.request_id}..."""
+        self.irregular_budget_request = IrregularBudgetRequest(
+            self.client, "Irregular Budget"
+        )
+        self.irregular_normal_request = IrregularNormalRequest(
+            self.client, "Irregular Normal"
+        )
+        self.irregular_comfort_request = IrregularComfortRequest(
+            self.client, "Irregular Comfort"
+        )
+        self.regular_request = RegularRequest(self.client, "Regular")
+        self.cancel_without_refund_request = CancelWithoutRefundRequest(
+            self.client, "Cancel Without Refund"
+        )
+        self.cancel_with_refund_request = CancelWithRefundRequest(
+            self.client, "Cancel With Refund"
         )
 
-    @task(1)
-    def visit_home(self):
-        self.request.visit_without_login("home")
+    @task(12)
+    def irregular_budget(self):
+        self.irregular_budget_request.perform_actions()
+
+    @task(10)
+    def irregular_normal(self):
+        self.irregular_normal_request.perform_actions()
+
+    @task(2)
+    def irregular_comfort(self):
+        self.irregular_comfort_request.perform_actions()
+
+    @task(24)
+    def regular(self):
+        self.regular_request.perform_actions()
 
     @task(1)
-    def visit_home(self):
-        self.request.visit_without_login("client login")
+    def cancel_without_refund(self):
+        self.cancel_without_refund_request.perform_actions()
 
-    @task(5)
-    def perfom_task(self):
-        self.request.search_departure_and_return()
+    @task(1)
+    def cancel_with_refund(self):
+        self.cancel_with_refund_request.perform_actions()
 
 
 # class UserLogin(HttpUser):
@@ -87,41 +113,3 @@ class PassengerWithoutLogin(HttpUser):
 #         ts_request.consign_ticket()
 #         ts_request.get_travel_plans()
 #         ts_request.update_contact()
-
-
-# class RailTrafficController(HttpUser):
-#     wait_time = constant(1)
-#     weight = 1
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-#         self.request = RailTrafficControllerRequest(self.client)
-#         logging.debug(
-#             f"""Running "RailTrafficController" with id {self.request.request_id}..."""
-#         )
-
-#     @task(3)
-#     def add_station(self):
-#         self.request.add_one_station()
-
-#     @task(6)
-#     def update_station(self):
-#         self.request.update_one_station()
-
-#     @task(1)
-#     def delete_station(self):
-#         self.request.delete_one_station()
-
-#     @task(3)
-#     def add_route(self):
-#         self.request.add_one_route()
-
-#     @task(6)
-#     def update_route(self):
-#         self.request.update_one_route()
-
-#     @task(1)
-#     def delete_route(self):
-#         self.request.delete_one_route()

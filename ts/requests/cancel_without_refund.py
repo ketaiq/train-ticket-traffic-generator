@@ -29,7 +29,7 @@ class CancelWithoutRefundRequest(PassengerRequest):
                 self.to_station,
                 self.request_id,
             )
-            self.trip = pick_random_travel(trips)
+        self.trip = pick_random_travel(trips)
 
     def _gen_ticket_info(self):
         self.seat_type = pick_random_seat_type()
@@ -76,8 +76,8 @@ class CancelWithoutRefundRequest(PassengerRequest):
             self.consign,
         )
         # pay for the booking
-        self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[-1][
-            "id"
-        ]
+        self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
+            -1
+        ]["id"]
         pay_one_order(self.client, self.bearer, self.user_id, self.order_id, trip_id)
         cancel_one_order(self.client, self.bearer, self.order_id, self.user_id)

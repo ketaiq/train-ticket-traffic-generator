@@ -21,77 +21,88 @@ from ts.util import gen_random_date
 
 
 class RegularRequest(PassengerRequest):
+    def _search_ticket_for_a_random_trip(self):
+        trips = []
+        while len(trips) == 0:
+            (
+                self.from_station,
+                self.to_station,
+            ) = pick_two_random_stations_in_one_route()
+            self.departure_date = gen_random_date()
+            trips = search_ticket(
+                self.client,
+                self.departure_date,
+                self.from_station,
+                self.to_station,
+                self.request_id,
+            )
+        self.trip = pick_random_travel(trips)
+
+    def _gen_ticket_info(self):
+        self.seat_type = pick_random_seat_type()
+        self.seat_price = "0"
+        if self.seat_type == SeatType.FIRST_CLASS.value:
+            self.seat_price = self.trip["priceForConfortClass"]
+        else:
+            self.seat_price = self.trip["priceForEconomyClass"]
+        self.contact_id = self.search_contacts()
+        assurance_types = get_assurance_types(self.client, self.bearer, self.user_id)
+        self.assurance = pick_random_assurance_type(assurance_types)
+        self.food = Food()
+        all_food = search_food_on_trip(
+            self.client,
+            self.bearer,
+            self.user_id,
+            self.departure_date,
+            self.from_station,
+            self.to_station,
+            self.trip["tripId"]["type"] + self.trip["tripId"]["number"],
+        )
+        if all_food is not None:
+            self.food = pick_random_food(all_food)
+        self.consign = Consign()
+
     def perform_actions(self):
         # login
         self.login_existent_user()
         # search tickets
-        trips = []
-        from_station, to_station = pick_two_random_stations_in_one_route()
-        departure_date = gen_random_date()
-        trips = search_ticket(
-            self.client,
-            departure_date,
-            from_station,
-            to_station,
-            self.request_id,
-        )
+        self._search_ticket_for_a_random_trip()
         # book with food
-        trip = pick_random_travel(trips)
-        trip_id = trip["tripId"]["type"] + trip["tripId"]["number"]
-        seat_type = pick_random_seat_type()
-        seat_price = "0"
-        if seat_type == SeatType.FIRST_CLASS.value:
-            seat_price = trip["priceForConfortClass"]
-        else:
-            seat_price = trip["priceForEconomyClass"]
+        trip_id = self.trip["tripId"]["type"] + self.trip["tripId"]["number"]
+        self._gen_ticket_info()
         visit_ticket_book(
             self.client,
             self.bearer,
             self.user_id,
             trip_id,
-            trip["startingStation"],
-            trip["terminalStation"],
-            seat_type,
-            seat_price,
-            departure_date,
+            self.trip["startingStation"],
+            self.trip["terminalStation"],
+            self.seat_type,
+            self.seat_price,
+            self.departure_date,
         )
-        contact_id = self.search_contacts()
-        assurance_types = get_assurance_types(self.client, self.bearer, self.user_id)
-        assurance = pick_random_assurance_type(assurance_types)
-        all_food = search_food_on_trip(
-            self.client,
-            self.bearer,
-            self.user_id,
-            departure_date,
-            from_station,
-            to_station,
-            trip_id,
-        )
-        food = Food()
-        if all_food is not None:
-            food = pick_random_food(all_food)
         reserve_one_ticket(
             self.client,
             self.bearer,
             self.user_id,
-            contact_id,
+            self.contact_id,
             trip_id,
-            seat_type,
-            departure_date,
-            from_station,
-            to_station,
-            assurance,
-            food,
-            Consign(),
+            self.seat_type,
+            self.departure_date,
+            self.from_station,
+            self.to_station,
+            self.assurance,
+            self.food,
+            self.consign,
         )
         # pay for the booking
-        order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[-1][
-            "id"
-        ]
-        pay_one_order(self.client, self.bearer, self.user_id, order_id, trip_id)
+        self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
+            -1
+        ]["id"]
+        pay_one_order(self.client, self.bearer, self.user_id, self.order_id, trip_id)
         # collect ticket
-        collect_one_ticket(self.client, self.bearer, self.user_id, order_id)
+        collect_one_ticket(self.client, self.bearer, self.user_id, self.order_id)
         # enter station
-        enter_station(self.client, self.bearer, self.user_id, order_id)
+        enter_station(self.client, self.bearer, self.user_id, self.order_id)
         # print voucher
-        get_one_voucher(self.client, self.bearer, self.user_id, order_id)
+        get_one_voucher(self.client, self.bearer, self.user_id, self.order_id)

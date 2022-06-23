@@ -29,7 +29,7 @@ class CancelWithRefundRequest(PassengerRequest):
                 self.to_station,
                 self.request_id,
             )
-            self.trip = pick_random_travel(trips)
+        self.trip = pick_random_travel(trips)
 
     def _gen_ticket_info(self):
         self.seat_type = pick_random_seat_type()

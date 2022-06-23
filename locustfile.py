@@ -90,26 +90,3 @@ class Passenger(HttpUser):
     @task(1)
     def cancel_with_refund(self):
         self.cancel_with_refund_request.perform_actions()
-
-
-# class UserLogin(HttpUser):
-#     weight = 1
-#     wait_time = constant(1)
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-
-#     @task
-#     def perform_task(self):
-#         ts_request = TrainTicketRequest(self.client)
-#         logging.debug(f"""Running user "login" with id {ts_request.request_id}...""")
-
-#         ts_request.create_and_login_user()
-#         ts_request.book()
-#         ts_request.cancel_last_order_with_no_refund()
-#         ts_request.get_voucher_of_last_order()
-#         ts_request.consign_ticket()
-#         ts_request.get_travel_plans()
-#         ts_request.update_contact()

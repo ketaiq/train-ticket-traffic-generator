@@ -19,59 +19,76 @@ from ts.util import gen_random_date
 
 
 class IrregularBudgetRequest(PassengerRequest):
+    def _search_ticket_for_a_random_trip(self):
+        trips = []
+        # search tickets with advanced filter for 5-20x randomly
+        for _ in range(random.randint(5, 20)):
+            while len(trips) == 0:
+                (
+                    self.from_station,
+                    self.to_station,
+                ) = pick_two_random_stations_in_one_route()
+                self.departure_date = gen_random_date()
+                trips = pick_random_strategy_and_search(
+                    self.client,
+                    self.request_id,
+                    self.from_station,
+                    self.to_station,
+                    self.departure_date,
+                )
+        self.trip = pick_random_travel(trips)
+
+    def _gen_ticket_info(self):
+        self.seat_type = pick_random_seat_type()
+        self.seat_price = "0"
+        if self.seat_type == SeatType.FIRST_CLASS.value:
+            self.seat_price = self.trip["priceForConfortClass"]
+        else:
+            self.seat_price = self.trip["priceForEconomyClass"]
+        self.contact_id = self.search_contacts()
+        self.assurance = AssuranceType.NONE.value
+        self.food = Food()
+        self.consign = Consign()
+
     def perform_actions(self):
         # create and login user
         self.create_and_login_user()
-        # search tickets with advanced filter for 5-20x randomly
-        trips = []
-        from_station, to_station = pick_two_random_stations_in_one_route()
-        departure_date = gen_random_date()
-        for _ in range(random.randint(5, 20)):
-            trips = pick_random_strategy_and_search(
-                self.client, self.request_id, from_station, to_station, departure_date
-            )
+        self._search_ticket_for_a_random_trip()
         # book without extra services
-        trip = pick_random_travel(trips)
-        seat_type = pick_random_seat_type()
-        seat_price = "0"
-        if seat_type == SeatType.FIRST_CLASS.value:
-            seat_price = trip["priceForFirstClassSeat"]
-        else:
-            seat_price = trip["priceForSecondClassSeat"]
+        self._gen_ticket_info()
         visit_ticket_book(
             self.client,
             self.bearer,
             self.user_id,
-            trip["tripId"],
-            trip["fromStationName"],
-            trip["toStationName"],
-            seat_type,
-            seat_price,
-            departure_date,
+            self.trip["tripId"],
+            self.trip["fromStationName"],
+            self.trip["toStationName"],
+            self.seat_type,
+            self.seat_price,
+            self.departure_date,
         )
-        contact_id = self.search_contacts()
         reserve_one_ticket(
             self.client,
             self.bearer,
             self.user_id,
-            contact_id,
-            trip["tripId"],
-            seat_type,
-            departure_date,
-            from_station,
-            to_station,
-            AssuranceType.NONE.value,
-            Food(),
-            Consign(),
+            self.contact_id,
+            self.trip["tripId"],
+            self.seat_type,
+            self.departure_date,
+            self.from_station,
+            self.to_station,
+            self.assurance,
+            self.food,
+            self.consign,
         )
         # pay for the booking
-        order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
+        self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
             -1
         ]["id"]
         pay_one_order(
-            self.client, self.bearer, self.user_id, order_id, trip["tripId"]
+            self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"]
         )
         # collect ticket
-        collect_one_ticket(self.client, self.bearer, self.user_id, order_id)
+        collect_one_ticket(self.client, self.bearer, self.user_id, self.order_id)
         # enter station
-        enter_station(self.client, self.bearer, self.user_id, order_id)
+        enter_station(self.client, self.bearer, self.user_id, self.order_id)

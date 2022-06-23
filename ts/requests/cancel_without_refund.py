@@ -9,7 +9,7 @@ from ts.services.preserve_service import (
 from ts.services.assurance_service import AssuranceType
 from ts.services.inside_payment_service import pay_one_order
 from ts.services.order_service import get_orders_by_login_id
-from ts.services.visit_page import visit_ticket_book
+from ts.services.visit_page import visit_ticket_book, visit_home
 from ts.services.food_service import Food
 from ts.services.consign_service import Consign
 from ts.services.cancel_service import cancel_one_order
@@ -18,6 +18,7 @@ from ts.util import gen_random_date
 
 class CancelWithoutRefundRequest(PassengerRequest):
     def _search_ticket_for_a_random_trip(self):
+        visit_home(self.client, self.request_id)
         trips = []
         while len(trips) == 0:
             self.from_station, self.to_station = pick_two_random_stations_in_one_route()

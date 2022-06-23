@@ -9,7 +9,7 @@ from ts.services.preserve_service import (
 from ts.services.inside_payment_service import pay_one_order
 from ts.services.order_service import get_orders_by_login_id
 from ts.services.execute_service import collect_one_ticket, enter_station
-from ts.services.visit_page import visit_ticket_book
+from ts.services.visit_page import visit_ticket_book, visit_home
 from ts.services.food_service import search_food_on_trip, pick_random_food, Food
 from ts.services.assurance_service import (
     get_assurance_types,
@@ -21,6 +21,7 @@ from ts.util import gen_random_date
 
 class IrregularComfortRequest(PassengerRequest):
     def _search_ticket_for_a_random_trip(self):
+        visit_home(self.client, self.request_id)
         trips = []
         # search tickets for 2-5x randomly
         for _ in range(random.randint(2, 5)):

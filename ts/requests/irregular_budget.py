@@ -12,7 +12,7 @@ from ts.services.assurance_service import AssuranceType
 from ts.services.inside_payment_service import pay_one_order
 from ts.services.order_service import get_orders_by_login_id
 from ts.services.execute_service import collect_one_ticket, enter_station
-from ts.services.visit_page import visit_ticket_book
+from ts.services.visit_page import visit_ticket_book, visit_home
 from ts.services.food_service import Food
 from ts.services.consign_service import Consign
 from ts.util import gen_random_date
@@ -20,6 +20,7 @@ from ts.util import gen_random_date
 
 class IrregularBudgetRequest(PassengerRequest):
     def _search_ticket_for_a_random_trip(self):
+        visit_home(self.client, self.request_id)
         trips = []
         # search tickets with advanced filter for 5-20x randomly
         for _ in range(random.randint(5, 20)):

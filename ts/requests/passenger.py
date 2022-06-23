@@ -1,19 +1,11 @@
-from pickle import NONE
-import random
 import uuid
 from ts.services.admin_user_service import add_one_user
-from ts.services.travel_service import search_ticket
-from ts.services.visit_page import visit_client_login, visit_home, visit_ticket_book
-from ts.services.admin_route_service import pick_two_random_stations_in_one_route
+from ts.services.visit_page import visit_client_login
 from ts.services.auth_service import login_user
 from ts.services.contacts_service import (
     get_contacts_by_account_id,
     add_one_contact,
-    update_one_contact,
-    gen_random_contact,
 )
-
-from ts.util import gen_random_date
 
 
 class PassengerRequest:

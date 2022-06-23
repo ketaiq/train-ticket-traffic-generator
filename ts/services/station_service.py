@@ -56,9 +56,11 @@ def get_all_stations(client, admin_bearer: str, admin_user_id: str) -> list:
         name=operation,
     ) as response:
         if response.json()["msg"] != "Find all content":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             stations = response.json()["data"]
             log_response_info(admin_user_id, operation, stations)
@@ -138,9 +140,11 @@ def add_one_new_station(
                 stay_time,
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
 
 
 def add_one_station_request(
@@ -223,9 +227,11 @@ def update_one_station(
         name=operation,
     ) as response:
         if response.json()["msg"] != "Update success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             updated_station = response.json()["data"]
             log_response_info(admin_user_id, operation, updated_station)
@@ -291,9 +297,11 @@ def delete_one_station(
         name=operation,
     ) as response:
         if response.json()["msg"] != "Delete success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             deleted_station = response.json()["data"]
             log_response_info(admin_user_id, operation, deleted_station)

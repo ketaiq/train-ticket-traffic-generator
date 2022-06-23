@@ -121,7 +121,7 @@ class ServiceRequestTestCase(unittest.TestCase):
 
         test_all(request_id, self.assertIsInstance, self.assertEqual)
 
-    # @unittest.skip("skipping")
+    @unittest.skip("skipping")
     def test_preserve_service(self):
         from ts.services.auth_service import login_user_request
         from test.test_preserve_service import test_all

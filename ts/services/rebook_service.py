@@ -45,9 +45,11 @@ def change_booking(
             log_response_info(user_id, operation, new_order)
             return new_order
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
 
 
 def pay_difference(
@@ -83,6 +85,8 @@ def pay_difference(
             log_response_info(user_id, operation, new_order)
             return new_order
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )

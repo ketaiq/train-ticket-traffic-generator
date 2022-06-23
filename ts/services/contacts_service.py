@@ -77,9 +77,11 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
         name=operation,
     ) as response:
         if response.json()["msg"] != "Success":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             data = response.json()["data"]
             log_response_info(user_id, operation, data)
@@ -113,11 +115,8 @@ def get_all_contacts_request(request_id: str, bearer: str):
         print(f"Response did not contain expected key '{key}'")
 
 
-def add_one_contact(
-    client, bearer: str, name: str, user_id: str, document_number: str
-) -> dict:
-    operation = "add new contact"
-    data = dict()
+def add_one_contact(client, bearer: str, user_id: str, contact: Contact) -> dict:
+    operation = "add contact"
     with client.post(
         url="/api/v1/contactservice/contacts",
         headers={
@@ -126,18 +125,20 @@ def add_one_contact(
             "Authorization": bearer,
         },
         json={
-            "name": name,
-            "accountId": user_id,
-            "documentType": "1",
-            "documentNumber": document_number,
-            "phoneNumber": "123456",
+            "name": contact.name,
+            "accountId": contact.user_id,
+            "documentType": contact.document_type,
+            "documentNumber": contact.document_number,
+            "phoneNumber": contact.phone_number,
         },
         name=operation,
     ) as response:
         if response.json()["msg"] != "Create contacts success":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             data = response.json()["data"]
             contact_id = data["id"]
@@ -202,9 +203,11 @@ def update_one_contact(client, bearer: str, contact: Contact):
         name=operation,
     ) as response:
         if response.json()["msg"] != "Modify success":
-            log_wrong_response_warning(contact.user_id, operation, response)
+            log_wrong_response_warning(
+                contact.user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(contact.user_id, operation, response)
+            log_timeout_warning(contact.user_id, operation, response.failure)
         else:
             old_contact = response.json()["data"]
             log = f"from {old_contact} to {contact}"
@@ -261,9 +264,11 @@ def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id
         name=operation,
     ) as response:
         if response.json()["msg"] != "Delete success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             deleted_contact_id = response.json()["data"]
             log_response_info(admin_user_id, operation, deleted_contact_id)

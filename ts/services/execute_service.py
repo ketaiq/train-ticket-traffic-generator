@@ -21,9 +21,9 @@ def collect_one_ticket(client, bearer: str, user_id: str, order_id: str):
         name=operation,
     ) as response:
         if response.json()["msg"] != "Success":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(user_id, operation, response.failure, response.json())
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             data = response.json()["data"]
             log_response_info(user_id, operation, data)
@@ -41,9 +41,9 @@ def enter_station(client, bearer: str, user_id: str, order_id: str):
         name=operation,
     ) as response:
         if response.json()["msg"] != "Success.":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(user_id, operation, response.failure, response.json())
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             data = response.json()["data"]
             log_response_info(user_id, operation, data)

@@ -5,7 +5,9 @@ from ts.services.auth_service import login_user
 from ts.services.contacts_service import (
     get_contacts_by_account_id,
     add_one_contact,
+    gen_random_contact
 )
+from ts.util import gen_random_name, gen_random_document_number
 
 
 class PassengerRequest:
@@ -79,8 +81,9 @@ class PassengerRequest:
             self.client, self.user_id, self.bearer
         )
         if len(response_of_contacts) == 0:
+            new_contact = gen_random_contact(None, self.user_id)
             new_contact = add_one_contact(
-                self.client, self.bearer, self.user_id, self.user_id, self.user_id
+                self.client, self.bearer, self.user_id, new_contact
             )
             contact_id = new_contact["id"]
         else:

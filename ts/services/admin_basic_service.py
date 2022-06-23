@@ -5,6 +5,13 @@ This module includes all API calls provided by ts-admin-basic-service.
 import requests
 from json import JSONDecodeError
 import random
+from ts.services.contacts_service import Contact
+from ts.log_syntax.locust_response import (
+    log_wrong_response_warning,
+    log_timeout_warning,
+    log_response_info,
+)
+from ts import TIMEOUT_MAX
 
 ADMIN_PRICE_SERVICE_URL = (
     "http://130.211.196.121:8080/api/v1/adminbasicservice/adminbasic/prices"
@@ -199,6 +206,35 @@ def delete_one_price_request(admin_bearer: str, request_id: str, price: Price) -
         print("Response could not be decoded as JSON")
     except KeyError:
         print(f"Response did not contain expected key '{key}'")
+
+
+def admin_add_one_contact(client, admin_bearer: str, user_id: str, contact: Contact):
+    operation = "admin add contact"
+    with client.post(
+        url="/api/v1/adminbasicservice/adminbasic/contacts",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+        json={
+            "name": contact.name,
+            "accountId": contact.user_id,
+            "documentType": contact.document_type,
+            "documentNumber": contact.document_number,
+            "phoneNumber": contact.phone_number,
+        },
+        name=operation,
+    ) as response:
+        if response.json()["msg"] != "Create Success":
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
+        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+            log_timeout_warning(user_id, operation, response.failure)
+        else:
+            data = response.json()["data"]
+            log_response_info(user_id, operation, data)
 
 
 def restore_original_prices(admin_bearer: str, request_id: str):

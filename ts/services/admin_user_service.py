@@ -26,7 +26,7 @@ def add_one_user(
     admin_bearer: str,
     username: str,
     password: str,
-):
+) -> dict:
     operation = "create user"
     with client.post(
         url="/api/v1/adminuserservice/users",
@@ -46,12 +46,15 @@ def add_one_user(
         name=operation,
     ) as response:
         if response.json()["msg"] != "REGISTER USER SUCCESS":
-            log_wrong_response_warning(request_id, operation, response, name="request")
+            log_wrong_response_warning(
+                request_id, operation, response.failure, response.json(), name="request"
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(request_id, operation, response, name="request")
+            log_timeout_warning(request_id, operation, response.failure, name="request")
         else:
             new_user = response.json()["data"]
             log_response_info(request_id, operation, new_user, name="request")
+            return new_user
 
 
 def get_all_users_request(admin_bearer: str, request_id: str) -> list:

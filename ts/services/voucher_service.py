@@ -26,6 +26,8 @@ def get_one_voucher(client, bearer: str, user_id: str, order_id: str):
             voucher = response.json()
             log_response_info(user_id, operation, voucher)
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )

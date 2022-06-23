@@ -23,9 +23,11 @@ def cancel_one_order(client, bearer: str, order_id: str, user_id: str):
         name=operation,
     ) as response:
         if response.json()["msg"] != "Success.":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             log_response_info(user_id, operation, response.json())
 
@@ -42,9 +44,11 @@ def get_refund_amount(client, bearer: str, order_id: str, user_id: str):
         name=operation,
     ) as response:
         if "Success" not in response.json()["msg"]:
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             refund = response.json()["data"]
             log_response_info(user_id, operation, refund)

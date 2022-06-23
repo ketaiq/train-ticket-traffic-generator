@@ -3,7 +3,6 @@ This module includes all API calls provided by ts-admin-travel-service.
 """
 
 import requests
-import logging
 import time
 import random
 from json import JSONDecodeError

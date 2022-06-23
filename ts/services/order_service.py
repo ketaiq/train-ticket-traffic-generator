@@ -32,9 +32,11 @@ def get_orders_by_login_id(client, user_id: str, bearer: str) -> list:
         },
     ) as response:
         if response.json()["msg"] != "Query Orders For Refresh Success":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             orders = response.json()["data"]
             log_response_info(user_id, operation, orders)

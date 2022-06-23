@@ -43,9 +43,9 @@ class IrregularBudgetRequest(PassengerRequest):
         self.seat_type = pick_random_seat_type()
         self.seat_price = "0"
         if self.seat_type == SeatType.FIRST_CLASS.value:
-            self.seat_price = self.trip["priceForConfortClass"]
+            self.seat_price = self.trip["priceForFirstClassSeat"]
         else:
-            self.seat_price = self.trip["priceForEconomyClass"]
+            self.seat_price = self.trip["priceForSecondClassSeat"]
         self.contact_id = self.search_contacts()
         self.assurance = AssuranceType.NONE.value
         self.food = Food()

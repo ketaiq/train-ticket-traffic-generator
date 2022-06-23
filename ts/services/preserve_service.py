@@ -73,9 +73,9 @@ def reserve_one_ticket(
         name=operation,
     ) as response:
         if response.json()["msg"] != "Success.":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(user_id, operation, response.failure, response.json())
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             log_response_info(user_id, operation, response.json()["data"])
 

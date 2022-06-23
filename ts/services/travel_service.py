@@ -36,9 +36,11 @@ def search_ticket(
         msg = response.json()["msg"]
         operation += f" from {from_station} to {to_station} on {departure_date}"
         if msg != "Success":
-            log_wrong_response_warning(request_id, operation, response, name="request")
+            log_wrong_response_warning(
+                request_id, operation, response.failure, response.json(), name="request"
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(request_id, operation, response, name="request")
+            log_timeout_warning(request_id, operation, response.failure, name="request")
         else:
             data = response.json()["data"]
             res = ""

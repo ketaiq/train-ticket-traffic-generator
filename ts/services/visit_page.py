@@ -53,9 +53,11 @@ def visit_ticket_book(
         name=operation,
     ) as response:
         if response.status_code != 200:
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             log_response_info(user_id, operation, response.url)
 

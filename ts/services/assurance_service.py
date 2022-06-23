@@ -35,9 +35,11 @@ def get_assurance_types(client, bearer: str, user_id: str) -> list:
         name=operation,
     ) as response:
         if response.json()["msg"] != "Find All Assurance":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(
+                user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             assurance_types = response.json()["data"]
             log_response_info(user_id, operation, assurance_types)

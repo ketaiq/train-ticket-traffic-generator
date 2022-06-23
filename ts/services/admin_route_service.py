@@ -119,9 +119,11 @@ def get_all_routes(client, admin_bearer: str, admin_user_id: str) -> list:
         name=operation,
     ) as response:
         if response.json()["msg"] != "Success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             routes = response.json()["data"]
             log_response_info(admin_user_id, operation, routes)
@@ -179,9 +181,11 @@ def add_one_route(
         name=operation,
     ) as response:
         if response.json()["msg"] != "Save Success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             new_route = response.json()["data"]
             log_response_info(admin_user_id, operation, new_route)
@@ -215,9 +219,11 @@ def update_one_route(
         name=operation,
     ) as response:
         if response.json()["msg"] != "Modify success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             new_route = response.json()["data"]
             log_response_info(admin_user_id, operation, new_route)
@@ -284,9 +290,11 @@ def delete_one_route(
         name=operation,
     ) as response:
         if response.json()["msg"] != "Delete Success":
-            log_wrong_response_warning(admin_user_id, operation, response)
+            log_wrong_response_warning(
+                admin_user_id, operation, response.failure, response.json()
+            )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response)
+            log_timeout_warning(admin_user_id, operation, response.failure)
         else:
             deleted_route_id = response.json()["data"]
             log_response_info(admin_user_id, operation, deleted_route_id)

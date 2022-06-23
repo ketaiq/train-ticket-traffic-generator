@@ -76,9 +76,9 @@ def search_food_on_trip(
         if response.json()["msg"] == "Get All Food Failed":
             return None
         if response.json()["msg"] != "Get All Food Success":
-            log_wrong_response_warning(user_id, operation, response)
+            log_wrong_response_warning(user_id, operation, response.failure, response.json())
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response)
+            log_timeout_warning(user_id, operation, response.failure)
         else:
             all_food = response.json()["data"]
             log_response_info(user_id, operation, all_food)

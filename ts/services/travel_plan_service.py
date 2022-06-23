@@ -9,6 +9,7 @@ from ts.log_syntax.locust_response import (
     log_response_info,
 )
 import random
+from json import JSONDecodeError
 
 
 def get_cheapest_travel_plans(
@@ -32,14 +33,29 @@ def get_cheapest_travel_plans(
         },
         name=operation,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(request_id, operation, response, name="request")
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(request_id, operation, response, name="request")
-        else:
-            plans = response.json()["data"]
-            log_response_info(request_id, operation, plans, name="request")
-            return plans
+        try:
+            key = "msg"
+            if response.json()["msg"] != "Success":
+                log_wrong_response_warning(
+                    request_id,
+                    operation,
+                    response.failure,
+                    response.json(),
+                    name="request",
+                )
+            elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                log_timeout_warning(
+                    request_id, operation, response.failure, name="request"
+                )
+            else:
+                key = "data"
+                plans = response.json()["data"]
+                log_response_info(request_id, operation, plans, name="request")
+                return plans
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
 
 
 def get_quickest_travel_plans(
@@ -63,14 +79,29 @@ def get_quickest_travel_plans(
         },
         name=operation,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(request_id, operation, response, name="request")
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(request_id, operation, response, name="request")
-        else:
-            plans = response.json()["data"]
-            log_response_info(request_id, operation, plans, name="request")
-            return plans
+        try:
+            key = "msg"
+            if response.json()["msg"] != "Success":
+                log_wrong_response_warning(
+                    request_id,
+                    operation,
+                    response.failure,
+                    response.json(),
+                    name="request",
+                )
+            elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                log_timeout_warning(
+                    request_id, operation, response.failure, name="request"
+                )
+            else:
+                key = "data"
+                plans = response.json()["data"]
+                log_response_info(request_id, operation, plans, name="request")
+                return plans
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
 
 
 def get_min_station_travel_plans(
@@ -94,14 +125,29 @@ def get_min_station_travel_plans(
         },
         name=operation,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(request_id, operation, response, name="request")
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(request_id, operation, response, name="request")
-        else:
-            plans = response.json()["data"]
-            log_response_info(request_id, operation, plans, name="request")
-            return plans
+        try:
+            key = "msg"
+            if response.json()["msg"] != "Success":
+                log_wrong_response_warning(
+                    request_id,
+                    operation,
+                    response.failure,
+                    response.json(),
+                    name="request",
+                )
+            elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                log_timeout_warning(
+                    request_id, operation, response.failure, name="request"
+                )
+            else:
+                key = "data"
+                plans = response.json()["data"]
+                log_response_info(request_id, operation, plans, name="request")
+                return plans
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
 
 
 def pick_random_strategy_and_search(

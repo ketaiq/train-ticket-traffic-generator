@@ -43,54 +43,54 @@ def on_locust_init(environment, **kwargs):
     init_european_stations(admin_user_id, admin_bearer)
 
 
-# class Passenger(HttpUser):
-#     weight = 50
-#     wait_time = between(2 * 60 * 60, 24 * 60 * 60)
+class Passenger(HttpUser):
+    weight = 50
+    wait_time = between(2 * 60 * 60, 24 * 60 * 60)
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-#         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-#         self.irregular_budget_request = IrregularBudgetRequest(
-#             self.client, "Irregular Budget"
-#         )
-#         self.irregular_normal_request = IrregularNormalRequest(
-#             self.client, "Irregular Normal"
-#         )
-#         self.irregular_comfort_request = IrregularComfortRequest(
-#             self.client, "Irregular Comfort"
-#         )
-#         self.regular_request = RegularRequest(self.client, "Regular")
-#         self.cancel_without_refund_request = CancelWithoutRefundRequest(
-#             self.client, "Cancel Without Refund"
-#         )
-#         self.cancel_with_refund_request = CancelWithRefundRequest(
-#             self.client, "Cancel With Refund"
-#         )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
+        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+        self.irregular_budget_request = IrregularBudgetRequest(
+            self.client, "Irregular Budget"
+        )
+        self.irregular_normal_request = IrregularNormalRequest(
+            self.client, "Irregular Normal"
+        )
+        self.irregular_comfort_request = IrregularComfortRequest(
+            self.client, "Irregular Comfort"
+        )
+        self.regular_request = RegularRequest(self.client, "Regular")
+        self.cancel_without_refund_request = CancelWithoutRefundRequest(
+            self.client, "Cancel Without Refund"
+        )
+        self.cancel_with_refund_request = CancelWithRefundRequest(
+            self.client, "Cancel With Refund"
+        )
 
-#     @task(12)
-#     def irregular_budget(self):
-#         self.irregular_budget_request.perform_actions()
+    @task(12)
+    def irregular_budget(self):
+        self.irregular_budget_request.perform_actions()
 
-#     @task(10)
-#     def irregular_normal(self):
-#         self.irregular_normal_request.perform_actions()
+    @task(10)
+    def irregular_normal(self):
+        self.irregular_normal_request.perform_actions()
 
-#     @task(2)
-#     def irregular_comfort(self):
-#         self.irregular_comfort_request.perform_actions()
+    @task(2)
+    def irregular_comfort(self):
+        self.irregular_comfort_request.perform_actions()
 
-#     @task(24)
-#     def regular(self):
-#         self.regular_request.perform_actions()
+    @task(24)
+    def regular(self):
+        self.regular_request.perform_actions()
 
-#     @task(1)
-#     def cancel_without_refund(self):
-#         self.cancel_without_refund_request.perform_actions()
+    @task(1)
+    def cancel_without_refund(self):
+        self.cancel_without_refund_request.perform_actions()
 
-#     @task(1)
-#     def cancel_with_refund(self):
-#         self.cancel_with_refund_request.perform_actions()
+    @task(1)
+    def cancel_with_refund(self):
+        self.cancel_with_refund_request.perform_actions()
 
 
 class Sales(HttpUser):

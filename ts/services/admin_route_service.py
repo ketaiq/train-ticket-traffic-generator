@@ -1,6 +1,7 @@
 """
 This module includes all API calls provided by ts-admin-route-service.
 """
+from __future__ import annotations
 
 import logging
 import sys
@@ -19,7 +20,7 @@ import uuid
 import math
 
 ADMIN_ROUTE_SERVICE_URL = (
-    "http://130.211.196.121:8080/api/v1/adminrouteservice/adminroute"
+    "http://34.160.158.68/api/v1/adminrouteservice/adminroute"
 )
 ORIGINAL_ROUTES = [
     {
@@ -471,6 +472,7 @@ def pick_two_random_stations_in_one_route() -> tuple[str, str]:
     from ts.services.station_service import european_stations
 
     results = []
+    # print("european_routes:", european_routes)
     picked_route = random.choice(european_routes)
     picked_stations = random.sample(picked_route["stations"], k=2)
     for picked_station in picked_stations:
@@ -486,6 +488,8 @@ def pick_two_random_stations_in_one_route() -> tuple[str, str]:
 
 def init_european_routes(admin_bearer: str, request_id: str):
     all_routes = get_all_routes_request(admin_bearer, request_id)
+    # print("all_routes", all_routes)
     for route in ORIGINAL_ROUTES:
         all_routes.remove(route)
     european_routes.extend(all_routes)
+    print("european_routes", len(european_routes))

@@ -16,6 +16,8 @@ from ts.services.travel_service import pick_random_travel
 from ts.services.visit_page import visit_home
 from ts.util import gen_random_date
 
+from random import randint
+from time import sleep
 
 class SalesRequest:
     def __init__(self, client):
@@ -115,16 +117,34 @@ class SalesRequest:
             )
 
     def perform_create_order_actions(self):
+
+        sleep(randint(1,5))
         self._login_admin_user("Create Order")
+
+        sleep(randint(1,5))
         self._create_user()
+
+        sleep(randint(1,5))
         self._create_contact()
+
+        sleep(randint(1,5))
         self._search_ticket_for_a_random_trip()
+
+        sleep(randint(1,5))
         self._add_order()
 
     def perform_update_order_actions(self):
+
+        sleep(randint(1,5))
         self._login_admin_user("Update Order")
+
+        sleep(randint(1,5))
         self._update_order()
 
     def perform_delete_order_actions(self):
+
+        sleep(randint(1,5))
         self._login_admin_user("Delete Order")
+
+        sleep(randint(1,5))
         self._delete_order()

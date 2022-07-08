@@ -3,7 +3,7 @@ import logging
 from json import JSONDecodeError
 
 TRAIN_SERVICE_URL = (
-    "http://130.211.196.121:8080/api/v1/adminbasicservice/adminbasic/trains"
+    "http://34.160.158.68/api/v1/adminbasicservice/adminbasic/trains"
 )
 ORIGINAL_TRAINS = [
     {

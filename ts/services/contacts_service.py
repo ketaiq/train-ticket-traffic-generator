@@ -1,6 +1,7 @@
 """
 This module includes all API calls provided by ts-contacts-service.
 """
+from __future__ import annotations
 
 import logging
 import requests
@@ -15,7 +16,7 @@ import random
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
 
-CONTACTS_SERVICE_URL = "http://130.211.196.121:8080/api/v1/contactservice/contacts"
+CONTACTS_SERVICE_URL = "http://34.160.158.68/api/v1/contactservice/contacts"
 ORIGINAL_CONTACTS = [
     {
         "id": "3fcb512a-339d-4cf2-ad62-744558353adb",

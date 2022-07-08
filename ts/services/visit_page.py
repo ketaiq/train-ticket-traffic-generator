@@ -74,7 +74,7 @@ def visit_ticket_book_request(
 ):
     operation = "visit ticket book page"
     r = requests.get(
-        url="http://130.211.196.121:8080/client_ticket_book.html",
+        url="http://34.160.158.68/client_ticket_book.html",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

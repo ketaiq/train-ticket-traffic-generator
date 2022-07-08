@@ -14,7 +14,7 @@ from json import JSONDecodeError
 from ts import TIMEOUT_MAX
 import random
 
-PRESERVE_SERVICE_URL = "http://130.211.196.121:8080/api/v1/preserveservice/preserve"
+PRESERVE_SERVICE_URL = "http://34.160.158.68/api/v1/preserveservice/preserve"
 
 
 class SeatType(Enum):

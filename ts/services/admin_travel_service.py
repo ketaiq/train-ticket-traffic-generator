@@ -8,7 +8,7 @@ import random
 from json import JSONDecodeError
 
 ADMIN_TRAVEL_SERVICE_URL = (
-    "http://130.211.196.121:8080/api/v1/admintravelservice/admintravel"
+    "http://34.160.158.68/api/v1/admintravelservice/admintravel"
 )
 ORIGINAL_TRAVELS = [
     {

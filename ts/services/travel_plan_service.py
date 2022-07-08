@@ -11,6 +11,9 @@ from ts.log_syntax.locust_response import (
 import random
 from json import JSONDecodeError
 
+from random import randint
+from time import sleep
+
 
 def get_cheapest_travel_plans(
     client,
@@ -157,8 +160,12 @@ def pick_random_strategy_and_search(
     to_station: str,
     departure_date: str,
 ) -> list:
+
+    # sleep(randint(30, 60))
+
     strategy = random.randint(0, 2)
     if strategy == 0:
+        sleep(randint(20, 60))
         return get_cheapest_travel_plans(
             client, request_id, from_station, to_station, departure_date
         )

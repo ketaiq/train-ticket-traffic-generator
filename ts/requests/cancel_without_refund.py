@@ -15,6 +15,9 @@ from ts.services.consign_service import Consign
 from ts.services.cancel_service import cancel_one_order
 from ts.util import gen_random_date
 
+from random import randint
+from time import sleep
+
 
 class CancelWithoutRefundRequest(PassengerRequest):
     def _search_ticket_for_a_random_trip(self):
@@ -45,11 +48,19 @@ class CancelWithoutRefundRequest(PassengerRequest):
         self.consign = Consign()
 
     def perform_actions(self):
+
         # login
+        sleep(randint(1,5))
         self.login_existent_user()
+
         # search tickets
+        sleep(randint(1,5))
         self._search_ticket_for_a_random_trip()
+
+        sleep(randint(1,5))
         self._gen_ticket_info()
+
+        sleep(randint(1,5))
         trip_id = self.trip["tripId"]["type"] + self.trip["tripId"]["number"]
         visit_ticket_book(
             self.client,
@@ -62,6 +73,8 @@ class CancelWithoutRefundRequest(PassengerRequest):
             self.seat_price,
             self.departure_date,
         )
+
+        sleep(randint(1,5))
         reserve_one_ticket(
             self.client,
             self.bearer,
@@ -76,9 +89,13 @@ class CancelWithoutRefundRequest(PassengerRequest):
             self.food,
             self.consign,
         )
+
         # pay for the booking
+        sleep(randint(1,5))
         self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
             -1
         ]["id"]
         pay_one_order(self.client, self.bearer, self.user_id, self.order_id, trip_id)
+
+        sleep(randint(1,5))
         cancel_one_order(self.client, self.bearer, self.order_id, self.user_id)

@@ -1,6 +1,7 @@
 """
 This module includes all API calls provided by ts-admin-basic-service.
 """
+from __future__ import annotations
 
 import requests
 from json import JSONDecodeError
@@ -14,7 +15,7 @@ from ts.log_syntax.locust_response import (
 from ts import TIMEOUT_MAX
 
 ADMIN_PRICE_SERVICE_URL = (
-    "http://130.211.196.121:8080/api/v1/adminbasicservice/adminbasic/prices"
+    "http://34.160.158.68/api/v1/adminbasicservice/adminbasic/prices"
 )
 
 ORIGINAL_PRICES = [

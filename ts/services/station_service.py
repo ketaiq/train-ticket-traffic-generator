@@ -13,7 +13,7 @@ import random
 import string
 from ts import TIMEOUT_MAX
 
-STATION_SERVICE_URL = "http://130.211.196.121:8080/api/v1/stationservice/stations"
+STATION_SERVICE_URL = "http://34.160.158.68/api/v1/stationservice/stations"
 
 ORIGINAL_STATIONS = [
     {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},
@@ -444,3 +444,4 @@ def init_european_stations(admin_user_id: str, admin_bearer: str):
     for station in ORIGINAL_STATIONS:
         all_stations.remove(station)
     european_stations.extend(all_stations)
+    print("european_stations", len(european_stations))

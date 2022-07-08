@@ -11,6 +11,7 @@ from ts.util import gen_random_name, gen_random_document_number
 
 
 class PassengerRequest:
+
     def __init__(self, client, description):
         self.client = client
         self.description = description

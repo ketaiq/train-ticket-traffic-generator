@@ -17,7 +17,7 @@ from ts.log_syntax.locust_response import (
     log_response_info,
 )
 
-ADMIN_USER_SERVICE_URL = "http://130.211.196.121:8080/api/v1/adminuserservice/users"
+ADMIN_USER_SERVICE_URL = "http://34.160.158.68/api/v1/adminuserservice/users"
 
 
 def add_one_user(

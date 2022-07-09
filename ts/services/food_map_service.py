@@ -235,7 +235,7 @@ def get_train_food_in_one_trip_request(request_id: str, trip_id: str) -> list:
 
 
 def print_all_food_from_mongo():
-    client = MongoClient("mongodb://35.232.87.32:27017/")
+    client = MongoClient("mongodb://34.67.141.236:27017/")
     db = client["ts"]
     trainfoods = db["trainfoods"]
     stores = db["stores"]
@@ -285,7 +285,7 @@ def _gen_random_store_record(food_choices, store_choices, station) -> dict:
 
 
 def add_food(all_travels, all_stations):
-    client = MongoClient("mongodb://35.232.87.32:27017/")
+    client = MongoClient("mongodb://34.67.141.236:27017/")
     db = client["ts"]
     trainfoods = db["trainfoods"]
     trainfoods.delete_many({})
@@ -348,7 +348,7 @@ def add_food(all_travels, all_stations):
         "The Breakfast Club",
         "Custard's Last Stand",
         "Happy Grillmore",
-        "Café Jack",
+        "Cafe Jack",
         "Life of Pie",
         "Filled of Dreams",
         "Lord of the Wings",

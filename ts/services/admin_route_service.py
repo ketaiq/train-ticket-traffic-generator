@@ -19,75 +19,63 @@ import random
 import uuid
 import math
 
-ADMIN_ROUTE_SERVICE_URL = (
-    "http://34.160.158.68/api/v1/adminrouteservice/adminroute"
-)
+ADMIN_ROUTE_SERVICE_URL = "http://34.160.158.68/api/v1/adminrouteservice/adminroute"
 ORIGINAL_ROUTES = [
     {
-        "id": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
         "stations": ["shanghai", "nanjing", "shijiazhuang", "taiyuan"],
         "distances": [0, 350, 1000, 1300],
         "startStationId": "shanghai",
         "terminalStationId": "taiyuan",
     },
     {
-        "id": "9fc9c261-3263-4bfa-82f8-bb44e06b2f52",
         "stations": ["nanjing", "xuzhou", "jinan", "beijing"],
         "distances": [0, 500, 700, 1200],
         "startStationId": "nanjing",
         "terminalStationId": "beijing",
     },
     {
-        "id": "d693a2c5-ef87-4a3c-bef8-600b43f62c68",
         "stations": ["taiyuan", "shijiazhuang", "nanjing", "shanghai"],
         "distances": [0, 300, 950, 1300],
         "startStationId": "taiyuan",
         "terminalStationId": "shanghai",
     },
     {
-        "id": "20eb7122-3a11-423f-b10a-be0dc5bce7db",
         "stations": ["shanghai", "taiyuan"],
         "distances": [0, 1300],
         "startStationId": "shanghai",
         "terminalStationId": "taiyuan",
     },
     {
-        "id": "1367db1f-461e-4ab7-87ad-2bcc05fd9cb7",
         "stations": ["shanghaihongqiao", "jiaxingnan", "hangzhou"],
         "distances": [0, 150, 300],
         "startStationId": "shanghaihongqiao",
         "terminalStationId": "hangzhou",
     },
     {
-        "id": "92708982-77af-4318-be25-57ccb0ff69ad",
         "stations": ["nanjing", "zhenjiang", "wuxi", "suzhou", "shanghai"],
         "distances": [0, 100, 150, 200, 250],
         "startStationId": "nanjing",
         "terminalStationId": "shanghai",
     },
     {
-        "id": "aefcef3f-3f42-46e8-afd7-6cb2a928bd3d",
         "stations": ["nanjing", "shanghai"],
         "distances": [0, 250],
         "startStationId": "nanjing",
         "terminalStationId": "shanghai",
     },
     {
-        "id": "a3f256c1-0e43-4f7d-9c21-121bf258101f",
         "stations": ["nanjing", "suzhou", "shanghai"],
         "distances": [0, 200, 250],
         "startStationId": "nanjing",
         "terminalStationId": "shanghai",
     },
     {
-        "id": "084837bb-53c8-4438-87c8-0321a4d09917",
         "stations": ["suzhou", "shanghai"],
         "distances": [0, 50],
         "startStationId": "suzhou",
         "terminalStationId": "shanghai",
     },
     {
-        "id": "f3d4d4ef-693b-4456-8eed-59c0d717dd08",
         "stations": ["shanghai", "suzhou"],
         "distances": [0, 50],
         "startStationId": "shanghai",
@@ -333,7 +321,13 @@ def delete_one_route_request(admin_bearer: str, request_id: str, route_id: str) 
 def restore_original_routes(admin_bearer: str, request_id: str):
     routes = get_all_routes_request(admin_bearer, request_id)
     for route in routes:
-        if route not in ORIGINAL_ROUTES:
+        route_without_id = {
+            "stations": route["stations"],
+            "distances": route["distances"],
+            "startStationId": route["startStationId"],
+            "terminalStationId": route["terminalStationId"],
+        }
+        if route_without_id not in ORIGINAL_ROUTES:
             deleted_route_id = delete_one_route_request(
                 admin_bearer, request_id, route["id"]
             )

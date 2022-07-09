@@ -2,7 +2,6 @@ import pandas as pd
 import json
 import math
 import uuid
-import random
 from ts.services.station_service import gen_random_station, add_stations
 from ts.services.admin_route_service import (
     gen_random_route,
@@ -15,6 +14,7 @@ from ts.services.train_service import gen_random_train, add_trains
 from ts.services.admin_travel_service import Travel, add_travels
 from ts.services.admin_basic_service import add_prices
 from ts.services.food_map_service import add_food
+from unidecode import unidecode
 
 
 def init_dataframe() -> pd.DataFrame:
@@ -27,7 +27,7 @@ def init_dataframe() -> pd.DataFrame:
         .apply(lambda cell: [json.loads(station) for station in cell])
     )
     df["stations"] = df["vias"].apply(
-        lambda cell: [station["station_name"] for station in cell]
+        lambda cell: [unidecode(station["station_name"]) for station in cell]
     )
     df["distances"] = df["vias"].apply(extract_distances)
     routes_series = df.apply(extract_routes_from_series, axis=1)

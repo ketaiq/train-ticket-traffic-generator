@@ -7,15 +7,12 @@ import time
 import random
 from json import JSONDecodeError
 
-ADMIN_TRAVEL_SERVICE_URL = (
-    "http://34.160.158.68/api/v1/admintravelservice/admintravel"
-)
+ADMIN_TRAVEL_SERVICE_URL = "http://34.160.158.68/api/v1/admintravelservice/admintravel"
 ORIGINAL_TRAVELS = [
     {
         "trip": {
             "tripId": {"type": "G", "number": "1234"},
             "trainTypeId": "GaoTieOne",
-            "routeId": "92708982-77af-4318-be25-57ccb0ff69ad",
             "startingStationId": "shanghai",
             "stationsId": "suzhou",
             "terminalStationId": "taiyuan",
@@ -29,7 +26,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 250,
         },
         "route": {
-            "id": "92708982-77af-4318-be25-57ccb0ff69ad",
             "stations": ["nanjing", "zhenjiang", "wuxi", "suzhou", "shanghai"],
             "distances": [0, 100, 150, 200, 250],
             "startStationId": "nanjing",
@@ -40,7 +36,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "G", "number": "1235"},
             "trainTypeId": "GaoTieOne",
-            "routeId": "aefcef3f-3f42-46e8-afd7-6cb2a928bd3d",
             "startingStationId": "shanghai",
             "stationsId": "suzhou",
             "terminalStationId": "taiyuan",
@@ -54,7 +49,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 250,
         },
         "route": {
-            "id": "aefcef3f-3f42-46e8-afd7-6cb2a928bd3d",
             "stations": ["nanjing", "shanghai"],
             "distances": [0, 250],
             "startStationId": "nanjing",
@@ -65,7 +59,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "G", "number": "1236"},
             "trainTypeId": "GaoTieOne",
-            "routeId": "a3f256c1-0e43-4f7d-9c21-121bf258101f",
             "startingStationId": "shanghai",
             "stationsId": "suzhou",
             "terminalStationId": "taiyuan",
@@ -79,7 +72,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 250,
         },
         "route": {
-            "id": "a3f256c1-0e43-4f7d-9c21-121bf258101f",
             "stations": ["nanjing", "suzhou", "shanghai"],
             "distances": [0, 200, 250],
             "startStationId": "nanjing",
@@ -90,7 +82,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "G", "number": "1237"},
             "trainTypeId": "GaoTieTwo",
-            "routeId": "084837bb-53c8-4438-87c8-0321a4d09917",
             "startingStationId": "shanghai",
             "stationsId": "suzhou",
             "terminalStationId": "taiyuan",
@@ -104,7 +95,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 200,
         },
         "route": {
-            "id": "084837bb-53c8-4438-87c8-0321a4d09917",
             "stations": ["suzhou", "shanghai"],
             "distances": [0, 50],
             "startStationId": "suzhou",
@@ -115,7 +105,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "D", "number": "1345"},
             "trainTypeId": "DongCheOne",
-            "routeId": "f3d4d4ef-693b-4456-8eed-59c0d717dd08",
             "startingStationId": "shanghai",
             "stationsId": "suzhou",
             "terminalStationId": "taiyuan",
@@ -129,7 +118,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 180,
         },
         "route": {
-            "id": "f3d4d4ef-693b-4456-8eed-59c0d717dd08",
             "stations": ["shanghai", "suzhou"],
             "distances": [0, 50],
             "startStationId": "shanghai",
@@ -140,7 +128,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "Z", "number": "1234"},
             "trainTypeId": "ZhiDa",
-            "routeId": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
             "startingStationId": "shanghai",
             "stationsId": "nanjing",
             "terminalStationId": "beijing",
@@ -154,7 +141,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 120,
         },
         "route": {
-            "id": "0b23bd3e-876a-4af3-b920-c50a90c90b04",
             "stations": ["shanghai", "nanjing", "shijiazhuang", "taiyuan"],
             "distances": [0, 350, 1000, 1300],
             "startStationId": "shanghai",
@@ -165,7 +151,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "Z", "number": "1235"},
             "trainTypeId": "ZhiDa",
-            "routeId": "9fc9c261-3263-4bfa-82f8-bb44e06b2f52",
             "startingStationId": "shanghai",
             "stationsId": "nanjing",
             "terminalStationId": "beijing",
@@ -179,7 +164,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 120,
         },
         "route": {
-            "id": "9fc9c261-3263-4bfa-82f8-bb44e06b2f52",
             "stations": ["nanjing", "xuzhou", "jinan", "beijing"],
             "distances": [0, 500, 700, 1200],
             "startStationId": "nanjing",
@@ -190,7 +174,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "Z", "number": "1236"},
             "trainTypeId": "ZhiDa",
-            "routeId": "d693a2c5-ef87-4a3c-bef8-600b43f62c68",
             "startingStationId": "shanghai",
             "stationsId": "nanjing",
             "terminalStationId": "beijing",
@@ -204,7 +187,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 120,
         },
         "route": {
-            "id": "d693a2c5-ef87-4a3c-bef8-600b43f62c68",
             "stations": ["taiyuan", "shijiazhuang", "nanjing", "shanghai"],
             "distances": [0, 300, 950, 1300],
             "startStationId": "taiyuan",
@@ -215,7 +197,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "T", "number": "1235"},
             "trainTypeId": "TeKuai",
-            "routeId": "20eb7122-3a11-423f-b10a-be0dc5bce7db",
             "startingStationId": "shanghai",
             "stationsId": "nanjing",
             "terminalStationId": "beijing",
@@ -229,7 +210,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 120,
         },
         "route": {
-            "id": "20eb7122-3a11-423f-b10a-be0dc5bce7db",
             "stations": ["shanghai", "taiyuan"],
             "distances": [0, 1300],
             "startStationId": "shanghai",
@@ -240,7 +220,6 @@ ORIGINAL_TRAVELS = [
         "trip": {
             "tripId": {"type": "K", "number": "1345"},
             "trainTypeId": "KuaiSu",
-            "routeId": "1367db1f-461e-4ab7-87ad-2bcc05fd9cb7",
             "startingStationId": "shanghai",
             "stationsId": "nanjing",
             "terminalStationId": "beijing",
@@ -254,7 +233,6 @@ ORIGINAL_TRAVELS = [
             "averageSpeed": 90,
         },
         "route": {
-            "id": "1367db1f-461e-4ab7-87ad-2bcc05fd9cb7",
             "stations": ["shanghaihongqiao", "jiaxingnan", "hangzhou"],
             "distances": [0, 150, 300],
             "startStationId": "shanghaihongqiao",
@@ -382,7 +360,30 @@ def restore_original_travels(
 ):
     travels = get_all_travels_request(admin_bearer, request_id)
     for travel in travels:
-        if travel not in ORIGINAL_TRAVELS:
+        travel_without_id = {
+            "trip": {
+                "tripId": travel["trip"]["tripId"],
+                "trainTypeId": travel["trip"]["trainTypeId"],
+                "startingStationId": travel["trip"]["startingStationId"],
+                "stationsId": travel["trip"]["stationsId"],
+                "terminalStationId": travel["trip"]["terminalStationId"],
+                "startingTime": travel["trip"]["startingTime"],
+                "endTime": travel["trip"]["endTime"],
+            },
+            "trainType": {
+                "id": travel["trainType"]["id"],
+                "economyClass": travel["trainType"]["economyClass"],
+                "confortClass": travel["trainType"]["confortClass"],
+                "averageSpeed": travel["trainType"]["averageSpeed"],
+            },
+            "route": {
+                "stations": travel["route"]["stations"],
+                "distances": travel["route"]["distances"],
+                "startStationId": travel["route"]["startStationId"],
+                "terminalStationId": travel["route"]["terminalStationId"],
+            },
+        }
+        if travel_without_id not in ORIGINAL_TRAVELS:
             id = travel["trip"]["tripId"]
             if id["type"]:
                 id = id["type"] + id["number"]

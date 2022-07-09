@@ -15,6 +15,7 @@ from ts.services.admin_travel_service import Travel, add_travels
 from ts.services.admin_basic_service import add_prices
 from ts.services.food_map_service import add_food
 from unidecode import unidecode
+import re
 
 
 def init_dataframe() -> pd.DataFrame:
@@ -27,7 +28,10 @@ def init_dataframe() -> pd.DataFrame:
         .apply(lambda cell: [json.loads(station) for station in cell])
     )
     df["stations"] = df["vias"].apply(
-        lambda cell: [unidecode(station["station_name"]) for station in cell]
+        lambda cell: [
+            re.sub("[^\w\s]+", "", unidecode(station["station_name"]))
+            for station in cell
+        ]
     )
     df["distances"] = df["vias"].apply(extract_distances)
     routes_series = df.apply(extract_routes_from_series, axis=1)

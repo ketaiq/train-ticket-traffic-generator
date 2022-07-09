@@ -33,6 +33,7 @@ class RegularRequest(PassengerRequest):
 
         trips = []
         while len(trips) == 0:
+            # if doesn't find a trip, find again
             (
                 self.from_station,
                 self.to_station,
@@ -45,15 +46,12 @@ class RegularRequest(PassengerRequest):
                 self.to_station,
                 self.request_id,
             )
+
         self.trip = pick_random_travel(trips)
 
     def _gen_ticket_info(self):
         self.seat_type = pick_random_seat_type()
-        self.seat_price = "0"
-        if self.seat_type == SeatType.FIRST_CLASS.value:
-            self.seat_price = self.trip["priceForConfortClass"]
-        else:
-            self.seat_price = self.trip["priceForEconomyClass"]
+        self.seat_price = self.get_seat_price()
         self.contact_id = self.search_contacts()
         assurance_types = get_assurance_types(self.client, self.bearer, self.user_id)
         self.assurance = pick_random_assurance_type(assurance_types)

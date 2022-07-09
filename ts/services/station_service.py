@@ -444,4 +444,3 @@ def init_european_stations(admin_user_id: str, admin_bearer: str):
     for station in ORIGINAL_STATIONS:
         all_stations.remove(station)
     european_stations.extend(all_stations)
-    print("european_stations", len(european_stations))

@@ -7,6 +7,7 @@ from ts.services.contacts_service import (
     add_one_contact,
     gen_random_contact,
 )
+from ts.services.preserve_service import SeatType
 
 
 class PassengerRequest:
@@ -88,3 +89,15 @@ class PassengerRequest:
         else:
             contact_id = response_of_contacts[0]["id"]
         return contact_id
+
+    def get_seat_price(self):
+        if self.seat_type == SeatType.FIRST_CLASS.value:
+            if "priceForFirstClassSeat" in self.trip:
+                return self.trip["priceForFirstClassSeat"]
+            else:
+                return self.trip["priceForConfortClass"]
+        else:
+            if "priceForSecondClassSeat" in self.trip:
+                return self.trip["priceForSecondClassSeat"]
+            else:
+                return self.trip["priceForEconomyClass"]

@@ -466,7 +466,6 @@ def pick_two_random_stations_in_one_route() -> tuple[str, str]:
     from ts.services.station_service import european_stations
 
     results = []
-    # print("european_routes:", european_routes)
     picked_route = random.choice(european_routes)
     picked_stations = random.sample(picked_route["stations"], k=2)
     for picked_station in picked_stations:
@@ -477,13 +476,20 @@ def pick_two_random_stations_in_one_route() -> tuple[str, str]:
     if len(results) == 2:
         return results[0], results[1]
     else:
+        print("picked_route: ", picked_route)
+        print("picked_stations: ", picked_stations)
         raise UndesirableResultError(results, ["station A", "station B"])
 
 
 def init_european_routes(admin_bearer: str, request_id: str):
     all_routes = get_all_routes_request(admin_bearer, request_id)
-    # print("all_routes", all_routes)
-    for route in ORIGINAL_ROUTES:
-        all_routes.remove(route)
+    for route in all_routes:
+        route_without_id = {
+            "stations": route["stations"],
+            "distances": route["distances"],
+            "startStationId": route["startStationId"],
+            "terminalStationId": route["terminalStationId"],
+        }
+        if route_without_id in ORIGINAL_ROUTES:
+            all_routes.remove(route)
     european_routes.extend(all_routes)
-    print("european_routes", len(european_routes))

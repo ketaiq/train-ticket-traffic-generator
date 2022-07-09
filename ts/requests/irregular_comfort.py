@@ -37,6 +37,7 @@ class IrregularComfortRequest(PassengerRequest):
             sleep(randint(10, 20))
             trips = []
             while len(trips) == 0:
+                # if doesn't find a trip, find again
                 (
                     self.from_station,
                     self.to_station,
@@ -49,19 +50,17 @@ class IrregularComfortRequest(PassengerRequest):
                     self.to_station,
                     self.request_id,
                 )
-            self.trip = pick_random_travel(trips)
-
         # search tickets with advanced filter for 5-10x randomly
-        """
-        trips = []
         for _ in range(random.randint(5, 10)):
+            sleep(randint(10, 20))
+            trips = []
             while len(trips) == 0:
+                # if doesn't find a trip, find again
                 (
                     self.from_station,
                     self.to_station,
                 ) = pick_two_random_stations_in_one_route()
                 self.departure_date = gen_random_date()
-
                 trips = pick_random_strategy_and_search(
                     self.client,
                     self.request_id,
@@ -69,14 +68,12 @@ class IrregularComfortRequest(PassengerRequest):
                     self.to_station,
                     self.departure_date,
                 )
-                
-        self.trip = pick_random_travel(trips)
-        """
 
+        self.trip = pick_random_travel(trips)
 
     def _gen_ticket_info(self):
         self.seat_type = "2"
-        self.seat_price = self.trip["priceForFirstClassSeat"]
+        self.seat_price = self.get_seat_price()
         self.contact_id = self.search_contacts()
         assurance_types = get_assurance_types(self.client, self.bearer, self.user_id)
         self.assurance = pick_random_assurance_type(assurance_types)
@@ -97,19 +94,19 @@ class IrregularComfortRequest(PassengerRequest):
     def perform_actions(self):
 
         # create and login user
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self.create_and_login_user()
 
         # search ticket
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._search_ticket_for_a_random_trip()
 
         # get the ticket's info
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._gen_ticket_info()
 
         # book with assurance, food and consign
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         visit_ticket_book(
             self.client,
             self.bearer,
@@ -122,7 +119,7 @@ class IrregularComfortRequest(PassengerRequest):
             self.departure_date,
         )
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         reserve_one_ticket(
             self.client,
             self.bearer,
@@ -139,7 +136,7 @@ class IrregularComfortRequest(PassengerRequest):
         )
 
         # pay for the booking
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
             -1
         ]["id"]
@@ -148,9 +145,9 @@ class IrregularComfortRequest(PassengerRequest):
         )
 
         # collect ticket
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         collect_one_ticket(self.client, self.bearer, self.user_id, self.order_id)
 
         # enter station
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         enter_station(self.client, self.bearer, self.user_id, self.order_id)

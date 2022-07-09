@@ -1,17 +1,11 @@
 from locust import HttpUser, task, between, constant, events
 from locust import LoadTestShape
-from datetime import datetime, timedelta, date
 from random import randint, gauss, randrange
 import random
-import json
 import uuid
 import numpy as np
-import sys
-import time
-import os
 import csv
 from collections import defaultdict
-import logging
 from requests.adapters import HTTPAdapter
 import locust.stats
 

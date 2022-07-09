@@ -5,13 +5,11 @@ from ts.services.auth_service import login_user
 from ts.services.contacts_service import (
     get_contacts_by_account_id,
     add_one_contact,
-    gen_random_contact
+    gen_random_contact,
 )
-from ts.util import gen_random_name, gen_random_document_number
 
 
 class PassengerRequest:
-
     def __init__(self, client, description):
         self.client = client
         self.description = description

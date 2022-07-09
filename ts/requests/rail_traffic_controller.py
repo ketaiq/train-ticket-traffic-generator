@@ -25,23 +25,7 @@ from ts.services.admin_route_service import (
 
 class RailTrafficControllerRequest:
     """
-    - Login
-    - Travel
-        - Add
-        - Update
-        - Delete
-    - Route
-        - Add
-        - Update
-        - Delete
-    - Station
-        - Add
-        - Update
-        - Delete
-    - Train
-        - Add
-        - Update
-        - Delete
+    Deprecated request
     """
 
     def __init__(self, client):

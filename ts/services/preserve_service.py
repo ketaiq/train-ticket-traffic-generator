@@ -71,13 +71,26 @@ def reserve_one_ticket(
             "consigneeWeight": consign.weight,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Success.":
-            log_wrong_response_warning(user_id, operation, response.failure, response.json())
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            log_response_info(user_id, operation, response.json()["data"])
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Success.":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    log_response_info(user_id, operation, response.json()["data"])
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def reserve_one_ticket_request(

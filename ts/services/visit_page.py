@@ -51,10 +51,11 @@ def visit_ticket_book(
             "date": urllib.parse.quote(date),
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.status_code != 200:
+        if not response.ok():
             log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
+                user_id, operation, response.failure, response.text
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
             log_timeout_warning(user_id, operation, response.failure)

@@ -1,6 +1,7 @@
 """
 This module includes all API calls provided by ts-admin-order-service.
 """
+from json import JSONDecodeError
 from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
     log_timeout_warning,
@@ -81,17 +82,28 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
             "price": order.price,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            log_response_info(user_id, operation, data)
-            return data
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    log_response_info(user_id, operation, data)
+                    return data
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order):
@@ -122,16 +134,27 @@ def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order
             "price": order.price,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            log_response_info(user_id, operation, data)
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    log_response_info(user_id, operation, data)
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def admin_delete_one_order(
@@ -149,16 +172,27 @@ def admin_delete_one_order(
             "Authorization": admin_bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            log_response_info(user_id, operation, data)
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    log_response_info(user_id, operation, data)
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def gen_random_order(trip, departure_date, user_id, contact) -> Order:

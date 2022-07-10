@@ -54,6 +54,7 @@ def get_all_stations(client, admin_bearer: str, admin_user_id: str) -> list:
             "Authorization": admin_bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] != "Find all content":
             log_wrong_response_warning(
@@ -116,6 +117,7 @@ def add_one_new_station(
             "stayTime": stay_time,
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] == "Create success":
             new_station = response.json()["data"]
@@ -225,6 +227,7 @@ def update_one_station(
             "stayTime": new_station_stay_time,
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] != "Update success":
             log_wrong_response_warning(
@@ -295,16 +298,27 @@ def delete_one_station(
             "name": station_name,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Delete success":
-            log_wrong_response_warning(
-                admin_user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            deleted_station = response.json()["data"]
-            log_response_info(admin_user_id, operation, deleted_station)
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Delete success":
+                    log_wrong_response_warning(
+                        admin_user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(admin_user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    deleted_station = response.json()["data"]
+                    log_response_info(admin_user_id, operation, deleted_station)
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def delete_one_station_request(

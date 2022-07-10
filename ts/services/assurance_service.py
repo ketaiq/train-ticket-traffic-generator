@@ -33,17 +33,28 @@ def get_assurance_types(client, bearer: str, user_id: str) -> list:
             "Authorization": bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Find All Assurance":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            assurance_types = response.json()["data"]
-            log_response_info(user_id, operation, assurance_types)
-            return assurance_types
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Find All Assurance":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    assurance_types = response.json()["data"]
+                    log_response_info(user_id, operation, assurance_types)
+                    return assurance_types
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def get_assurance_types_request(request_id: str, bearer: str):

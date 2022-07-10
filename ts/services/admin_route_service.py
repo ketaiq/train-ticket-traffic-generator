@@ -106,6 +106,7 @@ def get_all_routes(client, admin_bearer: str, admin_user_id: str) -> list:
             "Authorization": admin_bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] != "Success":
             log_wrong_response_warning(
@@ -168,6 +169,7 @@ def add_one_route(
             "endStation": stations[-1].lower(),
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] != "Save Success":
             log_wrong_response_warning(
@@ -206,6 +208,7 @@ def update_one_route(
             "endStation": stations[-1].lower(),
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] != "Modify success":
             log_wrong_response_warning(
@@ -277,6 +280,7 @@ def delete_one_route(
             "Authorization": admin_bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
         if response.json()["msg"] != "Delete Success":
             log_wrong_response_warning(
@@ -483,6 +487,7 @@ def pick_two_random_stations_in_one_route() -> tuple[str, str]:
 
 def init_european_routes(admin_bearer: str, request_id: str):
     all_routes = get_all_routes_request(admin_bearer, request_id)
+    new_routes = []
     for route in all_routes:
         route_without_id = {
             "stations": route["stations"],
@@ -490,6 +495,6 @@ def init_european_routes(admin_bearer: str, request_id: str):
             "startStationId": route["startStationId"],
             "terminalStationId": route["terminalStationId"],
         }
-        if route_without_id in ORIGINAL_ROUTES:
-            all_routes.remove(route)
-    european_routes.extend(all_routes)
+        if route_without_id not in ORIGINAL_ROUTES:
+            new_routes.append(route)
+    european_routes.extend(new_routes)

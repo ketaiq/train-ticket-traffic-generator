@@ -21,25 +21,36 @@ def login_user(
         json={"username": username, "password": password},
         name=description,
     ) as response:
-        if response.json()["msg"] != "login success":
-            log = f"user {username} tries to {operation} but gets wrong response"
-            logging.warning(f"{log} {response.json()}")
-            response.failure(log)
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log = f"user {username} tries to {operation} but request takes too long!"
-            logging.warning(log)
-            response.failure(log)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            if data is not None:
-                admin_bearer = "Bearer " + data["token"]
-                user_id = data["userId"]
-                logging.info(f"user {username} logs in")
-            else:
-                logging.error(
-                    f"user {username} fails to log in because there is no response data"
-                )
-
+            try:
+                key = "msg"
+                if response.json()["msg"] != "login success":
+                    log = (
+                        f"user {username} tries to {operation} but gets wrong response"
+                    )
+                    logging.warning(f"{log} {response.json()}")
+                    response.failure(log)
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log = f"user {username} tries to {operation} but request takes too long!"
+                    logging.warning(log)
+                    response.failure(log)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    if data is not None:
+                        admin_bearer = "Bearer " + data["token"]
+                        user_id = data["userId"]
+                        logging.info(f"user {username} logs in")
+                    else:
+                        logging.error(
+                            f"user {username} fails to log in because there is no response data"
+                        )
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
     return admin_bearer, user_id
 
 

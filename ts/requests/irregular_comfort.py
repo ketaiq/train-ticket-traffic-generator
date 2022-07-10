@@ -52,7 +52,7 @@ class IrregularComfortRequest(PassengerRequest):
                 )
         # search tickets with advanced filter for 5-10x randomly
         for _ in range(random.randint(5, 10)):
-            sleep(randint(10, 20))
+            sleep(randint(20, 60))
             trips = []
             while len(trips) == 0:
                 # if doesn't find a trip, find again

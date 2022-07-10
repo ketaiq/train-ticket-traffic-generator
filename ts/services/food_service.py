@@ -73,17 +73,30 @@ def search_food_on_trip(
             "Authorization": bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] == "Get All Food Failed":
-            return None
-        if response.json()["msg"] != "Get All Food Success":
-            log_wrong_response_warning(user_id, operation, response.failure, response.json())
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            all_food = response.json()["data"]
-            log_response_info(user_id, operation, all_food)
-            return all_food
+            try:
+                key = "msg"
+                if response.json()["msg"] == "Get All Food Failed":
+                    return None
+                if response.json()["msg"] != "Get All Food Success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    all_food = response.json()["data"]
+                    log_response_info(user_id, operation, all_food)
+                    return all_food
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def get_all_train_and_store_food_request(
@@ -129,7 +142,9 @@ def get_all_train_and_store_food_request(
 
 
 def pick_random_food(food_menu: dict) -> Food:
-    food_type = random.randint(FoodType.TRAIN_FOOD.value, FoodType.STATION_FOOD_STORES.value)
+    food_type = random.randint(
+        FoodType.TRAIN_FOOD.value, FoodType.STATION_FOOD_STORES.value
+    )
     if food_type == FoodType.TRAIN_FOOD:
         train_food = food_menu["trainFoodList"][0]
         chosen_food_index = random.randint(0, len(train_food["foodList"]) - 1)

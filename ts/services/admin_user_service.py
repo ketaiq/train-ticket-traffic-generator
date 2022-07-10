@@ -44,17 +44,34 @@ def add_one_user(
             "userName": username,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "REGISTER USER SUCCESS":
-            log_wrong_response_warning(
-                request_id, operation, response.failure, response.json(), name="request"
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(request_id, operation, response.failure, name="request")
+        if not response.ok():
+            response.raise_for_status()
         else:
-            new_user = response.json()["data"]
-            log_response_info(request_id, operation, new_user, name="request")
-            return new_user
+            try:
+                key = "msg"
+                if response.json()["msg"] != "REGISTER USER SUCCESS":
+                    log_wrong_response_warning(
+                        request_id,
+                        operation,
+                        response.failure,
+                        response.json(),
+                        name="request",
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(
+                        request_id, operation, response.failure, name="request"
+                    )
+                else:
+                    key = "data"
+                    new_user = response.json()["data"]
+                    log_response_info(request_id, operation, new_user, name="request")
+                    return new_user
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def get_all_users_request(admin_bearer: str, request_id: str) -> list:

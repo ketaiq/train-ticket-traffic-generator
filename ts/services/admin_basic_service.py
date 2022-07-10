@@ -216,16 +216,27 @@ def admin_add_one_contact(client, admin_bearer: str, user_id: str, contact: Cont
             "phoneNumber": contact.phone_number,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Create Success":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            log_response_info(user_id, operation, data)
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Create Success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    log_response_info(user_id, operation, data)
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def restore_original_prices(admin_bearer: str, request_id: str):

@@ -76,17 +76,28 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
             "Authorization": bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Success":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            log_response_info(user_id, operation, data)
-            return data
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    log_response_info(user_id, operation, data)
+                    return data
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def get_all_contacts_request(request_id: str, bearer: str):
@@ -133,18 +144,29 @@ def add_one_contact(client, bearer: str, user_id: str, contact: Contact) -> dict
             "phoneNumber": contact.phone_number,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Create contacts success":
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            data = response.json()["data"]
-            contact_id = data["id"]
-            log_response_info(user_id, operation, contact_id)
-            return data
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Create contacts success":
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    data = response.json()["data"]
+                    contact_id = data["id"]
+                    log_response_info(user_id, operation, contact_id)
+                    return data
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def add_one_contact_request(
@@ -202,17 +224,28 @@ def update_one_contact(client, bearer: str, contact: Contact):
             "phoneNumber": contact.phone_number,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Modify success":
-            log_wrong_response_warning(
-                contact.user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(contact.user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            old_contact = response.json()["data"]
-            log = f"from {old_contact} to {contact}"
-            log_response_info(contact.user_id, operation, log)
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Modify success":
+                    log_wrong_response_warning(
+                        contact.user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(contact.user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    old_contact = response.json()["data"]
+                    log = f"from {old_contact} to {contact}"
+                    log_response_info(contact.user_id, operation, log)
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def update_one_contact_request(
@@ -263,16 +296,27 @@ def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id
             "Authorization": admin_bearer,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        if response.json()["msg"] != "Delete success":
-            log_wrong_response_warning(
-                admin_user_id, operation, response.failure, response.json()
-            )
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            deleted_contact_id = response.json()["data"]
-            log_response_info(admin_user_id, operation, deleted_contact_id)
+            try:
+                key = "msg"
+                if response.json()["msg"] != "Delete success":
+                    log_wrong_response_warning(
+                        admin_user_id, operation, response.failure, response.json()
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(admin_user_id, operation, response.failure)
+                else:
+                    key = "data"
+                    deleted_contact_id = response.json()["data"]
+                    log_response_info(admin_user_id, operation, deleted_contact_id)
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def delete_one_contact_request(

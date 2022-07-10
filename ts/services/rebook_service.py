@@ -1,3 +1,4 @@
+from json import JSONDecodeError
 from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
@@ -32,24 +33,34 @@ def change_booking(
             "tripId": trip_id,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        print(response.json())
-        if response.json()["msg"] == "Success!":
-            new_order = response.json()["data"]
-            log_response_info(user_id, operation, new_order)
-            return new_order
-        elif response.json()["msg"] == "Please pay the different money!":
-            new_order = pay_difference(
-                client, bearer, user_id, date, old_trip_id, order_id, seat_type, trip_id
-            )
-            log_response_info(user_id, operation, new_order)
-            return new_order
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
+            try:
+                key = "msg"
+                if response.json()["msg"] == "Success!":
+                    key = "data"
+                    new_order = response.json()["data"]
+                    log_response_info(user_id, operation, new_order)
+                    return new_order
+                elif response.json()["msg"] == "Please pay the different money!":
+                    new_order = pay_difference(
+                        client, bearer, user_id, date, old_trip_id, order_id, seat_type, trip_id
+                    )
+                    log_response_info(user_id, operation, new_order)
+                    return new_order
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
 
 
 def pay_difference(
@@ -78,15 +89,25 @@ def pay_difference(
             "tripId": trip_id,
         },
         name=operation,
+        catch_response=True,
     ) as response:
-        print("diff" + response.json())
-        if "success" in response.json()["msg"].lower():
-            new_order = response.json()["data"]
-            log_response_info(user_id, operation, new_order)
-            return new_order
-        elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+        if not response.ok():
+            response.raise_for_status()
         else:
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.json()
-            )
+            try:
+                key = "msg"
+                if "success" in response.json()["msg"].lower():
+                    key = "data"
+                    new_order = response.json()["data"]
+                    log_response_info(user_id, operation, new_order)
+                    return new_order
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_warning(user_id, operation, response.failure)
+                else:
+                    log_wrong_response_warning(
+                        user_id, operation, response.failure, response.json()
+                    )
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")

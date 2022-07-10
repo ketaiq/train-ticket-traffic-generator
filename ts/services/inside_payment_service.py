@@ -24,7 +24,7 @@ def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

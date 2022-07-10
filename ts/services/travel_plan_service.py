@@ -37,7 +37,7 @@ def get_cheapest_travel_plans(
         name=operation,
         catch_response=True,
     ) as response:
-        if response.ok():
+        if response.ok:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
@@ -87,7 +87,7 @@ def get_quickest_travel_plans(
         name=operation,
         catch_response=True,
     ) as response:
-        if response.ok():
+        if response.ok:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
@@ -137,7 +137,7 @@ def get_min_station_travel_plans(
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

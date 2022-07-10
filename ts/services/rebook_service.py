@@ -35,7 +35,7 @@ def change_booking(
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -47,7 +47,14 @@ def change_booking(
                     return new_order
                 elif response.json()["msg"] == "Please pay the different money!":
                     new_order = pay_difference(
-                        client, bearer, user_id, date, old_trip_id, order_id, seat_type, trip_id
+                        client,
+                        bearer,
+                        user_id,
+                        date,
+                        old_trip_id,
+                        order_id,
+                        seat_type,
+                        trip_id,
                     )
                     log_response_info(user_id, operation, new_order)
                     return new_order
@@ -91,7 +98,7 @@ def pay_difference(
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

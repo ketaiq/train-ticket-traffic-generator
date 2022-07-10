@@ -24,7 +24,7 @@ def cancel_one_order(client, bearer: str, order_id: str, user_id: str):
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -55,7 +55,7 @@ def get_refund_amount(client, bearer: str, order_id: str, user_id: str):
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

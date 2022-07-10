@@ -21,7 +21,7 @@ def login_user(
         json={"username": username, "password": password},
         name=description,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

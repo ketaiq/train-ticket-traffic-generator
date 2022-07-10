@@ -78,7 +78,7 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -146,7 +146,7 @@ def add_one_contact(client, bearer: str, user_id: str, contact: Contact) -> dict
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -226,7 +226,7 @@ def update_one_contact(client, bearer: str, contact: Contact):
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -298,7 +298,7 @@ def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

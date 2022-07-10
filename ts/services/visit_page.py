@@ -53,7 +53,7 @@ def visit_ticket_book(
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             log_wrong_response_warning(
                 user_id, operation, response.failure, response.text
             )

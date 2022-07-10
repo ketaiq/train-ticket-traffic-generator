@@ -84,7 +84,7 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -136,7 +136,7 @@ def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:
@@ -174,7 +174,7 @@ def admin_delete_one_order(
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

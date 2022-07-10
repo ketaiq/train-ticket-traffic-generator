@@ -218,7 +218,7 @@ def admin_add_one_contact(client, admin_bearer: str, user_id: str, contact: Cont
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

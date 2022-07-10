@@ -33,7 +33,7 @@ def get_orders_by_login_id(client, user_id: str, bearer: str) -> list:
             "boughtDateEnd": "null",
         },
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

@@ -73,7 +73,7 @@ def reserve_one_ticket(
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

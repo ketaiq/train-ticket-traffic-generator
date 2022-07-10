@@ -35,7 +35,7 @@ def get_assurance_types(client, bearer: str, user_id: str) -> list:
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

@@ -34,7 +34,7 @@ def search_ticket(
         catch_response=True,
         name=operation,
     ) as response:
-        if not response.ok():
+        if not response.ok:
             response.raise_for_status()
         else:
             try:

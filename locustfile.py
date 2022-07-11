@@ -19,18 +19,56 @@ from ts.requests.sales import SalesRequest
 
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
 locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 10
-locust.stats.PERCENTILES_TO_REPORT = [0.25, 0.50, 0.75, 0.80, 0.90, 0.95, 0.98, 0.99, 0.999, 0.9999, 1.0]
+locust.stats.PERCENTILES_TO_REPORT = [
+    0.25,
+    0.50,
+    0.75,
+    0.80,
+    0.90,
+    0.95,
+    0.98,
+    0.99,
+    0.999,
+    0.9999,
+    1.0,
+]
 VERBOSE_LOGGING = 0
 
 period_duration = 120
 peak_1 = 13
 peak_2 = 53
 
-weights_non_peak_hours = [random.randint(11, 13), random.randint(9, 11), random.randint(1, 3), random.randint(23, 25), random.randint(0, 2), random.randint(0, 2), random.randint(45, 47), random.randint(1, 3), random.randint(1, 3)]
-weights_peak_hours = [random.randint(5, 7), random.randint(4, 5), random.randint(0, 2), random.randint(35, 36), random.randint(0, 2), random.randint(0, 2), random.randint(45, 47), random.randint(1, 3), random.randint(1, 3)]
+weights_non_peak_hours = [
+    random.randint(11, 13),
+    random.randint(9, 11),
+    random.randint(1, 3),
+    random.randint(23, 25),
+    random.randint(0, 2),
+    random.randint(0, 2),
+    random.randint(45, 47),
+    random.randint(1, 3),
+    random.randint(1, 3),
+]
+weights_peak_hours = [
+    random.randint(5, 7),
+    random.randint(4, 5),
+    random.randint(0, 2),
+    random.randint(35, 36),
+    random.randint(0, 2),
+    random.randint(0, 2),
+    random.randint(45, 47),
+    random.randint(1, 3),
+    random.randint(1, 3),
+]
 
-peak_hours_1 = [int(x) for x in range(period_duration * (peak_1 - 3), period_duration * (peak_1 + 2))]
-peak_hours_2 = [int(x) for x in range(period_duration * (peak_2 - 3), period_duration * (peak_2 + 2))]
+peak_hours_1 = [
+    int(x)
+    for x in range(period_duration * (peak_1 - 3), period_duration * (peak_1 + 2))
+]
+peak_hours_2 = [
+    int(x)
+    for x in range(period_duration * (peak_2 - 3), period_duration * (peak_2 + 2))
+]
 
 
 @events.init.add_listener
@@ -39,7 +77,7 @@ def on_locust_init(environment, **kwargs):
     from ts.services.station_service import init_european_stations
     from ts.services.auth_service import login_user_request
 
-    print("Fetch shared data, including routes, stations")
+    print("Wait for fetching shared data, including routes, stations")
     request_id = str(uuid.uuid4())
     admin_bearer, admin_user_id = login_user_request(
         username="admin", password="222222", request_id=request_id
@@ -160,9 +198,13 @@ class StagesShape(LoadTestShape):
         spawnRateList = [int(x) for x in spawnRate]
         durationList = np.cumsum([timeIntervals] * len(usersList))
 
-        stagesDict = {"duration": list(durationList), 'users': usersList, 'spawn_rate':spawnRateList}
+        stagesDict = {
+            "duration": list(durationList),
+            "users": usersList,
+            "spawn_rate": spawnRateList,
+        }
 
-        self.stages = [dict(zip(stagesDict,t)) for t in zip(*stagesDict.values())]
+        self.stages = [dict(zip(stagesDict, t)) for t in zip(*stagesDict.values())]
 
     def tick(self):
         run_time = self.get_run_time()
@@ -170,7 +212,9 @@ class StagesShape(LoadTestShape):
         for stage in self.stages:
             if run_time < stage["duration"]:
 
-                if (round(run_time) in peak_hours_1) or (round(run_time) in peak_hours_2):
+                if (round(run_time) in peak_hours_1) or (
+                    round(run_time) in peak_hours_2
+                ):
                     hour_type = "Peak"
                     weights_list = weights_peak_hours
                 else:
@@ -185,4 +229,3 @@ class StagesShape(LoadTestShape):
                 return tick_data
 
         return None
-

@@ -7,10 +7,15 @@ import requests
 from typing import Tuple
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from ts.log_syntax.locust_response import (
+    log_http_error,
+    log_timeout_warning,
+    log_wrong_response_warning,
+)
 
 
 def login_user(
-    client, username: str, password: str, description: str
+    client, request_id: str, username: str, password: str, description: str
 ) -> Tuple[str, str]:
     admin_bearer = ""
     user_id = ""
@@ -23,20 +28,30 @@ def login_user(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"login username: {username}, password: {password}"
+            log_http_error(
+                request_id,
+                operation,
+                response.failure,
+                response.status_code,
+                data,
+                name="request",
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "login success":
-                    log = (
-                        f"user {username} tries to {operation} but gets wrong response"
+                    log_wrong_response_warning(
+                        request_id,
+                        operation,
+                        response.failure,
+                        response.json(),
+                        name="request",
                     )
-                    logging.warning(f"{log} {response.json()}")
-                    response.failure(log)
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log = f"user {username} tries to {operation} but request takes too long!"
-                    logging.warning(log)
-                    response.failure(log)
+                    log_timeout_warning(
+                        request_id, operation, response.failure, name="request"
+                    )
                 else:
                     key = "data"
                     data = response.json()["data"]

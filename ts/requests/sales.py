@@ -19,6 +19,7 @@ from ts.util import gen_random_date
 from random import randint
 from time import sleep
 
+
 class SalesRequest:
     def __init__(self, client):
         self.client = client
@@ -36,6 +37,7 @@ class SalesRequest:
     def _login_admin_user(self, description):
         self.admin_bearer, self.admin_user_id = login_user(
             client=self.client,
+            request_id=self.request_id,
             username="admin",
             password="222222",
             description=f"login {description} admin user",
@@ -118,33 +120,33 @@ class SalesRequest:
 
     def perform_create_order_actions(self):
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._login_admin_user("Create Order")
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._create_user()
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._create_contact()
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._search_ticket_for_a_random_trip()
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._add_order()
 
     def perform_update_order_actions(self):
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._login_admin_user("Update Order")
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._update_order()
 
     def perform_delete_order_actions(self):
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._login_admin_user("Delete Order")
 
-        sleep(randint(1,5))
+        sleep(randint(1, 5))
         self._delete_order()

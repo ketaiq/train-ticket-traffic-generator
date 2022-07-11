@@ -39,6 +39,7 @@ class PassengerRequest:
         """
         admin_bearer, _ = login_user(
             self.client,
+            self.request_id,
             username="admin",
             password="222222",
             description="login admin user",
@@ -55,6 +56,7 @@ class PassengerRequest:
         visit_client_login(self.client, self.request_id)
         self.bearer, self.user_id = login_user(
             client=self.client,
+            request_id=self.request_id,
             username=self.username,
             password=self.password,
             description=f"login {self.description} user",
@@ -69,6 +71,7 @@ class PassengerRequest:
         else:
             self.bearer, self.user_id = login_user(
                 client=self.client,
+                request_id=self.request_id,
                 username=self.username,
                 password=self.password,
                 description=f"login {self.description} user",

@@ -4,21 +4,18 @@ import logging
 def log_wrong_response_warning(
     id: str, operation: str, response_failure, data, name: str = "user"
 ):
-    log = f"{name} {id} tries to {operation} but gets wrong response"
-    response_failure(log)
-    logging.warning(f"{log} {data}")
+    response_failure(f"tries to {operation} but gets wrong response")
+    logging.warning(f"{name} {id} tries to {operation} but gets wrong response {data}")
 
 
 def log_http_error(id: str, operation: str, response_failure, data, name: str = "user"):
-    log = f"{name} {id} tries to {operation} but gets http error"
-    response_failure(log)
-    logging.error(f"{log} {data}")
+    response_failure(f"tries to {operation} but gets http error")
+    logging.error(f"{name} {id} tries to {operation} but gets http error {data}")
 
 
 def log_timeout_warning(id: str, operation: str, response_failure, name: str = "user"):
-    log = f"{name} {id} tries to {operation} but request takes too long!"
-    response_failure(log)
-    logging.warning(log)
+    response_failure(f"tries to {operation} but request takes too long!")
+    logging.warning(f"{name} {id} tries to {operation} but request takes too long!")
 
 
 def log_response_info(id: str, operation: str, data, name: str = "user"):

@@ -9,6 +9,12 @@ def log_wrong_response_warning(
     logging.warning(f"{log} {data}")
 
 
+def log_http_error(id: str, operation: str, response_failure, data, name: str = "user"):
+    log = f"{name} {id} tries to {operation} but gets http error"
+    response_failure(log)
+    logging.error(f"{log} {data}")
+
+
 def log_timeout_warning(id: str, operation: str, response_failure, name: str = "user"):
     log = f"{name} {id} tries to {operation} but request takes too long!"
     response_failure(log)

@@ -7,6 +7,7 @@ from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
     log_timeout_warning,
     log_response_info,
+    log_http_error,
 )
 import random
 from json import JSONDecodeError
@@ -62,6 +63,14 @@ def get_cheapest_travel_plans(
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
         else:
+            log = f"{response.status_code} when searching from {startingPlace} to {endPlace} on {departure_time}"
+            log_http_error(
+                request_id,
+                operation,
+                response.failure,
+                log,
+                name="request",
+            )
             response.raise_for_status()
 
 
@@ -112,6 +121,14 @@ def get_quickest_travel_plans(
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
         else:
+            log = f"{response.status_code} when searching from {starting_place} to {end_place} on {departure_time}"
+            log_http_error(
+                request_id,
+                operation,
+                response.failure,
+                log,
+                name="request",
+            )
             response.raise_for_status()
 
 
@@ -138,6 +155,14 @@ def get_min_station_travel_plans(
         catch_response=True,
     ) as response:
         if not response.ok:
+            log = f"{response.status_code} when searching from {starting_place} to {end_place} on {departure_time}"
+            log_http_error(
+                request_id,
+                operation,
+                response.failure,
+                log,
+                name="request",
+            )
             response.raise_for_status()
         else:
             try:

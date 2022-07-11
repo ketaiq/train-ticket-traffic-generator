@@ -7,6 +7,7 @@ from ts.log_syntax.locust_response import (
     log_wrong_response_warning,
     log_timeout_warning,
     log_response_info,
+    log_http_error,
 )
 from ts import TIMEOUT_MAX
 import random
@@ -35,6 +36,14 @@ def search_ticket(
         name=operation,
     ) as response:
         if not response.ok:
+            log = f"{response.status_code} when searching from {from_station} to {to_station} on {departure_date}"
+            log_http_error(
+                request_id,
+                operation,
+                response.failure,
+                log,
+                name="request",
+            )
             response.raise_for_status()
         else:
             try:

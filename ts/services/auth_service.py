@@ -20,6 +20,7 @@ def login_user(
         headers={"Accept": "application/json", "Content-Type": "application/json"},
         json={"username": username, "password": password},
         name=description,
+        catch_response=True,
     ) as response:
         if not response.ok:
             response.raise_for_status()

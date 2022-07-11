@@ -36,15 +36,15 @@ def search_ticket(
         name=operation,
     ) as response:
         if not response.ok:
-            log = f"{response.status_code} when searching from {from_station} to {to_station} on {departure_date}"
+            data = f"searching from {from_station} to {to_station} on {departure_date}"
             log_http_error(
                 request_id,
                 operation,
                 response.failure,
-                log,
+                response.status_code,
+                data,
                 name="request",
             )
-            response.raise_for_status()
         else:
             try:
                 key = "msg"

@@ -5,6 +5,7 @@ This module includes all API calls provided by ts-admin-user-service.
 import requests
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.util import (
     gen_random_document_number,
     gen_random_document_type,
@@ -12,9 +13,10 @@ from ts.util import (
     gen_random_gender,
 )
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
+    log_http_error,
 )
 
 ADMIN_USER_SERVICE_URL = "http://34.160.158.68/api/v1/adminuserservice/users"
@@ -47,12 +49,19 @@ def add_one_user(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"username: {username}, password: {password}"
+            log_http_error(
+                request_id,
+                operation,
+                response,
+                data,
+                name="request",
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "REGISTER USER SUCCESS":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         request_id,
                         operation,
                         response.failure,
@@ -60,7 +69,7 @@ def add_one_user(
                         name="request",
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(
+                    log_timeout_error(
                         request_id, operation, response.failure, name="request"
                     )
                 else:
@@ -70,8 +79,10 @@ def add_one_user(
                     return new_user
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def get_all_users_request(admin_bearer: str, request_id: str) -> list:

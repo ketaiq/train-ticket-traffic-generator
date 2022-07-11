@@ -7,6 +7,7 @@ import random
 import uuid
 from ts.util import gen_random_phone_number
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 
 
 class Consign:

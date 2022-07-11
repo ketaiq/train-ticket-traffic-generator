@@ -3,11 +3,13 @@ This module includes all API calls provided by ts-admin-order-service.
 """
 from json import JSONDecodeError
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
+    log_http_error,
 )
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.services.preserve_service import SeatType, pick_random_seat_type
 from ts.util import now_time, convert_date_to_time
 import random
@@ -85,16 +87,22 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = str(order.__dict__)
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
@@ -102,8 +110,10 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
                     return data
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order):
@@ -137,24 +147,32 @@ def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = str(order.__dict__)
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
                     log_response_info(user_id, operation, data)
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def admin_delete_one_order(
@@ -175,24 +193,32 @@ def admin_delete_one_order(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"order_id: {order_id}, trip_id: {trip_id}"
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
                     log_response_info(user_id, operation, data)
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def gen_random_order(trip, departure_date, user_id, contact) -> Order:

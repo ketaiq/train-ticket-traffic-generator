@@ -4,12 +4,13 @@ This module includes all API calls provided by ts-travel-service.
 
 from json import JSONDecodeError
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
     log_http_error,
 )
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 import random
 
 
@@ -36,12 +37,11 @@ def search_ticket(
         name=operation,
     ) as response:
         if not response.ok:
-            data = f"searching from {from_station} to {to_station} on {departure_date}"
+            data = f"from_station: {from_station}, to_station: {to_station}, departure_date: {departure_date}"
             log_http_error(
                 request_id,
                 operation,
-                response.failure,
-                response.status_code,
+                response,
                 data,
                 name="request",
             )
@@ -51,7 +51,7 @@ def search_ticket(
                 msg = response.json()["msg"]
                 operation += f" from {from_station} to {to_station} on {departure_date}"
                 if msg != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         request_id,
                         operation,
                         response.failure,
@@ -59,7 +59,7 @@ def search_ticket(
                         name="request",
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(
+                    log_timeout_error(
                         request_id, operation, response.failure, name="request"
                     )
                 else:
@@ -74,8 +74,10 @@ def search_ticket(
                     return data
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def pick_random_travel(trips: list) -> dict:

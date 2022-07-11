@@ -8,10 +8,11 @@ import sys
 import requests
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
     log_response_info,
-    log_timeout_warning,
-    log_wrong_response_warning,
+    log_timeout_error,
+    log_wrong_response_error,
 )
 from ts.services.station_service import ORIGINAL_STATIONS
 from ts.errors import UndesirableResultError
@@ -109,11 +110,11 @@ def get_all_routes(client, admin_bearer: str, admin_user_id: str) -> list:
         catch_response=True,
     ) as response:
         if response.json()["msg"] != "Success":
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
             routes = response.json()["data"]
             log_response_info(admin_user_id, operation, routes)
@@ -172,11 +173,11 @@ def add_one_route(
         catch_response=True,
     ) as response:
         if response.json()["msg"] != "Save Success":
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
             new_route = response.json()["data"]
             log_response_info(admin_user_id, operation, new_route)
@@ -211,11 +212,11 @@ def update_one_route(
         catch_response=True,
     ) as response:
         if response.json()["msg"] != "Modify success":
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
             new_route = response.json()["data"]
             log_response_info(admin_user_id, operation, new_route)
@@ -283,11 +284,11 @@ def delete_one_route(
         catch_response=True,
     ) as response:
         if response.json()["msg"] != "Delete Success":
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
             deleted_route_id = response.json()["data"]
             log_response_info(admin_user_id, operation, deleted_route_id)

@@ -6,10 +6,12 @@ import requests
 import random
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
+    log_http_error,
 )
 from enum import Enum
 
@@ -36,16 +38,22 @@ def get_assurance_types(client, bearer: str, user_id: str) -> list:
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"user_id: {user_id}"
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Find All Assurance":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     assurance_types = response.json()["data"]
@@ -53,8 +61,10 @@ def get_assurance_types(client, bearer: str, user_id: str) -> list:
                     return assurance_types
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def get_assurance_types_request(request_id: str, bearer: str):

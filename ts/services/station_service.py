@@ -4,14 +4,16 @@ This module includes all API calls provided by ts-station-service.
 
 import requests
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_http_error,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
 )
 from json import JSONDecodeError
 import random
 import string
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 
 STATION_SERVICE_URL = "http://34.160.158.68/api/v1/stationservice/stations"
 
@@ -57,11 +59,11 @@ def get_all_stations(client, admin_bearer: str, admin_user_id: str) -> list:
         catch_response=True,
     ) as response:
         if response.json()["msg"] != "Find all content":
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
             stations = response.json()["data"]
             log_response_info(admin_user_id, operation, stations)
@@ -142,9 +144,9 @@ def add_one_new_station(
                 stay_time,
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
 
@@ -230,11 +232,11 @@ def update_one_station(
         catch_response=True,
     ) as response:
         if response.json()["msg"] != "Update success":
-            log_wrong_response_warning(
+            log_wrong_response_error(
                 admin_user_id, operation, response.failure, response.json()
             )
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(admin_user_id, operation, response.failure)
+            log_timeout_error(admin_user_id, operation, response.failure)
         else:
             updated_station = response.json()["data"]
             log_response_info(admin_user_id, operation, updated_station)
@@ -301,24 +303,32 @@ def delete_one_station(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"station_id: {station_id}, station_name: {station_name}"
+            log_http_error(
+                admin_user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Delete success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         admin_user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(admin_user_id, operation, response.failure)
+                    log_timeout_error(admin_user_id, operation, response.failure)
                 else:
                     key = "data"
                     deleted_station = response.json()["data"]
                     log_response_info(admin_user_id, operation, deleted_station)
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def delete_one_station_request(

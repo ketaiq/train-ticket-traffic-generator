@@ -3,9 +3,10 @@ This module includes all API calls provided by ts-travel-plan-service.
 """
 
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
     log_http_error,
 )
@@ -42,7 +43,7 @@ def get_cheapest_travel_plans(
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         request_id,
                         operation,
                         response.failure,
@@ -50,7 +51,7 @@ def get_cheapest_travel_plans(
                         name="request",
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(
+                    log_timeout_error(
                         request_id, operation, response.failure, name="request"
                     )
                 else:
@@ -60,15 +61,16 @@ def get_cheapest_travel_plans(
                     return plans
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
         else:
-            data = f"searching from {startingPlace} to {endPlace} on {departure_time}"
+            data = f"startingPlace: {startingPlace}, endPlace: {endPlace}, departure_time: {departure_time}"
             log_http_error(
                 request_id,
                 operation,
-                response.failure,
-                response.status_code,
+                response,
                 data,
                 name="request",
             )
@@ -100,7 +102,7 @@ def get_quickest_travel_plans(
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         request_id,
                         operation,
                         response.failure,
@@ -108,7 +110,7 @@ def get_quickest_travel_plans(
                         name="request",
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(
+                    log_timeout_error(
                         request_id, operation, response.failure, name="request"
                     )
                 else:
@@ -118,15 +120,16 @@ def get_quickest_travel_plans(
                     return plans
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
         else:
-            data = f"searching from {starting_place} to {end_place} on {departure_time}"
+            data = f"starting_place: {starting_place}, end_place: {end_place}, departure_time: {departure_time}"
             log_http_error(
                 request_id,
                 operation,
-                response.failure,
-                response.status_code,
+                response,
                 data,
                 name="request",
             )
@@ -155,12 +158,11 @@ def get_min_station_travel_plans(
         catch_response=True,
     ) as response:
         if not response.ok:
-            data = f"searching from {starting_place} to {end_place} on {departure_time}"
+            data = f"starting_place: {starting_place}, end_place: {end_place}, departure_time: {departure_time}"
             log_http_error(
                 request_id,
                 operation,
-                response.failure,
-                response.status_code,
+                response,
                 data,
                 name="request",
             )
@@ -168,7 +170,7 @@ def get_min_station_travel_plans(
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         request_id,
                         operation,
                         response.failure,
@@ -176,7 +178,7 @@ def get_min_station_travel_plans(
                         name="request",
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(
+                    log_timeout_error(
                         request_id, operation, response.failure, name="request"
                     )
                 else:
@@ -186,8 +188,10 @@ def get_min_station_travel_plans(
                     return plans
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def pick_random_strategy_and_search(

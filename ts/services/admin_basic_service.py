@@ -8,11 +8,13 @@ from json import JSONDecodeError
 import random
 from ts.services.contacts_service import Contact
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
+    log_http_error,
 )
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 
 ADMIN_PRICE_SERVICE_URL = (
     "http://34.160.158.68/api/v1/adminbasicservice/adminbasic/prices"
@@ -219,24 +221,32 @@ def admin_add_one_contact(client, admin_bearer: str, user_id: str, contact: Cont
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = str(contact.__dict__)
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Create Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
                     log_response_info(user_id, operation, data)
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def restore_original_prices(admin_bearer: str, request_id: str):

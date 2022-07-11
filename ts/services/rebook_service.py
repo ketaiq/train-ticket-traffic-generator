@@ -1,8 +1,10 @@
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_http_error,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
 )
 
@@ -36,7 +38,15 @@ def change_booking(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = (
+                f"date: {date}, old_trip_id: {old_trip_id}, order_id: {order_id}, ..."
+            )
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
@@ -59,15 +69,17 @@ def change_booking(
                     log_response_info(user_id, operation, new_order)
                     return new_order
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def pay_difference(
@@ -99,7 +111,15 @@ def pay_difference(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = (
+                f"date: {date}, old_trip_id: {old_trip_id}, order_id: {order_id}, ..."
+            )
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
@@ -109,12 +129,14 @@ def pay_difference(
                     log_response_info(user_id, operation, new_order)
                     return new_order
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()

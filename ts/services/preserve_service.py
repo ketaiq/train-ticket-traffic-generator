@@ -5,13 +5,15 @@ from enum import Enum
 from ts.services.food_service import Food
 from ts.services.consign_service import Consign
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_http_error,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
 )
 import requests
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 import random
 
 PRESERVE_SERVICE_URL = "http://34.160.158.68/api/v1/preserveservice/preserve"
@@ -74,23 +76,33 @@ def reserve_one_ticket(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = (
+                f"user_id: {user_id}, contact_id: {contact_id}, trip_id: {trip_id}, ..."
+            )
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success.":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     log_response_info(user_id, operation, response.json()["data"])
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def reserve_one_ticket_request(

@@ -6,15 +6,17 @@ from __future__ import annotations
 import logging
 import requests
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
+    log_http_error,
 )
 from enum import IntEnum
 from ts.util import gen_random_name, gen_random_document_number, gen_random_phone_number
 import random
 from json import JSONDecodeError
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 
 CONTACTS_SERVICE_URL = "http://34.160.158.68/api/v1/contactservice/contacts"
 ORIGINAL_CONTACTS = [
@@ -79,16 +81,22 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"user_id: {user_id}"
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
@@ -96,8 +104,10 @@ def get_contacts_by_account_id(client, user_id: str, bearer: str) -> list:
                     return data
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def get_all_contacts_request(request_id: str, bearer: str):
@@ -147,16 +157,22 @@ def add_one_contact(client, bearer: str, user_id: str, contact: Contact) -> dict
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = str(contact.__dict__)
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Create contacts success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
@@ -165,8 +181,10 @@ def add_one_contact(client, bearer: str, user_id: str, contact: Contact) -> dict
                     return data
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def add_one_contact_request(
@@ -227,16 +245,22 @@ def update_one_contact(client, bearer: str, contact: Contact):
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = str(contact.__dict__)
+            log_http_error(
+                contact.user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Modify success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         contact.user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(contact.user_id, operation, response.failure)
+                    log_timeout_error(contact.user_id, operation, response.failure)
                 else:
                     key = "data"
                     old_contact = response.json()["data"]
@@ -244,8 +268,10 @@ def update_one_contact(client, bearer: str, contact: Contact):
                     log_response_info(contact.user_id, operation, log)
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def update_one_contact_request(
@@ -299,24 +325,32 @@ def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"contact_id: {contact_id}"
+            log_http_error(
+                admin_user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] != "Delete success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         admin_user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(admin_user_id, operation, response.failure)
+                    log_timeout_error(admin_user_id, operation, response.failure)
                 else:
                     key = "data"
                     deleted_contact_id = response.json()["data"]
                     log_response_info(admin_user_id, operation, deleted_contact_id)
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def delete_one_contact_request(

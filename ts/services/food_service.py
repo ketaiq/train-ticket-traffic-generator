@@ -9,9 +9,11 @@ from json import JSONDecodeError
 import random
 import urllib.parse
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_http_error,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
 )
 
@@ -76,18 +78,24 @@ def search_food_on_trip(
         catch_response=True,
     ) as response:
         if not response.ok:
-            response.raise_for_status()
+            data = f"date: {date}, from_station: {from_station}, to_station: {to_station}, trip_id: {trip_id}"
+            log_http_error(
+                user_id,
+                operation,
+                response,
+                data,
+            )
         else:
             try:
                 key = "msg"
                 if response.json()["msg"] == "Get All Food Failed":
                     return None
                 if response.json()["msg"] != "Get All Food Success":
-                    log_wrong_response_warning(
+                    log_wrong_response_error(
                         user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_warning(user_id, operation, response.failure)
+                    log_timeout_error(user_id, operation, response.failure)
                 else:
                     key = "data"
                     all_food = response.json()["data"]
@@ -95,8 +103,10 @@ def search_food_on_trip(
                     return all_food
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
             except KeyError:
                 response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
 
 
 def get_all_train_and_store_food_request(

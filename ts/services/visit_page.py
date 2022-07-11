@@ -5,9 +5,11 @@ This module includes all calls of simply getting specific pages.
 import logging
 import requests
 from ts import TIMEOUT_MAX
+from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
-    log_wrong_response_warning,
-    log_timeout_warning,
+    log_http_error,
+    log_wrong_response_error,
+    log_timeout_error,
     log_response_info,
 )
 import urllib.parse
@@ -54,11 +56,9 @@ def visit_ticket_book(
         catch_response=True,
     ) as response:
         if not response.ok:
-            log_wrong_response_warning(
-                user_id, operation, response.failure, response.text
-            )
+            log_http_error(user_id, operation, response, response.text)
         elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-            log_timeout_warning(user_id, operation, response.failure)
+            log_timeout_error(user_id, operation, response.failure)
         else:
             log_response_info(user_id, operation, response.url)
 

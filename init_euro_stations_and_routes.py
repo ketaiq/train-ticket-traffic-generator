@@ -30,8 +30,7 @@ def init_dataframe() -> pd.DataFrame:
     )
     df["stations"] = df["vias"].apply(
         lambda cell: [
-            re.sub("[^\w\s]+", "", unidecode(station["station_name"]))
-            for station in cell
+            re.sub("[^\w]+", "", unidecode(station["station_name"])) for station in cell
         ]
     )
     df["distances"] = df["vias"].apply(extract_distances)

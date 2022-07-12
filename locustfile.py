@@ -16,6 +16,8 @@ from ts.requests.regular import RegularRequest
 from ts.requests.cancel_without_refund import CancelWithoutRefundRequest
 from ts.requests.cancel_with_refund import CancelWithRefundRequest
 from ts.requests.sales import SalesRequest
+from ts.services.admin_route_service import init_all_routes
+from ts.services.station_service import init_all_stations
 
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
 locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 10
@@ -82,8 +84,8 @@ def on_locust_init(environment, **kwargs):
     admin_bearer, admin_user_id = login_user_request(
         username="admin", password="222222", request_id=request_id
     )
-    init_european_routes(admin_bearer, request_id)
-    init_european_stations(admin_user_id, admin_bearer)
+    init_all_routes(admin_bearer, request_id)
+    init_all_stations(admin_user_id, admin_bearer)
 
 
 class Passenger(HttpUser):

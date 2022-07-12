@@ -503,3 +503,9 @@ def init_european_routes(admin_bearer: str, request_id: str):
             new_routes.append(route)
     european_routes.extend(new_routes)
     print("num of european_routes: ", len(european_routes))
+
+
+def init_all_routes(admin_bearer: str, request_id: str):
+    all_routes = get_all_routes_request(admin_bearer, request_id)
+    european_routes.extend(all_routes)
+    print("num of all routes: ", len(european_routes))

@@ -469,3 +469,9 @@ def init_european_stations(admin_user_id: str, admin_bearer: str):
         all_stations.remove(station)
     european_stations.extend(all_stations)
     print("num of european_stations: ", len(european_stations))
+
+def init_all_stations(admin_user_id: str, admin_bearer: str):
+    all_stations = get_all_stations_request(admin_user_id, admin_bearer)
+    european_stations.extend(all_stations)
+    print("num of all stations: ", len(european_stations))
+

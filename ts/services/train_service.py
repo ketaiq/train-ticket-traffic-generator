@@ -1,10 +1,8 @@
 import requests
-import logging
 from json import JSONDecodeError
+from ts import HOST_URL
 
-TRAIN_SERVICE_URL = (
-    "http://34.160.158.68/api/v1/adminbasicservice/adminbasic/trains"
-)
+TRAIN_SERVICE_URL = f"http://{HOST_URL}/api/v1/adminbasicservice/adminbasic/trains"
 ORIGINAL_TRAINS = [
     {
         "id": "GaoTieOne",

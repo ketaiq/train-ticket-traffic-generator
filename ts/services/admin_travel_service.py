@@ -5,9 +5,10 @@ This module includes all API calls provided by ts-admin-travel-service.
 import requests
 import time
 import random
+from ts import HOST_URL
 from json import JSONDecodeError
 
-ADMIN_TRAVEL_SERVICE_URL = "http://34.160.158.68/api/v1/admintravelservice/admintravel"
+ADMIN_TRAVEL_SERVICE_URL = f"http://{HOST_URL}/api/v1/admintravelservice/admintravel"
 ORIGINAL_TRAVELS = [
     {
         "trip": {

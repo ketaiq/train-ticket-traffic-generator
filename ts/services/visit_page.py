@@ -4,8 +4,7 @@ This module includes all calls of simply getting specific pages.
 
 import logging
 import requests
-from ts import TIMEOUT_MAX
-from locust.exception import RescheduleTask
+from ts import TIMEOUT_MAX, HOST_URL
 from ts.log_syntax.locust_response import (
     log_http_error,
     log_wrong_response_error,
@@ -75,7 +74,7 @@ def visit_ticket_book_request(
 ):
     operation = "visit ticket book page"
     r = requests.get(
-        url="http://34.160.158.68/client_ticket_book.html",
+        url=f"http://{HOST_URL}/client_ticket_book.html",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

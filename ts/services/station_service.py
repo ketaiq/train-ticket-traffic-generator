@@ -12,10 +12,10 @@ from ts.log_syntax.locust_response import (
 from json import JSONDecodeError
 import random
 import string
-from ts import TIMEOUT_MAX
+from ts import TIMEOUT_MAX, HOST_URL
 from locust.exception import RescheduleTask
 
-STATION_SERVICE_URL = "http://34.160.158.68/api/v1/stationservice/stations"
+STATION_SERVICE_URL = f"http://{HOST_URL}/api/v1/stationservice/stations"
 
 ORIGINAL_STATIONS = [
     {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},
@@ -470,8 +470,8 @@ def init_european_stations(admin_user_id: str, admin_bearer: str):
     european_stations.extend(all_stations)
     print("num of european_stations: ", len(european_stations))
 
+
 def init_all_stations(admin_user_id: str, admin_bearer: str):
     all_stations = get_all_stations_request(admin_user_id, admin_bearer)
     european_stations.extend(all_stations)
     print("num of all stations: ", len(european_stations))
-

@@ -7,8 +7,7 @@ import logging
 import sys
 import requests
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX
-from locust.exception import RescheduleTask
+from ts import TIMEOUT_MAX, HOST_URL
 from ts.log_syntax.locust_response import (
     log_response_info,
     log_timeout_error,
@@ -20,7 +19,7 @@ import random
 import uuid
 import math
 
-ADMIN_ROUTE_SERVICE_URL = "http://34.160.158.68/api/v1/adminrouteservice/adminroute"
+ADMIN_ROUTE_SERVICE_URL = f"http://{HOST_URL}/api/v1/adminrouteservice/adminroute"
 ORIGINAL_ROUTES = [
     {
         "stations": ["shanghai", "nanjing", "shijiazhuang", "taiyuan"],

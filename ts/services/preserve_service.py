@@ -12,11 +12,11 @@ from ts.log_syntax.locust_response import (
 )
 import requests
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX
+from ts import TIMEOUT_MAX, HOST_URL
 from locust.exception import RescheduleTask
 import random
 
-PRESERVE_SERVICE_URL = "http://34.160.158.68/api/v1/preserveservice/preserve"
+PRESERVE_SERVICE_URL = f"http://{HOST_URL}/api/v1/preserveservice/preserve"
 
 
 class SeatType(Enum):

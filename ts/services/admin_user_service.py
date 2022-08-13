@@ -4,7 +4,7 @@ This module includes all API calls provided by ts-admin-user-service.
 
 import requests
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX
+from ts import TIMEOUT_MAX, HOST_URL
 from locust.exception import RescheduleTask
 from ts.util import (
     gen_random_document_number,
@@ -19,7 +19,7 @@ from ts.log_syntax.locust_response import (
     log_http_error,
 )
 
-ADMIN_USER_SERVICE_URL = "http://34.160.158.68/api/v1/adminuserservice/users"
+ADMIN_USER_SERVICE_URL = f"http://{HOST_URL}/api/v1/adminuserservice/users"
 
 
 def add_one_user(

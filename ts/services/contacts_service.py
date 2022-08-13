@@ -15,10 +15,10 @@ from enum import IntEnum
 from ts.util import gen_random_name, gen_random_document_number, gen_random_phone_number
 import random
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX
+from ts import TIMEOUT_MAX, HOST_URL
 from locust.exception import RescheduleTask
 
-CONTACTS_SERVICE_URL = "http://34.160.158.68/api/v1/contactservice/contacts"
+CONTACTS_SERVICE_URL = f"http://{HOST_URL}/api/v1/contactservice/contacts"
 ORIGINAL_CONTACTS = [
     {
         "id": "3fcb512a-339d-4cf2-ad62-744558353adb",

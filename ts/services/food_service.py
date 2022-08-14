@@ -177,7 +177,9 @@ def _pick_random_train_food(food_menu):
 def _pick_random_station_food(food_menu):
     all_station_food = food_menu["foodStoreListMap"]
     station_food = all_station_food[random.choice(list(all_station_food.keys()))]
-    store_index = random.randint(0, len(station_food) - 1)
+    store_index = (
+        random.randint(0, len(station_food) - 1) if len(station_food) > 1 else 0
+    )
     store_food = station_food[store_index]
     chosen_food_index = random.randint(0, len(store_food["foodList"]) - 1)
     chosen_food = store_food["foodList"][chosen_food_index]

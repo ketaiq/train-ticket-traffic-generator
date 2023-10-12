@@ -1,26 +1,26 @@
-from locust import HttpUser, task, between, constant, events
-from locust import LoadTestShape
-from random import randint, gauss, randrange
+import csv
+import logging
 import random
 import uuid
-import numpy as np
-import csv
-from collections import defaultdict
-from requests.adapters import HTTPAdapter
-import locust.stats
+from datetime import datetime
 
-from ts.requests.irregular_budget import IrregularBudgetRequest
-from ts.requests.irregular_normal import IrregularNormalRequest
-from ts.requests.irregular_comfort import IrregularComfortRequest
-from ts.requests.regular import RegularRequest
-from ts.requests.cancel_without_refund import CancelWithoutRefundRequest
-from ts.requests.cancel_with_refund import CancelWithRefundRequest
-from ts.requests.sales import SalesRequest
+import locust.stats
+import numpy as np
+from locust import HttpUser, task, events, LoadTestShape
+from requests.adapters import HTTPAdapter
+
+from ts.requests.passenger_actions import PassengerActions
 from ts.services.admin_route_service import init_all_routes
+from ts.services.auth_service import login_user_request
 from ts.services.station_service import init_all_stations
 
+import ts.util as utl
+tt_host = utl.tt_host
+wl_file_name = utl.wl_file_name
+
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
-locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 10
+locust.stats.CSV_STATS_INTERVAL_SEC = 60 # default is 1 second
+locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 60 # Determines how often the data is flushed to disk, default is 10 seconds
 locust.stats.PERCENTILES_TO_REPORT = [
     0.25,
     0.50,
@@ -36,174 +36,162 @@ locust.stats.PERCENTILES_TO_REPORT = [
 ]
 VERBOSE_LOGGING = 0
 
-period_duration = 120
-peak_1 = 13
-peak_2 = 53
 
-weights_non_peak_hours = [
-    random.randint(11, 13),
-    random.randint(9, 11),
-    random.randint(1, 3),
-    random.randint(23, 25),
-    random.randint(0, 2),
-    random.randint(0, 2),
-    random.randint(45, 47),
-    random.randint(1, 3),
-    random.randint(1, 3),
-]
-weights_peak_hours = [
-    random.randint(5, 7),
-    random.randint(4, 5),
-    random.randint(0, 2),
-    random.randint(35, 36),
-    random.randint(0, 2),
-    random.randint(0, 2),
-    random.randint(45, 47),
-    random.randint(1, 3),
-    random.randint(1, 3),
-]
+number_of_days = 14
+number_of_periods_per_day = 96
+number_of_points_in_period = 900
+peak_period_1 = 13
+peak_period_2 = 53
 
-peak_hours_1 = [
-    int(x)
-    for x in range(period_duration * (peak_1 - 3), period_duration * (peak_1 + 2))
-]
-peak_hours_2 = [
-    int(x)
-    for x in range(period_duration * (peak_2 - 3), period_duration * (peak_2 + 2))
-]
+peak_points_1 = []
+peak_points_2 = []
+
+for day_number in range(number_of_days):
+    periods_shift = number_of_periods_per_day * day_number
+
+    for x in range(number_of_points_in_period * (periods_shift + peak_period_1 - 3), number_of_points_in_period * (periods_shift + peak_period_1 + 2)):
+        peak_points_1.append(x)
+
+    for x in range(number_of_points_in_period * (periods_shift + peak_period_2 - 3), number_of_points_in_period * (periods_shift + peak_period_2 + 2)):
+        peak_points_2.append(x)
+
+
+def setup_logger(name, log_file, level=logging.INFO):
+
+    formatter = logging.Formatter('%(asctime)s %(message)s')
+
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+
+logger_tasks = setup_logger('logger_1', 'tasks.log')
+logger_actions = setup_logger('logger_actions', 'actions.log')
+
+now = datetime.now()
+current_dateTime = now.strftime("%Y-%m-%d %H:%M:%S")
+logger_assignments = setup_logger('logger_assignments', 'assignments-{date_time}.log'.format(date_time=current_dateTime))
 
 
 @events.init.add_listener
 def on_locust_init(environment, **kwargs):
-    from ts.services.admin_route_service import init_european_routes
-    from ts.services.station_service import init_european_stations
-    from ts.services.auth_service import login_user_request
-
     print("Wait for fetching shared data, including routes, stations")
+    print("Log in as admin")
     request_id = str(uuid.uuid4())
-    admin_bearer, admin_user_id = login_user_request(
-        username="admin", password="222222", request_id=request_id
-    )
+    admin_bearer, admin_user_id = login_user_request(username="admin", password="222222", request_id=request_id)
+    print("Start initialisation")
     init_all_routes(admin_bearer, request_id)
     init_all_stations(admin_user_id, admin_bearer)
 
 
-class Passenger(HttpUser):
-    wait_time = between(1, 5)
-    weights_global = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+class Passenger_Role(HttpUser):
+    peak_hour = None
+    current_time = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
         self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
 
-        self.irregular_budget_request = IrregularBudgetRequest(
-            self.client, "Irregular Budget"
-        )
-        self.irregular_normal_request = IrregularNormalRequest(
-            self.client, "Irregular Normal"
-        )
-        self.irregular_comfort_request = IrregularComfortRequest(
-            self.client, "Irregular Comfort"
-        )
-        self.regular_request = RegularRequest(self.client, "Regular")
-        self.cancel_without_refund_request = CancelWithoutRefundRequest(
-            self.client, "Cancel Without Refund"
-        )
-        self.cancel_with_refund_request = CancelWithRefundRequest(
-            self.client, "Cancel With Refund"
-        )
+    @task
+    def perform_task(self):
 
-    @task(weights_global[0])
-    def irregular_budget(self):
-        self.irregular_budget_request.perform_actions()
+        role_list = [ii for ii in range(8)]
 
-    @task(weights_global[1])
-    def irregular_normal(self):
-        self.irregular_normal_request.perform_actions()
+        if self.peak_hour:
+            role_weights = (
+                random.randint(5, 7),
+                random.randint(4, 6),
+                random.randint(0, 2),
+                random.randint(35, 37),
+                random.randint(0, 2),
+                random.randint(0, 2),
+                random.randint(45, 47),
+                random.randint(3, 5)
+            )
+        else:
+            role_weights = (
+                random.randint(11, 13),
+                random.randint(9, 11),
+                random.randint(1, 3),
+                random.randint(23, 25),
+                random.randint(0, 2),
+                random.randint(0, 2),
+                random.randint(45, 47),
+                random.randint(3, 5)
+            )
 
-    @task(weights_global[2])
-    def irregular_comfort(self):
-        self.irregular_comfort_request.perform_actions()
+        # role_weights = (0, 0, 0, 0, 100, 100, 0, 0)
 
-    @task(weights_global[3])
-    def regular(self):
-        self.regular_request.perform_actions()
+        role_to_perform = int(random.choices(role_list, weights=role_weights)[0])
 
-    @task(weights_global[4])
-    def cancel_without_refund(self):
-        self.cancel_without_refund_request.perform_actions()
+        assignment_id = "a-{ID}".format(ID=uuid.uuid4())
+        logger_assignments.info(assignment_id + " start")
 
-    @task(weights_global[5])
-    def cancel_with_refund(self):
-        self.cancel_with_refund_request.perform_actions()
+        if role_to_perform == 0:
+            request = PassengerActions(self.client, "Irregular_Budget")
+            request.perform_actions(logger_tasks, 1, 1, 5, 10, False, False, False)
 
+        if role_to_perform == 1:
+            request = PassengerActions(self.client, "Irregular_Normal")
+            request.perform_actions(logger_tasks, 5, 10, 1, 1, True, False, False)
 
-class Sales(HttpUser):
-    wait_time = between(6, 10)
-    weights_global = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+        if role_to_perform == 2:
+            request = PassengerActions(self.client, "Irregular_Comfort")
+            request.perform_actions(logger_tasks, 1, 1, 5, 10, True, True, True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
-        self.sales_request = SalesRequest(self.client)
+        if role_to_perform == 3:
+            request = PassengerActions(self.client, "Regular")
+            request.perform_actions(logger_tasks, 1, 1, 1, 1, True, True, False)
 
-    @task(weights_global[6])
-    def sales_create_order(self):
-        self.sales_request.perform_create_order_actions()
+        if role_to_perform == 4:
+            request = PassengerActions(self.client, "Cancel_No_Refund")
+            request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
-    @task(weights_global[7])
-    def sales_update_order(self):
-        self.sales_request.perform_update_order_actions()
+        if role_to_perform == 5:
+            request = PassengerActions(self.client, "Cancel_With_Refund")
+            request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
-    @task(weights_global[8])
-    def sales_delete_order(self):
-        self.sales_request.perform_delete_order_actions()
+        if role_to_perform == 6:
+            request = PassengerActions(self.client, "sales_add_order")
+            request.perform_actions_sales()
+
+        if role_to_perform == 7:
+            request = PassengerActions(self.client, "sales_update_order")
+            request.perform_actions_sales()
+
+        logger_assignments.info(assignment_id + " end")
 
 
 class StagesShape(LoadTestShape):
-    """
-    A simply load test shape class that has different user and spawn_rate at
-    different stages.
-    Keyword arguments:
-        stages -- A list of dicts, each representing a stage with the following keys:
-            duration -- When this many seconds pass the test is advanced to the next stage
-            users -- Total user count
-            spawn_rate -- Number of users to start/stop per second
-            stop -- A boolean that can stop that test at a specific stage
-        stop_at_end -- Can be set to stop once all stages have run.
-    """
-
     stages = []
 
-    def __init__(self, timeIntervals=period_duration):
-        """
-        This function needs an external csv file, with header where the 2 and 4th columns are respectively
-        the rate of users and the rate at which these are spawned.
-        Keyword arguments:
-            totalUsersNumber -- Number of users to be used for the rates.
-            timeIntervals -- how long between each stage needs to pass (i.e., 60seconds).
-        """
+    def __init__(self, timeIntervals=number_of_points_in_period):
 
-        workload = defaultdict(list)
-        with open("workload.csv") as f:
-            csv_reader = csv.DictReader(f, delimiter=",")
-            for row in csv_reader:
-                for key, value in row.items():
-                    workload[key].append(value)
+        workload = []
+        with open(wl_file_name, newline='') as fil:
+            reader = csv.reader(fil)
+            next(reader)
 
-        usersNumber = list(workload.items())[0][1]
-        spawnRate = list(workload.items())[1][1]
+            periods_to_skip = 0
+            for ii in range(periods_to_skip):
+                next(reader)
 
-        usersList = [int(x) for x in usersNumber]
-        spawnRateList = [int(x) for x in spawnRate]
-        durationList = np.cumsum([timeIntervals] * len(usersList))
+            for row in reader:
+                workload.append(int(row[0]))
+
+        spawnRate = [1 for x in workload]
+        durationList = np.cumsum([timeIntervals] * len(workload))
 
         stagesDict = {
             "duration": list(durationList),
-            "users": usersList,
-            "spawn_rate": spawnRateList,
+            "users": workload,
+            "spawn_rate": spawnRate,
         }
 
         self.stages = [dict(zip(stagesDict, t)) for t in zip(*stagesDict.values())]
@@ -213,21 +201,16 @@ class StagesShape(LoadTestShape):
 
         for stage in self.stages:
             if run_time < stage["duration"]:
-
-                if (round(run_time) in peak_hours_1) or (
-                    round(run_time) in peak_hours_2
-                ):
-                    hour_type = "Peak"
-                    weights_list = weights_peak_hours
-                else:
-                    hour_type = "Non-Peak"
-                    weights_list = weights_non_peak_hours
-
-                print(round(run_time), hour_type, stage["users"], stage["duration"])
-                Passenger.weights_global = weights_list
-                Sales.weights_global = weights_list
-
                 tick_data = (stage["users"], stage["spawn_rate"])
+
+                if (round(run_time) in peak_points_1) or (round(run_time) in peak_points_2):
+                    Passenger_Role.peak_hour = True
+                else:
+                    Passenger_Role.peak_hour = False
+
+                current_time = round(run_time)
+                Passenger_Role.current_time = current_time
+
                 return tick_data
 
         return None

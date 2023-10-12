@@ -12,11 +12,14 @@ from ts.log_syntax.locust_response import (
 )
 import requests
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 import random
 
-PRESERVE_SERVICE_URL = f"http://{HOST_URL}/api/v1/preserveservice/preserve"
+import ts.util as utl
+tt_host = utl.tt_host
+
+PRESERVE_SERVICE_URL = tt_host + "/api/v1/preserveservice/preserve"
 
 
 class SeatType(Enum):
@@ -43,6 +46,7 @@ def reserve_one_ticket(
     consign: Consign,
 ):
     operation = "reserve ticket"
+
     with client.post(
         url="/api/v1/preserveservice/preserve",
         headers={
@@ -53,7 +57,8 @@ def reserve_one_ticket(
         json={
             "accountId": user_id,
             "contactsId": contact_id,
-            "tripId": trip_id,
+            # "tripId" : trip_id,
+            "tripId": "D1345",
             "seatType": seat_type,
             "date": date,
             "from": from_station,
@@ -77,7 +82,29 @@ def reserve_one_ticket(
     ) as response:
         if not response.ok:
             data = (
-                f"user_id: {user_id}, contact_id: {contact_id}, trip_id: {trip_id}, ..."
+                {
+                    "accountId": user_id,
+                    "contactsId": contact_id,
+                    # "tripId" : trip_id,
+                    "tripId": "D1345",
+                    "seatType": seat_type,
+                    "date": date,
+                    "from": from_station,
+                    "to": to_station,
+                    "assurance": assurance,
+                    # food
+                    "foodType": food.type,
+                    "foodName": food.name,
+                    "foodPrice": food.price,
+                    "stationName": food.station,
+                    "storeName": food.store,
+                    # consign
+                    "handleDate": date,
+                    "isWithin": False,
+                    "consigneeName": consign.name,
+                    "consigneePhone": consign.phone,
+                    "consigneeWeight": consign.weight,
+                }
             )
             log_http_error(
                 user_id,
@@ -120,6 +147,7 @@ def reserve_one_ticket_request(
     consign: Consign,
 ) -> str:
     operation = "reserve a ticket"
+
     r = requests.post(
         url=PRESERVE_SERVICE_URL,
         headers={

@@ -1,10 +1,6 @@
-"""
-This module includes all API calls provided by ts-admin-user-service.
-"""
-
 import requests
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from ts.util import (
     gen_random_document_number,
@@ -19,16 +15,8 @@ from ts.log_syntax.locust_response import (
     log_http_error,
 )
 
-ADMIN_USER_SERVICE_URL = f"http://{HOST_URL}/api/v1/adminuserservice/users"
 
-
-def add_one_user(
-    client,
-    request_id: str,
-    admin_bearer: str,
-    username: str,
-    password: str,
-) -> dict:
+def user_add(client, request_id: str, admin_bearer: str, username: str, password: str) -> dict:
     operation = "create user"
     with client.post(
         url="/api/v1/adminuserservice/users",
@@ -85,10 +73,67 @@ def add_one_user(
                 raise RescheduleTask()
 
 
+def user_delete(client, request_id: str, admin_bearer: str, username: str, password: str) -> dict:
+    operation = "delete user"
+    with client.delete(
+            url="/api/v1/adminuserservice/users",
+            headers={
+                "Authorization": admin_bearer,
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            json={
+                "documentNum": gen_random_document_number(),
+                "documentType": gen_random_document_type(),
+                "email": gen_random_email(),
+                "gender": gen_random_gender(),
+                "password": password,
+                "userName": username,
+            },
+            name=operation,
+            catch_response=True,
+    ) as response:
+        if not response.ok:
+            data = f"username: {username}, password: {password}"
+            log_http_error(
+                request_id,
+                operation,
+                response,
+                data,
+                name="request",
+            )
+        else:
+            try:
+                key = "msg"
+                if response.json()["msg"] != "REGISTER USER SUCCESS":
+                    log_wrong_response_error(
+                        request_id,
+                        operation,
+                        response.failure,
+                        response.json(),
+                        name="request",
+                    )
+                elif response.elapsed.total_seconds() > TIMEOUT_MAX:
+                    log_timeout_error(
+                        request_id, operation, response.failure, name="request"
+                    )
+                else:
+                    key = "data"
+                    new_user = response.json()["data"]
+                    log_response_info(request_id, operation, new_user, name="request")
+                    return new_user
+            except JSONDecodeError:
+                response.failure(f"Response could not be decoded as JSON")
+                raise RescheduleTask()
+            except KeyError:
+                response.failure(f"Response did not contain expected key '{key}'")
+                raise RescheduleTask()
+
+
 def get_all_users_request(admin_bearer: str, request_id: str) -> list:
     operation = "get all users"
     r = requests.get(
-        url=ADMIN_USER_SERVICE_URL,
+        url="/api/v1/adminuserservice/users",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -108,15 +153,10 @@ def get_all_users_request(admin_bearer: str, request_id: str) -> list:
         print(f"Response did not contain expected key '{key}'")
 
 
-def add_one_user_request(
-    request_id: str,
-    admin_bearer: str,
-    username: str,
-    password: str,
-):
+def add_one_user_request(request_id: str, admin_bearer: str, username: str, password: str):
     operation = "add one user"
     r = requests.post(
-        url=ADMIN_USER_SERVICE_URL,
+        url="/api/v1/adminuserservice/users",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -147,7 +187,7 @@ def add_one_user_request(
 def delete_one_user_request(request_id: str, admin_bearer: str, id: str):
     operation = "delete one user"
     r = requests.delete(
-        url=ADMIN_USER_SERVICE_URL + "/" + id,
+        url="/api/v1/adminuserservice/users" + "/" + id,
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

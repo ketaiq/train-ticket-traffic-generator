@@ -1,76 +1,58 @@
 import uuid
-import random
-from ts.services.admin_route_service import pick_two_random_stations_in_one_route
-from ts.services.auth_service import login_user
-from ts.services.admin_user_service import add_one_user
-from ts.services.contacts_service import gen_random_contact
+from random import randint
+from time import sleep
+
+from ts.services.contacts_service import gen_random_contact, delete_one_contact_request
 from ts.services.admin_basic_service import admin_add_one_contact
+from ts.requests.passenger import admin_orders_get_list_by_user_id
+from ts.services.auth_service import login_user
+from ts.services.admin_user_service import user_add
+from ts.services.travel_service import search_ticket, pick_random_travel
+from ts.services.travel_plan_service import pick_random_strategy_and_search
 from ts.services.admin_order_service import (
     admin_add_one_order,
     admin_delete_one_order,
     admin_update_one_order,
     gen_random_order,
 )
-from ts.services.travel_plan_service import pick_random_strategy_and_search
-from ts.services.travel_service import pick_random_travel
-from ts.services.visit_page import visit_home
-from ts.util import gen_random_date
-
-from random import randint
-from time import sleep
-
+from datetime import datetime
 
 class SalesRequest:
     def __init__(self, client):
         self.client = client
-        self.admin_bearer = None
+
+        self.admin_username = "admin"
+        self.admin_password = "222222"
         self.admin_user_id = None
+        self.admin_bearer = None
+
+        self.username = None
+        self.password = None
+        self.bearer = None
+        self.user_id = None
+
+        self.test_user_id = "4d2a46c7-71cb-4cf1-b5bb-b68406d9da6f"
+
         self.request_id = str(uuid.uuid4())
-        self.created_user = None
+
         self.contact = None
-        self.from_station = None
-        self.to_station = None
-        self.departure_date = None
+
+        self.departure_date = str(datetime.now().date())
+        self.from_station = "Shang Hai"
+        self.to_station = "Su Zhou"
+
         self.trip = None
-        self.orders = []
+        self.order = None
 
-    def _login_admin_user(self, description):
-        self.admin_bearer, self.admin_user_id = login_user(
-            client=self.client,
-            request_id=self.request_id,
-            username="admin",
-            password="222222",
-            description=f"login {description} admin user",
-        )
+    def _contact_create_add(self):
+        self.contact = gen_random_contact(str(uuid.uuid4()), self.user_id)
+        admin_add_one_contact(self.client, self.admin_bearer, self.user_id, self.contact)
 
-    def _create_user(self):
-        username = str(uuid.uuid4())
-        password = username
-        self.created_user = add_one_user(
-            self.client,
-            self.request_id,
-            self.admin_bearer,
-            username=username,
-            password=password,
-        )
+    def _ticket_search(self):
 
-    def _create_contact(self):
-        self.contact = gen_random_contact(
-            str(uuid.uuid4()), self.created_user["userId"]
-        )
-        admin_add_one_contact(
-            self.client, self.admin_bearer, self.created_user["userId"], self.contact
-        )
-
-    def _search_ticket_for_a_random_trip(self):
-        visit_home(self.client, self.request_id)
         trips = []
-        while len(trips) == 0:
-            (
-                self.from_station,
-                self.to_station,
-            ) = pick_two_random_stations_in_one_route()
-            self.departure_date = gen_random_date()
+
+        for _ in range(randint(5, 10)):
             trips = pick_random_strategy_and_search(
                 self.client,
                 self.request_id,
@@ -78,75 +60,93 @@ class SalesRequest:
                 self.to_station,
                 self.departure_date,
             )
+
+        for _ in range(randint(0, 1)):
+            trips = search_ticket(
+                self.client,
+                self.departure_date,
+                self.from_station,
+                self.to_station,
+                self.request_id,
+            )
+
         self.trip = pick_random_travel(trips)
 
-    def _add_order(self):
+    def _order_create_add(self):
+        new_order_object = gen_random_order(self.trip, self.departure_date, self.admin_user_id, self.contact)
+        new_order = admin_add_one_order(self.client, self.admin_bearer, self.admin_user_id, new_order_object)
+        self.order = new_order
+
+    def _order_update(self):
         new_order = gen_random_order(
-            self.trip, self.departure_date, self.created_user["userId"], self.contact
+            self.trip,
+            self.departure_date,
+            self.user_id,
+            self.contact
         )
-        added_order = admin_add_one_order(
+        picked_order = random.choice(self.orders)
+        self.orders.remove(picked_order)
+        new_order.id = picked_order.id
+        admin_update_one_order(
             self.client, self.admin_bearer, self.admin_user_id, new_order
         )
-        new_order.id = added_order["id"]
         self.orders.append(new_order)
-
-    def _update_order(self):
-        if self.orders:
-            new_order = gen_random_order(
-                self.trip,
-                self.departure_date,
-                self.created_user["userId"],
-                self.contact,
-            )
-            picked_order = random.choice(self.orders)
-            self.orders.remove(picked_order)
-            new_order.id = picked_order.id
-            admin_update_one_order(
-                self.client, self.admin_bearer, self.admin_user_id, new_order
-            )
-            self.orders.append(new_order)
-
-    def _delete_order(self):
-        if self.orders:
-            picked_order = random.choice(self.orders)
-            self.orders.remove(picked_order)
-            admin_delete_one_order(
-                self.client,
-                self.admin_bearer,
-                self.admin_user_id,
-                picked_order.id,
-                picked_order.trainNumber,
-            )
 
     def perform_create_order_actions(self):
 
-        sleep(randint(1, 5))
-        self._login_admin_user("Create Order")
+        sleep(randint(2, 9))
+        self.admin_bearer, _ = login_user(
+            self.client,
+            self.request_id,
+            username=self.admin_username,
+            password=self.admin_password,
+            description="login Create Order admin user"
+        )
 
-        sleep(randint(1, 5))
-        self._create_user()
+        sleep(randint(2, 9))
+        self.username = str(uuid.uuid4())
+        self.password = self.username
+        user_add(
+            self.client,
+            self.request_id,
+            self.admin_bearer,
+            username=self.username,
+            password=self.password,
+        )
 
-        sleep(randint(1, 5))
-        self._create_contact()
+        sleep(randint(2, 9))
+        self._contact_create_add()
 
-        sleep(randint(1, 5))
-        self._search_ticket_for_a_random_trip()
+        sleep(randint(2, 9))
+        self._ticket_search()
 
-        sleep(randint(1, 5))
-        self._add_order()
+        sleep(randint(2, 9))
+        self._order_create_add()
+
+        sleep(randint(2, 9))
+        admin_delete_one_order(
+            self.client,
+            self.admin_bearer,
+            self.admin_user_id,
+            self.order.id,
+            self.order.trainNumber
+        )
+
+        sleep(randint(2, 9))
+        _ = delete_one_contact_request(self.request_id, self.admin_bearer, self.contact.id)
 
     def perform_update_order_actions(self):
 
-        sleep(randint(1, 5))
-        self._login_admin_user("Update Order")
+        sleep(randint(2, 9))
+        self.admin_bearer, self.admin_user_id = login_user(
+            self.client,
+            self.request_id,
+            username=self.admin_username,
+            password=self.admin_password,
+            description="login Create Order admin user"
+        )
 
-        sleep(randint(1, 5))
-        self._update_order()
+        user_orders_list = admin_orders_get_list_by_user_id(self.admin_bearer, self.test_user_id)
+        order_id = user_orders_list[-1]["id"]
 
-    def perform_delete_order_actions(self):
-
-        sleep(randint(1, 5))
-        self._login_admin_user("Delete Order")
-
-        sleep(randint(1, 5))
-        self._delete_order()
+        admin_update_one_order(self.client, self.admin_bearer, self.test_user_id, self.order)

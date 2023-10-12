@@ -15,10 +15,14 @@ from enum import IntEnum
 from ts.util import gen_random_name, gen_random_document_number, gen_random_phone_number
 import random
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 
-CONTACTS_SERVICE_URL = f"http://{HOST_URL}/api/v1/contactservice/contacts"
+import ts.util as utl
+tt_host = utl.tt_host
+
+CONTACTS_SERVICE_URL = tt_host + "/api/v1/contactservice/contacts"
+
 ORIGINAL_CONTACTS = [
     {
         "id": "3fcb512a-339d-4cf2-ad62-744558353adb",
@@ -353,9 +357,7 @@ def delete_one_contact(client, admin_bearer: str, admin_user_id: str, contact_id
                 raise RescheduleTask()
 
 
-def delete_one_contact_request(
-    request_id: str, admin_bearer: str, contact_id: str
-) -> str:
+def delete_one_contact_request(request_id: str, admin_bearer: str, contact_id: str) -> str:
     operation = "delete one contact"
     r = requests.delete(
         url=CONTACTS_SERVICE_URL + "/" + contact_id,
@@ -369,9 +371,7 @@ def delete_one_contact_request(
         key = "msg"
         msg = r.json()["msg"]
         if "success" not in msg.lower():
-            logging.warning(
-                f"request {request_id} tries to {operation} but gets wrong response {msg}"
-            )
+            logging.warning(f"request {request_id} tries to {operation} but gets wrong response {msg}")
         else:
             key = "data"
             deleted_contact_id = r.json()["data"]
@@ -398,6 +398,4 @@ def gen_random_contact(contact_id: str | None, user_id: str) -> Contact:
     document_number = gen_random_document_number()
     document_type = random.choice(list(DocumentType)).value
     phone_number = gen_random_phone_number()
-    return Contact(
-        contact_id, name, user_id, document_number, document_type, phone_number
-    )
+    return Contact(contact_id, name, user_id, document_number, document_type, phone_number)

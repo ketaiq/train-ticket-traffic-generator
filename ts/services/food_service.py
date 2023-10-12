@@ -8,7 +8,7 @@ import requests
 from json import JSONDecodeError
 import random
 import urllib.parse
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
     log_http_error,
@@ -17,7 +17,10 @@ from ts.log_syntax.locust_response import (
     log_response_info,
 )
 
-FOOD_SERVICE_URL = f"http://{HOST_URL}/api/v1/foodservice/foods"
+import ts.util as utl
+tt_host = utl.tt_host
+
+FOOD_SERVICE_URL = tt_host + "/api/v1/foodservice/foods"
 
 
 class FoodType(IntEnum):
@@ -68,7 +71,7 @@ def search_food_on_trip(
         + "/"
         + urllib.parse.quote(to_station)
         + "/"
-        + urllib.parse.quote(trip_id),
+        + urllib.parse.quote("D1345"),
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -155,38 +158,28 @@ def pick_random_food(food_menu: dict) -> Food:
     food_type = random.randint(
         FoodType.TRAIN_FOOD.value, FoodType.STATION_FOOD_STORES.value
     )
-    if len(food_menu["foodStoreListMap"]) == 0 or food_type == FoodType.TRAIN_FOOD:
-        return _pick_random_train_food(food_menu)
+    if food_type == FoodType.TRAIN_FOOD:
+        train_food = food_menu["trainFoodList"][0]
+        chosen_food_index = random.randint(0, len(train_food["foodList"]) - 1)
+        chosen_food = train_food["foodList"][chosen_food_index]
+        return Food(
+            chosen_food["foodName"],
+            food_type,
+            "",
+            "",
+            chosen_food["price"],
+        )
     else:
-        return _pick_random_station_food(food_menu)
-
-
-def _pick_random_train_food(food_menu):
-    train_food = food_menu["trainFoodList"][0]
-    chosen_food_index = random.randint(0, len(train_food["foodList"]) - 1)
-    chosen_food = train_food["foodList"][chosen_food_index]
-    return Food(
-        chosen_food["foodName"],
-        FoodType.TRAIN_FOOD,
-        "",
-        "",
-        chosen_food["price"],
-    )
-
-
-def _pick_random_station_food(food_menu):
-    all_station_food = food_menu["foodStoreListMap"]
-    station_food = all_station_food[random.choice(list(all_station_food.keys()))]
-    store_index = (
-        random.randint(0, len(station_food) - 1) if len(station_food) > 1 else 0
-    )
-    store_food = station_food[store_index]
-    chosen_food_index = random.randint(0, len(store_food["foodList"]) - 1)
-    chosen_food = store_food["foodList"][chosen_food_index]
-    return Food(
-        chosen_food["foodName"],
-        FoodType.STATION_FOOD_STORES,
-        store_food["stationId"],
-        store_food["storeName"],
-        chosen_food["price"],
-    )
+        all_station_food = food_menu["foodStoreListMap"]
+        station_food = all_station_food[random.choice(list(all_station_food.keys()))]
+        store_index = random.randint(0, len(station_food) - 1)
+        store_food = station_food[store_index]
+        chosen_food_index = random.randint(0, len(store_food["foodList"]) - 1)
+        chosen_food = store_food["foodList"][chosen_food_index]
+        return Food(
+            chosen_food["foodName"],
+            food_type,
+            store_food["stationId"],
+            store_food["storeName"],
+            chosen_food["price"],
+        )

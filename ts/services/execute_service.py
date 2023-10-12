@@ -53,8 +53,9 @@ def collect_one_ticket(client, bearer: str, user_id: str, order_id: str):
                 raise RescheduleTask()
 
 
-def enter_station(client, bearer: str, user_id: str, order_id: str):
-    operation = "enter station"
+def enter_station(client, bearer: str, user_id: str, order_id: str, tag: str):
+    operation = "Enter Station: " + tag
+
     with client.get(
         url="/api/v1/executeservice/execute/execute/" + order_id,
         headers={

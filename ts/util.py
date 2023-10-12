@@ -3,6 +3,13 @@ from datetime import datetime
 import uuid
 import string
 import time
+import configparser
+
+
+config = configparser.ConfigParser()
+config.read('setup.ini')
+tt_host = config["default"]["tt_host"]
+wl_file_name = config["default"]["wl_file_name"]
 
 
 def gen_random_phone_number() -> str:

@@ -14,6 +14,7 @@ from ts.log_syntax.locust_response import (
 
 
 def get_orders_by_login_id(client, user_id: str, bearer: str) -> list:
+
     operation = "search orders"
     with client.post(
         url="/api/v1/orderservice/order/refresh",

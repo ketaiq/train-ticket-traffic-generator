@@ -22,7 +22,7 @@ def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str
             "Content-Type": "application/json",
             "Authorization": bearer,
         },
-        json={"orderId": order_id, "tripId": trip_id},
+        json={"orderId": order_id, "tripId": "D1345"},
         name=operation,
         catch_response=True,
     ) as response:

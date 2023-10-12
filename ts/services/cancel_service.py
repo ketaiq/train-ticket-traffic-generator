@@ -3,7 +3,6 @@ This module includes all API calls provided by ts-cancel-service.
 """
 
 from json import JSONDecodeError
-import logging
 from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
@@ -54,7 +53,7 @@ def cancel_one_order(client, bearer: str, order_id: str, user_id: str):
 
 
 def get_refund_amount(client, bearer: str, order_id: str, user_id: str):
-    operation = "get refund from cancelling order"
+    operation = "get refund"
     with client.get(
         url="/api/v1/cancelservice/cancel/refound/" + order_id,
         headers={

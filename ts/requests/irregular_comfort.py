@@ -1,125 +1,64 @@
-import random
-
-from locust import between
-
-from ts.requests.passenger import PassengerRequest
-from ts.services.admin_route_service import pick_two_random_stations_in_one_route
-from ts.services.travel_plan_service import pick_random_strategy_and_search
-from ts.services.travel_service import pick_random_travel, search_ticket
-from ts.services.preserve_service import (
-    reserve_one_ticket,
-)
-from ts.services.inside_payment_service import pay_one_order
-from ts.services.order_service import get_orders_by_login_id
-from ts.services.execute_service import collect_one_ticket, enter_station
-from ts.services.visit_page import visit_ticket_book, visit_home
-from ts.services.food_service import search_food_on_trip, pick_random_food, Food
-from ts.services.assurance_service import (
-    get_assurance_types,
-    pick_random_assurance_type,
-)
-from ts.services.consign_service import gen_random_consign
-from ts.util import gen_random_date
-
+import uuid
 from random import randint
 from time import sleep
+import datetime
+
+from ts.requests.passenger import PassengerRequest, admin_orders_get_list_by_user_id
+from ts.services.auth_service import login_user
+from ts.services.admin_user_service import user_add
+from ts.services.preserve_service import reserve_one_ticket
+from ts.services.inside_payment_service import pay_one_order
+from ts.services.execute_service import collect_one_ticket, enter_station
+from ts.services.visit_page import visit_client_login
 
 
 class IrregularComfortRequest(PassengerRequest):
 
-    wait_time = between(2, 10)
+    def __init__(self, client, description):
+        super().__init__(client, description)
+        self.order_creation_time = None
+        self.order_completion_time = None
 
-    def _search_ticket_for_a_random_trip(self):
-        visit_home(self.client, self.request_id)
+    def perform_actions(self, logger_tasks):
 
-        # search tickets for 5-10x randomly
-        for _ in range(10):
-            sleep(randint(10, 20))
-            trips = []
-            while len(trips) == 0:
-                # if doesn't find a trip, find again
-                (
-                    self.from_station,
-                    self.to_station,
-                ) = pick_two_random_stations_in_one_route()
-                self.departure_date = gen_random_date()
-                trips = search_ticket(
-                    self.client,
-                    self.departure_date,
-                    self.from_station,
-                    self.to_station,
-                    self.request_id,
-                )
-        # search tickets with advanced filter for 5-10x randomly
-        for _ in range(random.randint(5, 10)):
-            sleep(randint(20, 60))
-            trips = []
-            while len(trips) == 0:
-                # if doesn't find a trip, find again
-                (
-                    self.from_station,
-                    self.to_station,
-                ) = pick_two_random_stations_in_one_route()
-                self.departure_date = gen_random_date()
-                trips = pick_random_strategy_and_search(
-                    self.client,
-                    self.request_id,
-                    self.from_station,
-                    self.to_station,
-                    self.departure_date,
-                )
-
-        self.trip = pick_random_travel(trips)
-
-    def _gen_ticket_info(self):
-        self.seat_type = "2"
-        self.seat_price = self.get_seat_price()
-        self.contact_id = self.search_contacts()
-        assurance_types = get_assurance_types(self.client, self.bearer, self.user_id)
-        self.assurance = pick_random_assurance_type(assurance_types)
-        all_food = search_food_on_trip(
+        sleep(randint(1, 2))
+        self.admin_bearer, _ = login_user(
             self.client,
-            self.bearer,
-            self.user_id,
-            self.departure_date,
-            self.from_station,
-            self.to_station,
-            self.trip["tripId"],
-        )
-        self.food = Food()
-        if all_food is not None:
-            self.food = pick_random_food(all_food)
-        self.consign = gen_random_consign()
-
-    def perform_actions(self):
-
-        # create and login user
-        sleep(randint(1, 5))
-        self.create_and_login_user()
-
-        # search ticket
-        sleep(randint(1, 5))
-        self._search_ticket_for_a_random_trip()
-
-        # get the ticket's info
-        sleep(randint(1, 5))
-        self._gen_ticket_info()
-
-        # book with assurance, food and consign
-        sleep(randint(1, 5))
-        visit_ticket_book(
-            self.client,
-            self.bearer,
-            self.user_id,
-            self.trip["tripId"],
-            self.trip["fromStationName"],
-            self.trip["toStationName"],
-            self.seat_type,
-            self.seat_price,
-            self.departure_date,
+            self.request_id,
+            username=self.admin_username,
+            password=self.admin_password,
+            description="admin login"
         )
 
-        sleep(randint(1, 5))
+        sleep(randint(1, 2))
+        self.username = str(uuid.uuid4())
+        self.password = self.username
+        user_add(
+            self.client,
+            self.request_id,
+            self.admin_bearer,
+            username=self.username,
+            password=self.password,
+        )
+
+        visit_client_login(self.client, self.request_id)
+
+        sleep(randint(1, 2))
+        self.bearer, self.user_id = login_user(
+            client=self.client,
+            request_id=self.request_id,
+            username=self.username,
+            password=self.password,
+            description="user login"
+        )
+
+        sleep(randint(1, 2))
+        self.tickets_search(randint(1, 1), randint(5, 10))
+
+        sleep(randint(1, 2))
+        self.gen_ticket_info(True, True, True)
+
+        sleep(randint(1, 2))
         reserve_one_ticket(
             self.client,
             self.bearer,
@@ -135,19 +74,21 @@ class IrregularComfortRequest(PassengerRequest):
             self.consign,
         )
 
-        # pay for the booking
-        sleep(randint(1, 5))
-        self.order_id = get_orders_by_login_id(self.client, self.user_id, self.bearer)[
-            -1
-        ]["id"]
-        pay_one_order(
-            self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"]
-        )
+        self.order_creation_time = datetime.datetime.now()
 
-        # collect ticket
-        sleep(randint(1, 5))
+        sleep(randint(1, 2))
+        user_orders_list = admin_orders_get_list_by_user_id(self.admin_bearer, self.user_id)
+        self.order_id = user_orders_list[-1]["id"]
+
+        sleep(randint(1, 2))
+        pay_one_order(self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"])
+
+        sleep(randint(1, 2))
         collect_one_ticket(self.client, self.bearer, self.user_id, self.order_id)
 
-        # enter station
-        sleep(randint(1, 5))
+        sleep(randint(1, 2))
         enter_station(self.client, self.bearer, self.user_id, self.order_id)
+
+        self.order_completion_time = datetime.datetime.now()
+        order_age = int((self.order_completion_time - self.order_creation_time).total_seconds())
+        logger_tasks.info(self.description + ": " + str(order_age))

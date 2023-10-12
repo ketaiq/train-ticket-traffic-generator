@@ -12,10 +12,13 @@ from ts.log_syntax.locust_response import (
 from json import JSONDecodeError
 import random
 import string
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 
-STATION_SERVICE_URL = f"http://{HOST_URL}/api/v1/stationservice/stations"
+import ts.util as utl
+tt_host = utl.tt_host
+
+STATION_SERVICE_URL = tt_host + "/api/v1/stationservice/stations"
 
 ORIGINAL_STATIONS = [
     {"id": "shanghai", "name": "Shang Hai", "stayTime": 10},

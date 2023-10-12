@@ -1,8 +1,10 @@
 import requests
 from json import JSONDecodeError
-from ts import HOST_URL
 
-TRAIN_SERVICE_URL = f"http://{HOST_URL}/api/v1/adminbasicservice/adminbasic/trains"
+import ts.util as utl
+tt_host = utl.tt_host
+TRAIN_SERVICE_URL = (tt_host + "/api/v1/adminbasicservice/adminbasic/trains")
+
 ORIGINAL_TRAINS = [
     {
         "id": "GaoTieOne",

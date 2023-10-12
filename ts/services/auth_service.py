@@ -6,7 +6,7 @@ import logging
 import requests
 from typing import Tuple
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
     log_http_error,
@@ -14,6 +14,8 @@ from ts.log_syntax.locust_response import (
     log_wrong_response_error,
 )
 
+import ts.util as utl
+tt_host = utl.tt_host
 
 def login_user(
     client, request_id: str, username: str, password: str, description: str
@@ -79,7 +81,7 @@ def login_user_request(
     admin_bearer = ""
     user_id = ""
     r = requests.post(
-        url=f"http://{HOST_URL}/api/v1/users/login",
+        url=tt_host + "/api/v1/users/login",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

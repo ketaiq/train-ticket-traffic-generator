@@ -5,7 +5,7 @@ This module includes all API calls provided by ts-assurance-service.
 import requests
 import random
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
     log_wrong_response_error,
@@ -15,6 +15,8 @@ from ts.log_syntax.locust_response import (
 )
 from enum import Enum
 
+import ts.util as utl
+tt_host = utl.tt_host
 
 class AssuranceType(Enum):
     """
@@ -70,7 +72,7 @@ def get_assurance_types(client, bearer: str, user_id: str) -> list:
 def get_assurance_types_request(request_id: str, bearer: str):
     operation = "get assurance types"
     r = requests.get(
-        url=f"http://{HOST_URL}/api/v1/assuranceservice/assurances/types",
+        url=tt_host + "/api/v1/assuranceservice/assurances/types",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

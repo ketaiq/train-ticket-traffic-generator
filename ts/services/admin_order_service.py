@@ -1,25 +1,18 @@
-"""
-This module includes all API calls provided by ts-admin-order-service.
-"""
 from json import JSONDecodeError
+import time
+
+from locust.exception import RescheduleTask
+
+from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
     log_wrong_response_error,
     log_timeout_error,
     log_response_info,
     log_http_error,
 )
-from ts import TIMEOUT_MAX
-from locust.exception import RescheduleTask
-from ts.services.preserve_service import SeatType, pick_random_seat_type
-from ts.util import now_time, convert_date_to_time
-import random
 
 
 class Order:
-    """
-    According to https://github.com/FudanSELab/train-ticket/blob/master/ts-admin-order-service/src/main/java/adminorder/entity/Order.java
-    """
-
     def __init__(
         self,
         boughtDate,
@@ -56,8 +49,11 @@ class Order:
         self.price = price
 
 
-def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
-    operation = "admin add order"
+def admin_add_order(client, admin_bearer: str, admin_user_id: str, order: Order, description):
+
+    operation = description
+    boughtDate = int(float(time.time()) * 1000)
+
     with client.post(
         url="/api/v1/adminorderservice/adminorder",
         headers={
@@ -67,7 +63,7 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
         },
         json={
             "id": order.id,
-            "boughtDate": order.boughtDate,
+            "boughtDate": boughtDate,
             "travelDate": order.travelDate,
             "travelTime": order.travelTime,
             "accountId": order.accountId,
@@ -89,7 +85,7 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
         if not response.ok:
             data = str(order.__dict__)
             log_http_error(
-                user_id,
+                admin_user_id,
                 operation,
                 response,
                 data,
@@ -99,14 +95,14 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
                 key = "msg"
                 if response.json()["msg"] != "Success":
                     log_wrong_response_error(
-                        user_id, operation, response.failure, response.json()
+                        admin_user_id, operation, response.failure, response.json()
                     )
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
-                    log_timeout_error(user_id, operation, response.failure)
+                    log_timeout_error(admin_user_id, operation, response.failure)
                 else:
                     key = "data"
                     data = response.json()["data"]
-                    log_response_info(user_id, operation, data)
+                    log_response_info(admin_user_id, operation, data)
                     return data
             except JSONDecodeError:
                 response.failure(f"Response could not be decoded as JSON")
@@ -116,35 +112,36 @@ def admin_add_one_order(client, admin_bearer: str, user_id: str, order: Order):
                 raise RescheduleTask()
 
 
-def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order):
-    operation = "admin update order"
+def admin_update_order(client, admin_bearer: str, user_id: str, order: Order, description):
+    operation = description
+
     with client.put(
-        url="/api/v1/adminorderservice/adminorder",
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": admin_bearer,
-        },
-        json={
-            "id": order.id,
-            "boughtDate": order.boughtDate,
-            "travelDate": order.travelDate,
-            "travelTime": order.travelTime,
-            "accountId": order.accountId,
-            "contactsName": order.contactsName,
-            "documentType": order.documentType,
-            "contactsDocumentNumber": order.contactsDocumentNumber,
-            "trainNumber": order.trainNumber.lstrip("G"),
-            "coachNumber": order.coachNumber,
-            "seatClass": order.seatClass,
-            "seatNumber": order.seatNumber,
-            "from": order.from_station,
-            "to": order.to_station,
-            "status": order.status,
-            "price": order.price,
-        },
-        name=operation,
-        catch_response=True,
+            url="/api/v1/adminorderservice/adminorder",
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": admin_bearer,
+            },
+            json={
+                "id": order.id,
+                "boughtDate": order.boughtDate,
+                "travelDate": order.travelDate,
+                "travelTime": order.travelTime,
+                "accountId": order.accountId,
+                "contactsName": order.contactsName,
+                "documentType": order.documentType,
+                "contactsDocumentNumber": order.contactsDocumentNumber,
+                "trainNumber": order.trainNumber.lstrip("G"),
+                "coachNumber": order.coachNumber,
+                "seatClass": order.seatClass,
+                "seatNumber": order.seatNumber,
+                "from": order.from_station,
+                "to": order.to_station,
+                "status": order.status,
+                "price": order.price,
+            },
+            name=operation,
+            catch_response=True,
     ) as response:
         if not response.ok:
             data = str(order.__dict__)
@@ -174,10 +171,7 @@ def admin_update_one_order(client, admin_bearer: str, user_id: str, order: Order
                 response.failure(f"Response did not contain expected key '{key}'")
                 raise RescheduleTask()
 
-
-def admin_delete_one_order(
-    client, admin_bearer: str, user_id: str, order_id: str, trip_id: str
-):
+def admin_delete_one_order(client, admin_bearer: str, user_id: str, order_id: str, trip_id: str):
     operation = "admin delete order"
     with client.delete(
         url="/api/v1/adminorderservice/adminorder/"
@@ -221,32 +215,33 @@ def admin_delete_one_order(
                 raise RescheduleTask()
 
 
-def gen_random_order(trip, departure_date, user_id, contact) -> Order:
-    boughtDate = str(now_time())
-    travelDate = str(convert_date_to_time(departure_date))
-    travelTime = str(trip["startingTime"])
-    coachNumber = random.randint(1, 10)
-    seat_type = pick_random_seat_type()
-    seat_price = "0"
-    if seat_type == SeatType.FIRST_CLASS.value:
-        seat_price = trip["priceForFirstClassSeat"]
-    else:
-        seat_price = trip["priceForSecondClassSeat"]
-    seat_number = random.randint(1, 10000)
+def gen_random_order(user_id) -> Order:
+
+    boughtDate = "1"
+    travelDate = "2"
+    travelTime = "3"
+    coachNumber = "4"
+    seat_type = "5"
+    seat_price = "6"
+    seat_number = "7"
+    contact_name = "John"
+    contact_document_type = "1"
+    contact_document_number = "1234"
+
     return Order(
         boughtDate,
         travelDate,
         travelTime,
         user_id,
-        contact.name,
-        contact.document_type,
-        contact.document_number,
-        trip["tripId"],
+        contact_name,
+        contact_document_type,
+        contact_document_number,
+        "8",
         coachNumber,
         seat_type,
         seat_number,
-        trip["fromStationName"].lower(),
-        trip["toStationName"].lower(),
+        "s1",
+        "s2",
         0,
-        seat_price,
+        seat_price
     )

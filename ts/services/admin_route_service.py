@@ -7,7 +7,7 @@ import logging
 import sys
 import requests
 from json import JSONDecodeError
-from ts import TIMEOUT_MAX, HOST_URL
+from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
     log_response_info,
     log_timeout_error,
@@ -19,7 +19,11 @@ import random
 import uuid
 import math
 
-ADMIN_ROUTE_SERVICE_URL = f"http://{HOST_URL}/api/v1/adminrouteservice/adminroute"
+import ts.util as utl
+tt_host = utl.tt_host
+
+ADMIN_ROUTE_SERVICE_URL = tt_host + "/api/v1/adminrouteservice/adminroute"
+
 ORIGINAL_ROUTES = [
     {
         "stations": ["shanghai", "nanjing", "shijiazhuang", "taiyuan"],
@@ -121,6 +125,7 @@ def get_all_routes(client, admin_bearer: str, admin_user_id: str) -> list:
 
 
 def get_all_routes_request(admin_bearer: str, request_id: str) -> list:
+    print("get_all_routes_request: Start")
     operation = "get all routes"
     r = requests.get(
         url=ADMIN_ROUTE_SERVICE_URL,
@@ -505,6 +510,7 @@ def init_european_routes(admin_bearer: str, request_id: str):
 
 
 def init_all_routes(admin_bearer: str, request_id: str):
+    print("init_all_routes function start")
     all_routes = get_all_routes_request(admin_bearer, request_id)
     european_routes.extend(all_routes)
     print("num of all routes: ", len(european_routes))

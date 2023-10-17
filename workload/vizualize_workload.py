@@ -19,8 +19,9 @@ def visualize_integer_array(csv_file_path):
 
         # Plot the integer array
         plt.plot(integer_array)
-        plt.xlabel("Index")
+        plt.xlabel("Hour")
         plt.ylabel("Value")
+        plt.xticks(range(0, 60 // 15 * 24, 4), range(24))
         plt.title("Visualization of the Integer Array")
         plt.grid(True)
         plt.show()
@@ -32,5 +33,5 @@ def visualize_integer_array(csv_file_path):
 
 
 # Provide the path to your CSV file here
-csv_file_path = "workload/workload_day_1.csv"
+csv_file_path = "workload/workload_12hours_0.csv"
 visualize_integer_array(csv_file_path)

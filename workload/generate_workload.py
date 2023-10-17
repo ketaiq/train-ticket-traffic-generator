@@ -64,6 +64,75 @@ def create_week_workload_by_day(weekdays_pattern, weekends_pattern, num_weeks: i
             write_wl_to_csv(day_workload, f"workload_day_{global_day_index}.csv")
 
 
+def create_week_workload_by_overlapped_hours(
+    weekdays_pattern,
+    weekends_pattern,
+    num_weeks: int,
+    num_hours_workload: int,
+    num_overlapped_hours: int,
+):
+    """
+    Create week workload separated by hours according to the designed pattern.
+    For example, 12-hour workload with 1 overlapped hour means 1h (begin) + 12h (workload) + 1h (end) = 14h in total.
+
+    Parameters
+    ----------
+    num_hours_workload: int
+        number of meaningful hours in a workload
+    num_overlapped_hours: int
+        number of overlapped hours before and after the workload period
+
+    """
+    workloads = []
+    for _ in range(num_weeks):
+        for day in range(7):
+            if day < 5:
+                workload_pattern = weekdays_pattern
+            else:
+                workload_pattern = weekends_pattern
+            day_workload = []
+
+            for user_number in workload_pattern:
+                number_of_users_period = random.randint(
+                    user_number - 1, user_number + 2
+                )
+                if number_of_users_period <= 0:
+                    number_of_users_period = 1
+                day_workload.append(number_of_users_period)
+
+            workloads.extend(day_workload)
+    for i in range(
+        0, len(workloads) - num_hours_workload * 4 + 1, num_hours_workload * 4
+    ):
+        hours_workload = workloads[i : i + num_hours_workload * 4]
+        begin_workload = gen_overlapped_workload(
+            num_overlapped_hours, hours_workload[0], True
+        )
+        end_workload = gen_overlapped_workload(
+            num_overlapped_hours, hours_workload[-1], False
+        )
+        hours_workload = begin_workload + hours_workload + end_workload
+        write_wl_to_csv(
+            hours_workload,
+            f"workload/workload_{num_hours_workload}hours_{i//48}.csv",
+        )
+
+
+def gen_overlapped_workload(num_overlapped_hours: int, value: int, increasing: bool):
+    num_overlapped_workload = num_overlapped_hours * 4
+    workload = []
+    if increasing:
+        for i in range(num_overlapped_workload):
+            num_users = value // (2**i)
+            if num_users < 1:
+                num_users = 1
+            workload.append(num_users)
+        workload.reverse()
+    else:
+        workload = [value] * num_overlapped_workload
+    return workload
+
+
 def make_flat(wl_week):
     wl_flat = []
     for wl_day in wl_week:
@@ -92,7 +161,10 @@ if __name__ == "__main__":
     # wl_week_2 = create_week(wl_pattern_weekdays, wl_pattern_weekends, start_day)
     # wl_two_weeks = make_flat(wl_week_1) + make_flat(wl_week_2)
 
-    create_week_workload_by_day(wl_pattern_weekdays, wl_pattern_weekends, 2)
+    # create_week_workload_by_day(wl_pattern_weekdays, wl_pattern_weekends, 2)
+    create_week_workload_by_overlapped_hours(
+        wl_pattern_weekdays, wl_pattern_weekends, 2, 12, 1
+    )
 
     # plt.plot(wl_two_weeks)
     # plt.ylabel("")

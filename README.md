@@ -19,5 +19,5 @@ Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/
 
 Collect node and pod information per minute in JSON files
 ```sh
-sh collect_node_pod.sh 3
+nohup bash collect_node_pod.sh 14 &
 ```

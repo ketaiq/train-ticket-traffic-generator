@@ -4,3 +4,4 @@ weekday_peak_hours:
 weekend_peak_hours:
   - 9
   - 17
+wl_interval_mins: 15

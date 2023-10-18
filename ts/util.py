@@ -74,11 +74,34 @@ def gen_random_document_type() -> str:
     return random.randint(1, 3)
 
 
+def calculate_peak_seconds(
+    wl_start_hour, weekday_peak_hours, weekend_peak_hours, wl_day
+) -> list:
+    if wl_day < 0 or wl_day > 6:
+        print(f"Workload day {wl_day} is illegal!")
+        return
+    if wl_start_hour != 0:
+        print(f"Workload start hour {wl_start_hour} is not supported!")
+    peak_seconds = []
+    if wl_day < 5:
+        for peak_hour in weekday_peak_hours:
+            peak_seconds += calculate_peak_range(peak_hour)
+    else:
+        for peak_hour in weekend_peak_hours:
+            peak_seconds += calculate_peak_range(peak_hour)
+    return peak_seconds
+
+
+def calculate_peak_range(peak_hour):
+    begin_peak_point = (peak_hour - 2) * 60 * 60
+    end_peak_point = (peak_hour + 3) * 60 * 60
+    return list(range(begin_peak_point, end_peak_point))
+
+
 if __name__ == "__main__":
     # print(gen_random_document_number())
     # print(gen_random_name())
     # print(gen_random_email())
     # print(gen_random_time())
     # print(convert_date_to_time(gen_random_date()))
-    # print(uuid.uuid4())
-    print(type(wl_start_hour))
+    print(uuid.uuid4())

@@ -2,8 +2,6 @@ import os
 import random
 import csv
 from collections import defaultdict
-from matplotlib import pyplot as plt
-import sys
 
 
 file_name_wl_pattern_weekdays = "wl_pattern_weekdays.csv"
@@ -61,7 +59,9 @@ def create_week_workload_by_day(weekdays_pattern, weekends_pattern, num_weeks: i
                 day_workload.append(number_of_users_period)
 
             global_day_index = 7 * week + day + 1
-            write_wl_to_csv(day_workload, f"workload_day_{global_day_index}.csv")
+            write_wl_to_csv(
+                day_workload, f"workload/by_day/workload_day_{global_day_index}.csv"
+            )
 
 
 def create_week_workload_by_overlapped_hours(

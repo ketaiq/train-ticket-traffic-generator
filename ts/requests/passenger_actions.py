@@ -14,30 +14,38 @@ from ts.services.cancel_service import cancel_one_order, get_refund_amount
 from ts.services.admin_order_service import (
     admin_add_order,
     admin_update_order,
-    gen_random_order
+    gen_random_order,
 )
 
 
 class PassengerActions(PassengerRequest):
-
     def __init__(self, client, description):
         super().__init__(client, description)
 
         self.order_creation_time = None
         self.order_completion_time = None
 
-    def perform_actions(self, logger_tasks, search_simple_fr, search_simple_to, search_adv_fr, search_adv_to, food_incl, assurance_incl, consign_incl):
-
-        sleep(randint(1, 2))
+    def perform_actions(
+        self,
+        logger_tasks,
+        search_simple_fr,
+        search_simple_to,
+        search_adv_fr,
+        search_adv_to,
+        food_incl,
+        assurance_incl,
+        consign_incl,
+    ):
+        sleep(randint(1, 5))
         self.admin_bearer, _ = login_user(
             self.client,
             self.request_id,
             username=self.admin_username,
             password=self.admin_password,
-            description="Admin Login: " + self.description
+            description="Admin Login: " + self.description,
         )
 
-        sleep(randint(1, 2))
+        sleep(randint(1, 5))
         self.username = str(uuid.uuid4())
         self.password = self.username
         user_add(
@@ -50,22 +58,25 @@ class PassengerActions(PassengerRequest):
 
         visit_client_login(self.client, self.request_id)
 
-        sleep(randint(1, 2))
+        sleep(randint(1, 5))
         self.bearer, self.user_id = login_user(
             client=self.client,
             request_id=self.request_id,
             username=self.username,
             password=self.password,
-            description="user login"
+            description="user login",
         )
 
-        sleep(randint(1, 2))
-        self.tickets_search(randint(search_simple_fr, search_simple_to), randint(search_adv_fr, search_adv_to))
+        sleep(randint(1, 5))
+        self.tickets_search(
+            randint(search_simple_fr, search_simple_to),
+            randint(search_adv_fr, search_adv_to),
+        )
 
-        sleep(randint(1, 2))
+        sleep(randint(1, 5))
         self.gen_ticket_info(food_incl, assurance_incl, consign_incl)
 
-        sleep(randint(1, 2))
+        sleep(randint(1, 5))
         reserve_one_ticket(
             self.client,
             self.bearer,
@@ -83,56 +94,82 @@ class PassengerActions(PassengerRequest):
 
         self.order_creation_time = datetime.datetime.now()
 
-        sleep(randint(1, 2))
-        user_orders_list = admin_orders_get_list_by_user_id(self.admin_bearer, self.user_id)
+        sleep(randint(1, 5))
+        user_orders_list = admin_orders_get_list_by_user_id(
+            self.admin_bearer, self.user_id
+        )
         self.order_id = user_orders_list[-1]["id"]
 
-        sleep(randint(1, 2))
-        pay_one_order(self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"])
+        sleep(randint(1, 5))
+        pay_one_order(
+            self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"]
+        )
 
         if self.description == "Cancel_With_Refund":
-            sleep(randint(1, 2))
+            sleep(randint(1, 5))
             get_refund_amount(self.client, self.bearer, self.order_id, self.user_id)
 
-        if self.description == "Cancel_No_Refund" or self.description == "Cancel_With_Refund":
-            sleep(randint(1, 2))
+        if (
+            self.description == "Cancel_No_Refund"
+            or self.description == "Cancel_With_Refund"
+        ):
+            sleep(randint(1, 5))
             cancel_one_order(self.client, self.bearer, self.order_id, self.user_id)
         else:
-            sleep(randint(1, 2))
+            sleep(randint(1, 5))
             collect_one_ticket(self.client, self.bearer, self.user_id, self.order_id)
 
-            sleep(randint(1, 2))
-            enter_station(self.client, self.bearer, self.user_id, self.order_id, self.description)
+            sleep(randint(1, 5))
+            enter_station(
+                self.client, self.bearer, self.user_id, self.order_id, self.description
+            )
 
         self.order_completion_time = datetime.datetime.now()
-        order_age = int((self.order_completion_time - self.order_creation_time).total_seconds())
+        order_age = int(
+            (self.order_completion_time - self.order_creation_time).total_seconds()
+        )
         logger_tasks.info(self.description + ": " + str(order_age))
 
     def perform_actions_sales(self):
-
         sleep(randint(2, 9))
         self.admin_bearer, self.admin_user_id = login_user(
             self.client,
             self.request_id,
             username=self.admin_username,
             password=self.admin_password,
-            description="Admin Login: " + self.description
+            description="Admin Login: " + self.description,
         )
 
         if self.description == "sales_add_order":
-
             sleep(randint(2, 9))
             order_object = gen_random_order(self.test_user_id)
-            the_order = admin_add_order(self.client, self.admin_bearer, self.admin_user_id, order_object, self.description)
+            the_order = admin_add_order(
+                self.client,
+                self.admin_bearer,
+                self.admin_user_id,
+                order_object,
+                self.description,
+            )
 
         if self.description == "sales_update_order":
-
             sleep(randint(2, 9))
             order_object = gen_random_order(self.test_user_id)
-            the_order = admin_add_order(self.client, self.admin_bearer, self.admin_user_id, order_object, self.description + " add")
+            the_order = admin_add_order(
+                self.client,
+                self.admin_bearer,
+                self.admin_user_id,
+                order_object,
+                self.description + " add",
+            )
 
             sleep(randint(2, 9))
             order_object.id = the_order["id"]
             order_object.boughtDate = the_order["boughtDate"]
             order_object.contactsName = order_object.contactsName + "__"
-            the_order = admin_update_order(self.client, self.admin_bearer, self.admin_user_id, order_object, self.description + " update")
+            the_order = admin_update_order(
+                self.client,
+                self.admin_bearer,
+                self.admin_user_id,
+                order_object,
+                self.description + " update",
+            )

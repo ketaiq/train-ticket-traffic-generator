@@ -14,13 +14,14 @@ from ts.services.admin_route_service import init_all_routes
 from ts.services.auth_service import login_user_request
 from ts.services.station_service import init_all_stations
 
-import ts.util as utl
-tt_host = utl.tt_host
-wl_file_name = utl.wl_file_name
+from ts.config import wl_file_name
 
+# configure locust statistics
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
-locust.stats.CSV_STATS_INTERVAL_SEC = 60 # default is 1 second
-locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = 60 # Determines how often the data is flushed to disk, default is 10 seconds
+locust.stats.CSV_STATS_INTERVAL_SEC = 60  # default is 1 second
+locust.stats.CSV_STATS_FLUSH_INTERVAL_SEC = (
+    60  # Determines how often the data is flushed to disk, default is 10 seconds
+)
 locust.stats.PERCENTILES_TO_REPORT = [
     0.25,
     0.50,
@@ -34,8 +35,6 @@ locust.stats.PERCENTILES_TO_REPORT = [
     0.9999,
     1.0,
 ]
-VERBOSE_LOGGING = 0
-
 
 number_of_days = 14
 number_of_periods_per_day = 96
@@ -49,16 +48,21 @@ peak_points_2 = []
 for day_number in range(number_of_days):
     periods_shift = number_of_periods_per_day * day_number
 
-    for x in range(number_of_points_in_period * (periods_shift + peak_period_1 - 3), number_of_points_in_period * (periods_shift + peak_period_1 + 2)):
+    for x in range(
+        number_of_points_in_period * (periods_shift + peak_period_1 - 3),
+        number_of_points_in_period * (periods_shift + peak_period_1 + 2),
+    ):
         peak_points_1.append(x)
 
-    for x in range(number_of_points_in_period * (periods_shift + peak_period_2 - 3), number_of_points_in_period * (periods_shift + peak_period_2 + 2)):
+    for x in range(
+        number_of_points_in_period * (periods_shift + peak_period_2 - 3),
+        number_of_points_in_period * (periods_shift + peak_period_2 + 2),
+    ):
         peak_points_2.append(x)
 
 
 def setup_logger(name, log_file, level=logging.INFO):
-
-    formatter = logging.Formatter('%(asctime)s %(message)s')
+    formatter = logging.Formatter("%(asctime)s %(message)s")
 
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
@@ -70,12 +74,15 @@ def setup_logger(name, log_file, level=logging.INFO):
     return logger
 
 
-logger_tasks = setup_logger('logger_1', 'tasks.log')
-logger_actions = setup_logger('logger_actions', 'actions.log')
+logger_tasks = setup_logger("logger_1", "tasks.log")
+logger_actions = setup_logger("logger_actions", "actions.log")
 
 now = datetime.now()
 current_dateTime = now.strftime("%Y-%m-%d %H:%M:%S")
-logger_assignments = setup_logger('logger_assignments', 'assignments-{date_time}.log'.format(date_time=current_dateTime))
+logger_assignments = setup_logger(
+    "logger_assignments",
+    "assignments-{date_time}.log".format(date_time=current_dateTime),
+)
 
 
 @events.init.add_listener
@@ -83,7 +90,9 @@ def on_locust_init(environment, **kwargs):
     print("Wait for fetching shared data, including routes, stations")
     print("Log in as admin")
     request_id = str(uuid.uuid4())
-    admin_bearer, admin_user_id = login_user_request(username="admin", password="222222", request_id=request_id)
+    admin_bearer, admin_user_id = login_user_request(
+        username="admin", password="222222", request_id=request_id
+    )
     print("Start initialisation")
     init_all_routes(admin_bearer, request_id)
     init_all_stations(admin_user_id, admin_bearer)
@@ -100,7 +109,6 @@ class Passenger_Role(HttpUser):
 
     @task
     def perform_task(self):
-
         role_list = [ii for ii in range(8)]
 
         if self.peak_hour:
@@ -112,7 +120,7 @@ class Passenger_Role(HttpUser):
                 random.randint(0, 2),
                 random.randint(0, 2),
                 random.randint(45, 47),
-                random.randint(3, 5)
+                random.randint(3, 5),
             )
         else:
             role_weights = (
@@ -123,7 +131,7 @@ class Passenger_Role(HttpUser):
                 random.randint(0, 2),
                 random.randint(0, 2),
                 random.randint(45, 47),
-                random.randint(3, 5)
+                random.randint(3, 5),
             )
 
         # role_weights = (0, 0, 0, 0, 100, 100, 0, 0)
@@ -172,9 +180,8 @@ class StagesShape(LoadTestShape):
     stages = []
 
     def __init__(self, timeIntervals=number_of_points_in_period):
-
         workload = []
-        with open(wl_file_name, newline='') as fil:
+        with open(wl_file_name, newline="") as fil:
             reader = csv.reader(fil)
             next(reader)
 
@@ -203,7 +210,9 @@ class StagesShape(LoadTestShape):
             if run_time < stage["duration"]:
                 tick_data = (stage["users"], stage["spawn_rate"])
 
-                if (round(run_time) in peak_points_1) or (round(run_time) in peak_points_2):
+                if (round(run_time) in peak_points_1) or (
+                    round(run_time) in peak_points_2
+                ):
                     Passenger_Role.peak_hour = True
                 else:
                     Passenger_Role.peak_hour = False

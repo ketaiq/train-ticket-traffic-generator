@@ -14,8 +14,8 @@ from ts.log_syntax.locust_response import (
     log_wrong_response_error,
 )
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
+
 
 def login_user(
     client, request_id: str, username: str, password: str, description: str

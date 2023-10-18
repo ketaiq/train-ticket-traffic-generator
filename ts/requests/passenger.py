@@ -5,18 +5,14 @@ from datetime import timedelta
 
 from ts.services.assurance_service import AssuranceType
 from ts.services.consign_service import Consign
-from ts.services.contacts_service import (
-    add_one_contact,
-    gen_random_contact
-)
+from ts.services.contacts_service import add_one_contact, gen_random_contact
 from ts.services.food_service import Food, search_food_on_trip, pick_random_food
 from ts.services.preserve_service import SeatType
 from ts.services.preserve_service import pick_random_seat_type
 from ts.services.travel_plan_service import pick_random_strategy_and_search
 from ts.services.travel_service import pick_random_travel, search_ticket
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
 
 
 def admin_orders_get_list(bearer: str):
@@ -25,8 +21,8 @@ def admin_orders_get_list(bearer: str):
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": bearer
-        }
+            "Authorization": bearer,
+        },
     )
 
     orders_list = response.json()["data"]
@@ -35,7 +31,7 @@ def admin_orders_get_list(bearer: str):
 
 def admin_orders_get_list_by_user_id(bearer: str, account_id: str):
     total_orders_list = admin_orders_get_list(bearer)
-    return list(filter(lambda item: item['accountId'] == account_id, total_orders_list))
+    return list(filter(lambda item: item["accountId"] == account_id, total_orders_list))
 
 
 class PassengerRequest:
@@ -74,7 +70,6 @@ class PassengerRequest:
         self.admin_bearer = None
 
     def tickets_search(self, number_of_smpl, number_of_adv):
-
         trips = []
 
         for _ in range(number_of_adv):
@@ -97,8 +92,9 @@ class PassengerRequest:
 
         self.trip = pick_random_travel(trips)
 
-    def gen_ticket_info(self, food_included=False, assurance_included=False, consign_included=False):
-
+    def gen_ticket_info(
+        self, food_included=False, assurance_included=False, consign_included=False
+    ):
         self.seat_type = pick_random_seat_type()
         self.seat_price = self.get_seat_price()
         self.contact_id = self.contact_create_add()
@@ -128,7 +124,9 @@ class PassengerRequest:
 
     def contact_create_add(self) -> str:
         contact_object = gen_random_contact(None, self.user_id)
-        contact = add_one_contact(self.client, self.bearer, self.user_id, contact_object)
+        contact = add_one_contact(
+            self.client, self.bearer, self.user_id, contact_object
+        )
         return contact["id"]
 
     def get_seat_price(self):
@@ -145,14 +143,16 @@ class PassengerRequest:
 
     def get_consign(self, user_token: str, user_id: str):
         with self.client.get(
-            url="/api/v1/consignservice/consigns/account/{user_id}".format(user_id=user_id),
+            url="/api/v1/consignservice/consigns/account/{user_id}".format(
+                user_id=user_id
+            ),
             headers={
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Authorization": user_token
+                "Authorization": user_token,
             },
             name="get_consign",
-            catch_response=True
+            catch_response=True,
         ) as response:
             pass
             # print("get_consign", response)
@@ -165,10 +165,10 @@ class PassengerRequest:
             headers={
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Authorization": user_token
+                "Authorization": user_token,
             },
             name="get_assurance",
-            catch_response=True
+            catch_response=True,
         ) as response:
             pass
             # print("get_assurance", response)

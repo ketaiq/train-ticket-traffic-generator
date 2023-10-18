@@ -161,10 +161,10 @@ if __name__ == "__main__":
     # wl_week_2 = create_week(wl_pattern_weekdays, wl_pattern_weekends, start_day)
     # wl_two_weeks = make_flat(wl_week_1) + make_flat(wl_week_2)
 
-    # create_week_workload_by_day(wl_pattern_weekdays, wl_pattern_weekends, 2)
-    create_week_workload_by_overlapped_hours(
-        wl_pattern_weekdays, wl_pattern_weekends, 2, 12, 1
-    )
+    create_week_workload_by_day(wl_pattern_weekdays, wl_pattern_weekends, 2)
+    # create_week_workload_by_overlapped_hours(
+    #     wl_pattern_weekdays, wl_pattern_weekends, 2, 12, 1
+    # )
 
     # plt.plot(wl_two_weeks)
     # plt.ylabel("")

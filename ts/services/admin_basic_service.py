@@ -16,9 +16,9 @@ from ts.log_syntax.locust_response import (
 from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 
-import ts.util as utl
-tt_host = utl.tt_host
-ADMIN_PRICE_SERVICE_URL = (tt_host + "/api/v1/adminbasicservice/adminbasic/prices")
+from ts.config import tt_host
+
+ADMIN_PRICE_SERVICE_URL = tt_host + "/api/v1/adminbasicservice/adminbasic/prices"
 
 ORIGINAL_PRICES = [
     {

@@ -7,8 +7,8 @@ import time
 import random
 from json import JSONDecodeError
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
+
 ADMIN_TRAVEL_SERVICE_URL = tt_host + "/api/v1/admintravelservice/admintravel"
 
 ORIGINAL_TRAVELS = [

@@ -3,13 +3,6 @@ from datetime import datetime
 import uuid
 import string
 import time
-import configparser
-
-
-config = configparser.ConfigParser()
-config.read('setup.ini')
-tt_host = config["default"]["tt_host"]
-wl_file_name = config["default"]["wl_file_name"]
 
 
 def gen_random_phone_number() -> str:
@@ -82,9 +75,10 @@ def gen_random_document_type() -> str:
 
 
 if __name__ == "__main__":
-    print(gen_random_document_number())
-    print(gen_random_name())
-    print(gen_random_email())
-    print(gen_random_time())
-    print(convert_date_to_time(gen_random_date()))
-    print(uuid.uuid4())
+    # print(gen_random_document_number())
+    # print(gen_random_name())
+    # print(gen_random_email())
+    # print(gen_random_time())
+    # print(convert_date_to_time(gen_random_date()))
+    # print(uuid.uuid4())
+    print(type(wl_start_hour))

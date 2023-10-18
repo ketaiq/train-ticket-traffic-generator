@@ -1,0 +1,6 @@
+weekday_peak_hours:
+  - 7
+  - 18
+weekend_peak_hours:
+  - 9
+  - 17

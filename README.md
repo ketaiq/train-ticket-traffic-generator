@@ -17,7 +17,12 @@ Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/
 
 ## Quick Start
 
-Collect node and pod information per minute in JSON files
+### Collect node and pod information per minute in JSON files
 ```sh
 nohup bash collect_node_pod.sh 14 &
 ```
+
+### Update *experiment_config.yaml*
+- *tt_host*: the URL of the dashboard of TrainTicket system
+- *wl_file_name*: the filename of the used workload
+- *wl_start_hour*: the starting hour of the workload, from 0 to 23.

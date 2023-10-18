@@ -33,5 +33,5 @@ def visualize_integer_array(csv_file_path):
 
 
 # Provide the path to your CSV file here
-csv_file_path = "workload/workload_12hours_0.csv"
+csv_file_path = "workload/by_day/workload_day_7.csv"
 visualize_integer_array(csv_file_path)

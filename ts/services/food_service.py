@@ -17,8 +17,7 @@ from ts.log_syntax.locust_response import (
     log_response_info,
 )
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
 
 FOOD_SERVICE_URL = tt_host + "/api/v1/foodservice/foods"
 

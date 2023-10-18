@@ -3,6 +3,8 @@ import random
 import csv
 from collections import defaultdict
 
+import yaml
+
 
 file_name_wl_pattern_weekdays = "wl_pattern_weekdays.csv"
 file_name_wl_pattern_weekends = "wl_pattern_weekends.csv"
@@ -40,7 +42,9 @@ def create_week(weekdays_pattern, weekends_pattern, start_day):
     return days[-(7 - start_day) :] + days[:start_day]
 
 
-def create_week_workload_by_day(weekdays_pattern, weekends_pattern, num_weeks: int):
+def create_week_workload_by_day(
+    weekdays_pattern, weekends_pattern, num_weeks: int, wl_num_start_interval: int
+):
     """Create week workload separated by days according to the designed pattern."""
     for week in range(num_weeks):
         for day in range(7):
@@ -57,6 +61,13 @@ def create_week_workload_by_day(weekdays_pattern, weekends_pattern, num_weeks: i
                 if number_of_users_period <= 0:
                     number_of_users_period = 1
                 day_workload.append(number_of_users_period)
+
+            start_workload = day_workload[0]
+            for i in range(wl_num_start_interval):
+                v = start_workload - i - 1
+                if v < 1:
+                    v = 1
+                day_workload.insert(0, v)
 
             global_day_index = 7 * week + day + 1
             write_wl_to_csv(
@@ -151,6 +162,9 @@ def write_wl_to_csv(wl_list, file_name_wl):
 
 
 if __name__ == "__main__":
+    with open("workload/workload_config.yaml") as stream:
+        workload_config = yaml.safe_load(stream)
+    wl_num_start_interval = workload_config["wl_num_start_interval"]
     file_name_wl_two_weeks = "workload-2-weeks.csv"
     start_day = 0  # weekdays from 0 to 6
 
@@ -161,7 +175,9 @@ if __name__ == "__main__":
     # wl_week_2 = create_week(wl_pattern_weekdays, wl_pattern_weekends, start_day)
     # wl_two_weeks = make_flat(wl_week_1) + make_flat(wl_week_2)
 
-    create_week_workload_by_day(wl_pattern_weekdays, wl_pattern_weekends, 2)
+    create_week_workload_by_day(
+        wl_pattern_weekdays, wl_pattern_weekends, 2, wl_num_start_interval
+    )
     # create_week_workload_by_overlapped_hours(
     #     wl_pattern_weekdays, wl_pattern_weekends, 2, 12, 1
     # )

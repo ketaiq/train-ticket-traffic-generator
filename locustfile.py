@@ -94,8 +94,8 @@ class Passenger_Role(HttpUser):
         role_list = [ii for ii in range(8)]
 
         if self.peak_hour:
-            min_wait_seconds = 5
-            max_wait_seconds = 10
+            min_wait_seconds = 1
+            max_wait_seconds = 5
             role_weights = (
                 random.randint(5, 7),
                 random.randint(4, 6),
@@ -107,8 +107,8 @@ class Passenger_Role(HttpUser):
                 random.randint(3, 5),
             )
         else:
-            min_wait_seconds = 10
-            max_wait_seconds = 30
+            min_wait_seconds = 5
+            max_wait_seconds = 10
             role_weights = (
                 random.randint(11, 13),
                 random.randint(9, 11),

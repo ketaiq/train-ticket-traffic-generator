@@ -46,7 +46,7 @@ locust.stats.PERCENTILES_TO_REPORT = [
 
 number_of_points_in_period = wl_interval_mins * 60  # seconds
 peak_points = calculate_peak_seconds(
-    wl_interval_mins, wl_start_hour, weekday_peak_hours, weekend_peak_hours, wl_day
+    wl_start_hour, weekday_peak_hours, weekend_peak_hours, wl_day
 )
 
 

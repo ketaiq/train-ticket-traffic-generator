@@ -67,17 +67,17 @@ logger_tasks = setup_logger("logger_1", "tasks.log")
 logger_actions = setup_logger("logger_actions", "actions.log")
 
 
-@events.init.add_listener
-def on_locust_init(environment, **kwargs):
-    print("Wait for fetching shared data, including routes, stations")
-    print("Log in as admin")
-    request_id = str(uuid.uuid4())
-    admin_bearer, admin_user_id = login_user_request(
-        username="admin", password="222222", request_id=request_id
-    )
-    print("Start initialisation")
-    init_all_routes(admin_bearer, request_id)
-    init_all_stations(admin_user_id, admin_bearer)
+# @events.init.add_listener
+# def on_locust_init(environment, **kwargs):
+#     print("Wait for fetching shared data, including routes, stations")
+#     print("Log in as admin")
+#     request_id = str(uuid.uuid4())
+#     admin_bearer, admin_user_id = login_user_request(
+#         username="admin", password="222222", request_id=request_id
+#     )
+#     print("Start initialisation")
+#     init_all_routes(admin_bearer, request_id)
+#     init_all_stations(admin_user_id, admin_bearer)
 
 
 class Passenger_Role(HttpUser):
@@ -94,8 +94,8 @@ class Passenger_Role(HttpUser):
         role_list = [ii for ii in range(8)]
 
         if self.peak_hour:
-            min_wait_seconds = 1
-            max_wait_seconds = 5
+            min_wait_seconds = 10
+            max_wait_seconds = 30
             role_weights = (
                 random.randint(5, 7),
                 random.randint(4, 6),
@@ -107,8 +107,8 @@ class Passenger_Role(HttpUser):
                 random.randint(3, 5),
             )
         else:
-            min_wait_seconds = 5
-            max_wait_seconds = 10
+            min_wait_seconds = 30
+            max_wait_seconds = 60
             role_weights = (
                 random.randint(11, 13),
                 random.randint(9, 11),

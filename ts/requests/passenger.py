@@ -97,7 +97,6 @@ class PassengerRequest:
     ):
         self.seat_type = pick_random_seat_type()
         self.seat_price = self.get_seat_price()
-        self.contact_id = self.contact_create_add()
 
         self.food = Food()
         self.assurance = AssuranceType.NONE.value

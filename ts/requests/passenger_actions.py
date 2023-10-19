@@ -55,7 +55,6 @@ class PassengerActions(PassengerRequest):
             username=self.username,
             password=self.password,
         )
-        self.contact_id = self.contact_create_add()
 
         visit_client_login(self.client, self.request_id)
 
@@ -67,6 +66,7 @@ class PassengerActions(PassengerRequest):
             password=self.password,
             description="user login",
         )
+        self.contact_id = self.contact_create_add()
 
         sleep(randint(5, 10))
         self.tickets_search(

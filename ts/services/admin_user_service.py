@@ -1,12 +1,8 @@
-import time
-import uuid
 import requests
 from json import JSONDecodeError
-from locustfile import Passenger_Role
 from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from requests.exceptions import ConnectionError
-from ts.services.auth_service import login_user
 from ts.util import (
     gen_random_document_number,
     gen_random_document_type,
@@ -77,15 +73,6 @@ def user_add(
                     log_response_info(request_id, operation, new_user, name="request")
                     return new_user
         except ConnectionError:
-            time.sleep(10)
-            Passenger_Role.admin_bearer, Passenger_Role.admin_user_id = login_user(
-                client,
-                str(uuid.uuid4()),
-                username=Passenger_Role.ADMIN_USERNAME,
-                password=Passenger_Role.ADMIN_PASSWORD,
-                description="Admin Login",
-            )
-            Passenger_Role.admin_bearer_created_timestamp = time.time()
             raise RescheduleTask()
         except JSONDecodeError:
             response.failure(f"Response could not be decoded as JSON")

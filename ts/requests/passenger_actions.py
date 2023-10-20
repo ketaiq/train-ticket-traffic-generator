@@ -19,11 +19,13 @@ from ts.services.admin_order_service import (
 
 
 class PassengerActions(PassengerRequest):
-    def __init__(self, client, description):
+    def __init__(self, client, description, admin_bearer, admin_user_id):
         super().__init__(client, description)
 
         self.order_creation_time = None
         self.order_completion_time = None
+        self.admin_bearer = admin_bearer
+        self.admin_user_id = admin_user_id
 
     def perform_actions(
         self,
@@ -36,15 +38,6 @@ class PassengerActions(PassengerRequest):
         assurance_incl,
         consign_incl,
     ):
-        sleep(randint(5, 10))
-        self.admin_bearer, _ = login_user(
-            self.client,
-            self.request_id,
-            username=self.admin_username,
-            password=self.admin_password,
-            description="Admin Login: " + self.description,
-        )
-
         sleep(randint(5, 10))
         self.username = str(uuid.uuid4())
         self.password = self.username
@@ -64,7 +57,7 @@ class PassengerActions(PassengerRequest):
             request_id=self.request_id,
             username=self.username,
             password=self.password,
-            description="user login",
+            description=f"User Login: {self.description}",
         )
         self.contact_id = self.contact_create_add()
 
@@ -132,15 +125,6 @@ class PassengerActions(PassengerRequest):
         logger_tasks.info(self.description + ": " + str(order_age))
 
     def perform_actions_sales(self):
-        sleep(randint(5, 10))
-        self.admin_bearer, self.admin_user_id = login_user(
-            self.client,
-            self.request_id,
-            username=self.admin_username,
-            password=self.admin_password,
-            description="Admin Login: " + self.description,
-        )
-
         if self.description == "sales_add_order":
             sleep(randint(5, 10))
             order_object = gen_random_order(self.test_user_id)

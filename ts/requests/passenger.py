@@ -41,11 +41,6 @@ class PassengerRequest:
         self.client = client
         self.description = description
 
-        self.admin_username = "admin"
-        self.admin_password = "222222"
-        self.admin_bearer = None
-        self.admin_user_id = None
-
         self.username = None
         self.password = None
         self.bearer = None

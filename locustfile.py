@@ -3,6 +3,7 @@ import logging
 import random
 import uuid
 from time import sleep
+import time
 
 import locust.stats
 import numpy as np
@@ -13,6 +14,7 @@ from ts.requests.passenger_actions import PassengerActions
 from ts.services.admin_route_service import init_all_routes
 from ts.services.auth_service import login_user_request
 from ts.services.station_service import init_all_stations
+from ts.services.auth_service import login_user
 
 from ts.config import (
     wl_file_name,
@@ -83,6 +85,22 @@ logger_actions = setup_logger("logger_actions", "actions.log")
 class Passenger_Role(HttpUser):
     peak_hour = None
     current_time = None
+    admin_bearer = None
+    admin_user_id = None
+    admin_bearer_created_timestamp = None
+    ROLES = [
+        "Irregular_Budget",
+        "Irregular_Normal",
+        "Irregular_Comfort",
+        "Regular",
+        "Cancel_No_Refund",
+        "Cancel_With_Refund",
+        "sales_add_order",
+        "sales_update_order",
+    ]
+    ADMIN_USERNAME = "admin"
+    ADMIN_PASSWORD = "222222"
+    ADMIN_BEARER_LIFETIME = 300  # seconds
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -121,37 +139,54 @@ class Passenger_Role(HttpUser):
             )
 
         role_to_perform = int(random.choices(role_list, weights=role_weights)[0])
+        description = Passenger_Role.ROLES[role_to_perform]
+
+        sleep(random.randint(5, 10))
+        current_timestamp = time.time()
+        if (
+            Passenger_Role.admin_bearer is None
+            or Passenger_Role.admin_bearer_created_timestamp
+            + Passenger_Role.ADMIN_BEARER_LIFETIME
+            < current_timestamp
+        ):
+            Passenger_Role.admin_bearer, Passenger_Role.admin_user_id = login_user(
+                self.client,
+                str(uuid.uuid4()),
+                username=Passenger_Role.ADMIN_USERNAME,
+                password=Passenger_Role.ADMIN_PASSWORD,
+                description="Admin Login",
+            )
+            Passenger_Role.admin_bearer_created_timestamp = current_timestamp
+
+        request = PassengerActions(
+            self.client,
+            description,
+            Passenger_Role.admin_bearer,
+            Passenger_Role.admin_user_id,
+        )
 
         if role_to_perform == 0:
-            request = PassengerActions(self.client, "Irregular_Budget")
             request.perform_actions(logger_tasks, 1, 1, 5, 10, False, False, False)
 
         if role_to_perform == 1:
-            request = PassengerActions(self.client, "Irregular_Normal")
             request.perform_actions(logger_tasks, 5, 10, 1, 1, True, False, False)
 
         if role_to_perform == 2:
-            request = PassengerActions(self.client, "Irregular_Comfort")
             request.perform_actions(logger_tasks, 1, 1, 5, 10, True, True, True)
 
         if role_to_perform == 3:
-            request = PassengerActions(self.client, "Regular")
             request.perform_actions(logger_tasks, 1, 1, 1, 1, True, True, False)
 
         if role_to_perform == 4:
-            request = PassengerActions(self.client, "Cancel_No_Refund")
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
         if role_to_perform == 5:
-            request = PassengerActions(self.client, "Cancel_With_Refund")
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
         if role_to_perform == 6:
-            request = PassengerActions(self.client, "sales_add_order")
             request.perform_actions_sales()
 
         if role_to_perform == 7:
-            request = PassengerActions(self.client, "sales_update_order")
             request.perform_actions_sales()
 
         sleep(random.randint(min_wait_seconds, max_wait_seconds))

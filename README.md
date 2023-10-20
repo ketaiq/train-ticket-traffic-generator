@@ -32,12 +32,13 @@ Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/
 sudo apt update
 sudo apt install git
 
-# install gcloud
+# install gcloud and kubectl
 sudo apt-get install apt-transport-https ca-certificates gnupg curl sudo
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-451.0.1-linux-x86_64.tar.gz
 tar -xf google-cloud-cli-451.0.1-linux-x86_64.tar.gz
 ./google-cloud-sdk/install.sh
 ./google-cloud-sdk/bin/gcloud init
+gcloud components install kubectl
 
 # install conda
 mkdir -p ~/miniconda3

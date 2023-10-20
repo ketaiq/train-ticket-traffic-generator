@@ -9,6 +9,7 @@ import locust.stats
 import numpy as np
 from locust import HttpUser, task, events, LoadTestShape
 from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from ts.requests.passenger_actions import PassengerActions
 from ts.services.admin_route_service import init_all_routes
@@ -100,12 +101,17 @@ class Passenger_Role(HttpUser):
     ]
     ADMIN_USERNAME = "admin"
     ADMIN_PASSWORD = "222222"
-    ADMIN_BEARER_LIFETIME = 300  # seconds
+    ADMIN_BEARER_LIFETIME = 60  # seconds
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.client.mount("https://", HTTPAdapter(pool_maxsize=50))
-        self.client.mount("http://", HTTPAdapter(pool_maxsize=50))
+        adapter = HTTPAdapter(
+            pool_connections=100,
+            pool_maxsize=100,
+            max_retries=Retry(total=10, backoff_factor=2),
+        )
+        self.client.mount("https://", adapter)
+        self.client.mount("http://", adapter)
 
     @task
     def perform_task(self):

@@ -1,7 +1,12 @@
+import time
+import uuid
 import requests
 from json import JSONDecodeError
+from locustfile import Passenger_Role
 from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
+from requests.exceptions import ConnectionError
+from ts.services.auth_service import login_user
 from ts.util import (
     gen_random_document_number,
     gen_random_document_type,
@@ -16,7 +21,13 @@ from ts.log_syntax.locust_response import (
 )
 
 
-def user_add(client, request_id: str, admin_bearer: str, username: str, password: str) -> dict:
+def user_add(
+    client,
+    request_id: str,
+    admin_bearer: str,
+    username: str,
+    password: str,
+) -> dict:
     operation = "create user"
     with client.post(
         url="/api/v1/adminuserservice/users",
@@ -36,17 +47,17 @@ def user_add(client, request_id: str, admin_bearer: str, username: str, password
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok:
-            data = f"username: {username}, password: {password}"
-            log_http_error(
-                request_id,
-                operation,
-                response,
-                data,
-                name="request",
-            )
-        else:
-            try:
+        try:
+            if not response.ok:
+                data = f"username: {username}, password: {password}"
+                log_http_error(
+                    request_id,
+                    operation,
+                    response,
+                    data,
+                    name="request",
+                )
+            else:
                 key = "msg"
                 if response.json()["msg"] != "REGISTER USER SUCCESS":
                     log_wrong_response_error(
@@ -65,33 +76,46 @@ def user_add(client, request_id: str, admin_bearer: str, username: str, password
                     new_user = response.json()["data"]
                     log_response_info(request_id, operation, new_user, name="request")
                     return new_user
-            except JSONDecodeError:
-                response.failure(f"Response could not be decoded as JSON")
-                raise RescheduleTask()
-            except KeyError:
-                response.failure(f"Response did not contain expected key '{key}'")
-                raise RescheduleTask()
+        except ConnectionError:
+            time.sleep(10)
+            Passenger_Role.admin_bearer, Passenger_Role.admin_user_id = login_user(
+                client,
+                str(uuid.uuid4()),
+                username=Passenger_Role.ADMIN_USERNAME,
+                password=Passenger_Role.ADMIN_PASSWORD,
+                description="Admin Login",
+            )
+            Passenger_Role.admin_bearer_created_timestamp = time.time()
+            raise RescheduleTask()
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+            raise RescheduleTask()
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
+            raise RescheduleTask()
 
 
-def user_delete(client, request_id: str, admin_bearer: str, username: str, password: str) -> dict:
+def user_delete(
+    client, request_id: str, admin_bearer: str, username: str, password: str
+) -> dict:
     operation = "delete user"
     with client.delete(
-            url="/api/v1/adminuserservice/users",
-            headers={
-                "Authorization": admin_bearer,
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-            json={
-                "documentNum": gen_random_document_number(),
-                "documentType": gen_random_document_type(),
-                "email": gen_random_email(),
-                "gender": gen_random_gender(),
-                "password": password,
-                "userName": username,
-            },
-            name=operation,
-            catch_response=True,
+        url="/api/v1/adminuserservice/users",
+        headers={
+            "Authorization": admin_bearer,
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        json={
+            "documentNum": gen_random_document_number(),
+            "documentType": gen_random_document_type(),
+            "email": gen_random_email(),
+            "gender": gen_random_gender(),
+            "password": password,
+            "userName": username,
+        },
+        name=operation,
+        catch_response=True,
     ) as response:
         if not response.ok:
             data = f"username: {username}, password: {password}"
@@ -153,7 +177,9 @@ def get_all_users_request(admin_bearer: str, request_id: str) -> list:
         print(f"Response did not contain expected key '{key}'")
 
 
-def add_one_user_request(request_id: str, admin_bearer: str, username: str, password: str):
+def add_one_user_request(
+    request_id: str, admin_bearer: str, username: str, password: str
+):
     operation = "add one user"
     r = requests.post(
         url="/api/v1/adminuserservice/users",

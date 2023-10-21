@@ -60,7 +60,7 @@ def create_week_workload_by_day(
                 )
                 if number_of_users_period <= 0:
                     number_of_users_period = 1
-                day_workload.append(number_of_users_period * 3)
+                day_workload.append(number_of_users_period * 2)
 
             start_workload = day_workload[0]
             for i in range(1, wl_num_start_interval + 1):

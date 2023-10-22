@@ -74,7 +74,7 @@ def gen_random_document_type() -> str:
     return random.randint(1, 3)
 
 
-def calculate_peak_seconds(
+def calculate_peak_seconds_within_hours(
     wl_start_hour,
     wl_num_start_interval,
     number_of_points_in_period,
@@ -90,12 +90,32 @@ def calculate_peak_seconds(
     if wl_day < 5:
         for peak_hour in weekday_peak_hours:
             if peak_hour > wl_start_hour:
-                peak_seconds += calculate_peak_range(start_offset, wl_start_hour, peak_hour)
+                peak_seconds += calculate_peak_range(
+                    start_offset, wl_start_hour, peak_hour
+                )
     else:
         for peak_hour in weekend_peak_hours:
             if peak_hour > wl_start_hour:
-                peak_seconds += calculate_peak_range(start_offset, wl_start_hour, peak_hour)
+                peak_seconds += calculate_peak_range(
+                    start_offset, wl_start_hour, peak_hour
+                )
     return peak_seconds
+
+
+def calculate_peak_seconds_within_weeks(
+    weekday_peak_hours, weekend_peak_hours, num_weeks: int = 2
+):
+    peak_seconds = []
+    start_offset = 0
+    for wl_week in range(num_weeks):
+        for wl_day in range(7):
+            start_offset = wl_week * 60 * 60 * 24 * 7 + 60 * 60 * 24 * wl_day
+            if wl_day < 5:
+                for peak_hour in weekday_peak_hours:
+                    peak_seconds += calculate_peak_range(start_offset, 0, peak_hour)
+            else:
+                for peak_hour in weekend_peak_hours:
+                    peak_seconds += calculate_peak_range(start_offset, 0, peak_hour)
 
 
 def calculate_peak_range(start_offset, wl_start_hour, peak_hour):
@@ -110,4 +130,6 @@ if __name__ == "__main__":
     # print(gen_random_email())
     # print(gen_random_time())
     # print(convert_date_to_time(gen_random_date()))
-    print(uuid.uuid4())
+    from ts.config import use_2week_workload
+
+    print(use_2week_workload)

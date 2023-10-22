@@ -23,8 +23,12 @@ from ts.config import (
     wl_interval_mins,
     wl_start_hour,
     wl_num_start_interval,
+    use_2week_workload,
 )
-from ts.util import calculate_peak_seconds
+from ts.util import (
+    calculate_peak_seconds_within_hours,
+    calculate_peak_seconds_within_weeks,
+)
 
 # configure locust statistics
 locust.stats.CONSOLE_STATS_INTERVAL_SEC = 30
@@ -47,14 +51,20 @@ locust.stats.PERCENTILES_TO_REPORT = [
 ]
 
 number_of_points_in_period = wl_interval_mins * 60  # seconds
-peak_points = calculate_peak_seconds(
-    wl_start_hour,
-    wl_num_start_interval,
-    number_of_points_in_period,
-    weekday_peak_hours,
-    weekend_peak_hours,
-    wl_day,
-)
+if use_2week_workload:
+    peak_points = calculate_peak_seconds_within_weeks(
+        weekday_peak_hours,
+        weekend_peak_hours,
+    )
+else:
+    peak_points = calculate_peak_seconds_within_hours(
+        wl_start_hour,
+        wl_num_start_interval,
+        number_of_points_in_period,
+        weekday_peak_hours,
+        weekend_peak_hours,
+        wl_day,
+    )
 
 
 def setup_logger(name, log_file, level=logging.INFO):

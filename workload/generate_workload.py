@@ -42,6 +42,25 @@ def create_week(weekdays_pattern, weekends_pattern, start_day):
     return days[-(7 - start_day) :] + days[:start_day]
 
 
+def create_week_workload(weekdays_pattern, weekends_pattern, num_weeks: int):
+    week_workload = []
+    for _ in range(num_weeks):
+        for day in range(7):
+            if day < 5:
+                workload_pattern = weekdays_pattern
+            else:
+                workload_pattern = weekends_pattern
+
+            for user_number in workload_pattern:
+                number_of_users_period = random.randint(
+                    user_number - 1, user_number + 2
+                )
+                if number_of_users_period <= 0:
+                    number_of_users_period = 1
+                week_workload.append(int(number_of_users_period * 1.5 + 0.5))
+    write_wl_to_csv(week_workload, f"workload/workload_{num_weeks}week.csv")
+
+
 def create_week_workload_by_day(
     weekdays_pattern, weekends_pattern, num_weeks: int, wl_num_start_interval: int
 ):
@@ -179,9 +198,10 @@ if __name__ == "__main__":
     # create_week_workload_by_day(
     #     wl_pattern_weekdays, wl_pattern_weekends, 2, wl_num_start_interval
     # )
-    create_week_workload_by_overlapped_hours(
-        wl_pattern_weekdays, wl_pattern_weekends, 2, 12, 1
-    )
+    # create_week_workload_by_overlapped_hours(
+    #     wl_pattern_weekdays, wl_pattern_weekends, 2, 12, 1
+    # )
+    create_week_workload(wl_pattern_weekdays, wl_pattern_weekends, 2)
 
     # plt.plot(wl_two_weeks)
     # plt.ylabel("")

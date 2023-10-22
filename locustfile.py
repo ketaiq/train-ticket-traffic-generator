@@ -132,37 +132,37 @@ class Passenger_Role(HttpUser):
                 random.randint(3, 5),
             )
 
-        role_to_perform = int(random.choices([role.value for role in Role], weights=role_weights)[0])
-        description = Role[role_to_perform].name
+        role_to_perform = int(random.choices(list(Role), weights=role_weights)[0])
+        description = role_to_perform.name
         request = PassengerActions(
             self.client,
             description,
         )
 
-        if role_to_perform == Role.Irregular_Budget.value:
+        if role_to_perform == Role.Irregular_Budget:
             request.perform_actions(logger_tasks, 1, 1, 5, 10, False, False, False)
 
-        elif role_to_perform == Role.Irregular_Normal.value:
+        elif role_to_perform == Role.Irregular_Normal:
             request.perform_actions(logger_tasks, 5, 10, 1, 1, True, False, False)
 
-        elif role_to_perform == Role.Irregular_Comfort.value:
+        elif role_to_perform == Role.Irregular_Comfort:
             request.perform_actions(logger_tasks, 1, 1, 5, 10, True, True, True)
 
-        elif role_to_perform == Role.Regular.value:
+        elif role_to_perform == Role.Regular:
             request.perform_actions(logger_tasks, 1, 1, 1, 1, True, True, False)
 
-        elif role_to_perform == Role.Cancel_No_Refund.value:
+        elif role_to_perform == Role.Cancel_No_Refund:
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
-        elif role_to_perform == Role.Cancel_With_Refund.value:
+        elif role_to_perform == Role.Cancel_With_Refund:
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
-        elif role_to_perform == Role.Sales_Add_Order.value:
+        elif role_to_perform == Role.Sales_Add_Order:
             request.perform_actions_sales()
 
-        elif role_to_perform == Role.Sales_Add_Update_Order.value:
+        elif role_to_perform == Role.Sales_Add_Update_Order:
             request.perform_actions_sales()
-        elif role_to_perform == Role.Sales_Delete_Order.value:
+        elif role_to_perform == Role.Sales_Delete_Order:
             request.perform_actions_sales()
 
         sleep(random.randint(min_wait_seconds, max_wait_seconds))

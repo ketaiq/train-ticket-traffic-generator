@@ -15,8 +15,8 @@ from ts.log_syntax.locust_response import (
 )
 from enum import Enum
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
+
 
 class AssuranceType(Enum):
     """

@@ -1,0 +1,8 @@
+weekday_peak_hours:
+  - 7
+  - 18
+weekend_peak_hours:
+  - 9
+  - 17
+wl_interval_mins: 15
+wl_num_start_interval: 4

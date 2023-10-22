@@ -2,6 +2,7 @@ from json import JSONDecodeError
 import time
 
 from locust.exception import RescheduleTask
+from requests.exceptions import ConnectionError
 
 from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
@@ -49,8 +50,9 @@ class Order:
         self.price = price
 
 
-def admin_add_order(client, admin_bearer: str, admin_user_id: str, order: Order, description):
-
+def admin_add_order(
+    client, admin_bearer: str, admin_user_id: str, order: Order, description
+):
     operation = description
     boughtDate = int(float(time.time()) * 1000)
 
@@ -82,16 +84,16 @@ def admin_add_order(client, admin_bearer: str, admin_user_id: str, order: Order,
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok:
-            data = str(order.__dict__)
-            log_http_error(
-                admin_user_id,
-                operation,
-                response,
-                data,
-            )
-        else:
-            try:
+        try:
+            if not response.ok:
+                data = str(order.__dict__)
+                log_http_error(
+                    admin_user_id,
+                    operation,
+                    response,
+                    data,
+                )
+            else:
                 key = "msg"
                 if response.json()["msg"] != "Success":
                     log_wrong_response_error(
@@ -104,55 +106,59 @@ def admin_add_order(client, admin_bearer: str, admin_user_id: str, order: Order,
                     data = response.json()["data"]
                     log_response_info(admin_user_id, operation, data)
                     return data
-            except JSONDecodeError:
-                response.failure(f"Response could not be decoded as JSON")
-                raise RescheduleTask()
-            except KeyError:
-                response.failure(f"Response did not contain expected key '{key}'")
-                raise RescheduleTask()
+        except ConnectionError:
+            raise RescheduleTask()
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+            raise RescheduleTask()
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
+            raise RescheduleTask()
 
 
-def admin_update_order(client, admin_bearer: str, user_id: str, order: Order, description):
+def admin_update_order(
+    client, admin_bearer: str, user_id: str, order: Order, description
+):
     operation = description
 
     with client.put(
-            url="/api/v1/adminorderservice/adminorder",
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Authorization": admin_bearer,
-            },
-            json={
-                "id": order.id,
-                "boughtDate": order.boughtDate,
-                "travelDate": order.travelDate,
-                "travelTime": order.travelTime,
-                "accountId": order.accountId,
-                "contactsName": order.contactsName,
-                "documentType": order.documentType,
-                "contactsDocumentNumber": order.contactsDocumentNumber,
-                "trainNumber": order.trainNumber.lstrip("G"),
-                "coachNumber": order.coachNumber,
-                "seatClass": order.seatClass,
-                "seatNumber": order.seatNumber,
-                "from": order.from_station,
-                "to": order.to_station,
-                "status": order.status,
-                "price": order.price,
-            },
-            name=operation,
-            catch_response=True,
+        url="/api/v1/adminorderservice/adminorder",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+        json={
+            "id": order.id,
+            "boughtDate": order.boughtDate,
+            "travelDate": order.travelDate,
+            "travelTime": order.travelTime,
+            "accountId": order.accountId,
+            "contactsName": order.contactsName,
+            "documentType": order.documentType,
+            "contactsDocumentNumber": order.contactsDocumentNumber,
+            "trainNumber": order.trainNumber.lstrip("G"),
+            "coachNumber": order.coachNumber,
+            "seatClass": order.seatClass,
+            "seatNumber": order.seatNumber,
+            "from": order.from_station,
+            "to": order.to_station,
+            "status": order.status,
+            "price": order.price,
+        },
+        name=operation,
+        catch_response=True,
     ) as response:
-        if not response.ok:
-            data = str(order.__dict__)
-            log_http_error(
-                user_id,
-                operation,
-                response,
-                data,
-            )
-        else:
-            try:
+        try:
+            if not response.ok:
+                data = str(order.__dict__)
+                log_http_error(
+                    user_id,
+                    operation,
+                    response,
+                    data,
+                )
+            else:
                 key = "msg"
                 if response.json()["msg"] != "Success":
                     log_wrong_response_error(
@@ -164,14 +170,19 @@ def admin_update_order(client, admin_bearer: str, user_id: str, order: Order, de
                     key = "data"
                     data = response.json()["data"]
                     log_response_info(user_id, operation, data)
-            except JSONDecodeError:
-                response.failure(f"Response could not be decoded as JSON")
-                raise RescheduleTask()
-            except KeyError:
-                response.failure(f"Response did not contain expected key '{key}'")
-                raise RescheduleTask()
+        except ConnectionError:
+            raise RescheduleTask()
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+            raise RescheduleTask()
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
+            raise RescheduleTask()
 
-def admin_delete_one_order(client, admin_bearer: str, user_id: str, order_id: str, trip_id: str):
+
+def admin_delete_one_order(
+    client, admin_bearer: str, user_id: str, order_id: str, trip_id: str
+):
     operation = "admin delete order"
     with client.delete(
         url="/api/v1/adminorderservice/adminorder/"
@@ -186,16 +197,16 @@ def admin_delete_one_order(client, admin_bearer: str, user_id: str, order_id: st
         name=operation,
         catch_response=True,
     ) as response:
-        if not response.ok:
-            data = f"order_id: {order_id}, trip_id: {trip_id}"
-            log_http_error(
-                user_id,
-                operation,
-                response,
-                data,
-            )
-        else:
-            try:
+        try:
+            if not response.ok:
+                data = f"order_id: {order_id}, trip_id: {trip_id}"
+                log_http_error(
+                    user_id,
+                    operation,
+                    response,
+                    data,
+                )
+            else:
                 key = "msg"
                 if response.json()["msg"] != "Success":
                     log_wrong_response_error(
@@ -207,16 +218,17 @@ def admin_delete_one_order(client, admin_bearer: str, user_id: str, order_id: st
                     key = "data"
                     data = response.json()["data"]
                     log_response_info(user_id, operation, data)
-            except JSONDecodeError:
-                response.failure(f"Response could not be decoded as JSON")
-                raise RescheduleTask()
-            except KeyError:
-                response.failure(f"Response did not contain expected key '{key}'")
-                raise RescheduleTask()
+        except ConnectionError:
+            raise RescheduleTask()
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+            raise RescheduleTask()
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
+            raise RescheduleTask()
 
 
 def gen_random_order(user_id) -> Order:
-
     boughtDate = "1"
     travelDate = "2"
     travelTime = "3"
@@ -243,5 +255,5 @@ def gen_random_order(user_id) -> Order:
         "s1",
         "s2",
         0,
-        seat_price
+        seat_price,
     )

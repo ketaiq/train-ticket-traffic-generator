@@ -15,8 +15,7 @@ import string
 from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
 
 STATION_SERVICE_URL = tt_host + "/api/v1/stationservice/stations"
 

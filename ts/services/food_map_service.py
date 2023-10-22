@@ -5,8 +5,7 @@ from pymongo import MongoClient
 import random
 from ts.util import gen_random_phone_number
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
 
 FOOD_MAP_SERVICE_URL = tt_host + "/api/v1/foodmapservice"
 

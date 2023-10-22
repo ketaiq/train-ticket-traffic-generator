@@ -16,8 +16,7 @@ from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 import random
 
-import ts.util as utl
-tt_host = utl.tt_host
+from ts.config import tt_host
 
 PRESERVE_SERVICE_URL = tt_host + "/api/v1/preserveservice/preserve"
 
@@ -81,31 +80,29 @@ def reserve_one_ticket(
         catch_response=True,
     ) as response:
         if not response.ok:
-            data = (
-                {
-                    "accountId": user_id,
-                    "contactsId": contact_id,
-                    # "tripId" : trip_id,
-                    "tripId": "D1345",
-                    "seatType": seat_type,
-                    "date": date,
-                    "from": from_station,
-                    "to": to_station,
-                    "assurance": assurance,
-                    # food
-                    "foodType": food.type,
-                    "foodName": food.name,
-                    "foodPrice": food.price,
-                    "stationName": food.station,
-                    "storeName": food.store,
-                    # consign
-                    "handleDate": date,
-                    "isWithin": False,
-                    "consigneeName": consign.name,
-                    "consigneePhone": consign.phone,
-                    "consigneeWeight": consign.weight,
-                }
-            )
+            data = {
+                "accountId": user_id,
+                "contactsId": contact_id,
+                # "tripId" : trip_id,
+                "tripId": "D1345",
+                "seatType": seat_type,
+                "date": date,
+                "from": from_station,
+                "to": to_station,
+                "assurance": assurance,
+                # food
+                "foodType": food.type,
+                "foodName": food.name,
+                "foodPrice": food.price,
+                "stationName": food.station,
+                "storeName": food.store,
+                # consign
+                "handleDate": date,
+                "isWithin": False,
+                "consigneeName": consign.name,
+                "consigneePhone": consign.phone,
+                "consigneeWeight": consign.weight,
+            }
             log_http_error(
                 user_id,
                 operation,

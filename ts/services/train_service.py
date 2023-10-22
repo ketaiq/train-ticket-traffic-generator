@@ -1,9 +1,9 @@
 import requests
 from json import JSONDecodeError
 
-import ts.util as utl
-tt_host = utl.tt_host
-TRAIN_SERVICE_URL = (tt_host + "/api/v1/adminbasicservice/adminbasic/trains")
+from ts.config import tt_host
+
+TRAIN_SERVICE_URL = tt_host + "/api/v1/adminbasicservice/adminbasic/trains"
 
 ORIGINAL_TRAINS = [
     {

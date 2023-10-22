@@ -75,26 +75,32 @@ def gen_random_document_type() -> str:
 
 
 def calculate_peak_seconds(
-    wl_start_hour, weekday_peak_hours, weekend_peak_hours, wl_day
+    wl_start_hour,
+    wl_num_start_interval,
+    number_of_points_in_period,
+    weekday_peak_hours,
+    weekend_peak_hours,
+    wl_day,
 ) -> list:
+    start_offset = wl_num_start_interval * number_of_points_in_period
     if wl_day < 0 or wl_day > 6:
         print(f"Workload day {wl_day} is illegal!")
         return
-    if wl_start_hour != 0:
-        print(f"Workload start hour {wl_start_hour} is not supported!")
     peak_seconds = []
     if wl_day < 5:
         for peak_hour in weekday_peak_hours:
-            peak_seconds += calculate_peak_range(peak_hour)
+            if peak_hour > wl_start_hour:
+                peak_seconds += calculate_peak_range(start_offset, wl_start_hour, peak_hour)
     else:
         for peak_hour in weekend_peak_hours:
-            peak_seconds += calculate_peak_range(peak_hour)
+            if peak_hour > wl_start_hour:
+                peak_seconds += calculate_peak_range(start_offset, wl_start_hour, peak_hour)
     return peak_seconds
 
 
-def calculate_peak_range(peak_hour):
-    begin_peak_point = (peak_hour - 2) * 60 * 60
-    end_peak_point = (peak_hour + 3) * 60 * 60
+def calculate_peak_range(start_offset, wl_start_hour, peak_hour):
+    begin_peak_point = start_offset + (peak_hour - 2 - wl_start_hour) * 60 * 60
+    end_peak_point = start_offset + (peak_hour + 3 - wl_start_hour) * 60 * 60
     return list(range(begin_peak_point, end_peak_point))
 
 

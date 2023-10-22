@@ -19,13 +19,11 @@ from ts.services.admin_order_service import (
 
 
 class PassengerActions(PassengerRequest):
-    def __init__(self, client, description, admin_bearer, admin_user_id):
+    def __init__(self, client, description):
         super().__init__(client, description)
 
         self.order_creation_time = None
         self.order_completion_time = None
-        self.admin_bearer = admin_bearer
-        self.admin_user_id = admin_user_id
 
     def perform_actions(
         self,
@@ -48,7 +46,6 @@ class PassengerActions(PassengerRequest):
             username=self.username,
             password=self.password,
         )
-
         visit_client_login(self.client, self.request_id)
 
         sleep(randint(5, 10))

@@ -12,3 +12,4 @@ with open("workload/workload_config.yaml") as stream:
 weekday_peak_hours = workload_config["weekday_peak_hours"]
 weekend_peak_hours = workload_config["weekend_peak_hours"]
 wl_interval_mins = workload_config["wl_interval_mins"]
+wl_num_start_interval = workload_config["wl_num_start_interval"]

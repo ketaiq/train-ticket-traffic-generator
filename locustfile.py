@@ -1,10 +1,7 @@
 import csv
 import logging
 import random
-import uuid
 from time import sleep
-import time
-
 import locust.stats
 import numpy as np
 from locust import HttpUser, task, events, LoadTestShape
@@ -86,9 +83,6 @@ logger_actions = setup_logger("logger_actions", "actions.log")
 class Passenger_Role(HttpUser):
     peak_hour = None
     current_time = None
-    admin_bearer = None
-    admin_user_id = None
-    admin_bearer_created_timestamp = None
     ROLES = [
         "Irregular_Budget",
         "Irregular_Normal",
@@ -99,9 +93,6 @@ class Passenger_Role(HttpUser):
         "sales_add_order",
         "sales_update_order",
     ]
-    ADMIN_USERNAME = "admin"
-    ADMIN_PASSWORD = "222222"
-    ADMIN_BEARER_LIFETIME = 60  # seconds
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -118,8 +109,8 @@ class Passenger_Role(HttpUser):
         role_list = [ii for ii in range(8)]
 
         if self.peak_hour:
-            min_wait_seconds = 10
-            max_wait_seconds = 30
+            min_wait_seconds = 5
+            max_wait_seconds = 10
             role_weights = (
                 random.randint(5, 7),
                 random.randint(4, 6),
@@ -131,8 +122,8 @@ class Passenger_Role(HttpUser):
                 random.randint(3, 5),
             )
         else:
-            min_wait_seconds = 30
-            max_wait_seconds = 60
+            min_wait_seconds = 10
+            max_wait_seconds = 15
             role_weights = (
                 random.randint(11, 13),
                 random.randint(9, 11),
@@ -146,29 +137,9 @@ class Passenger_Role(HttpUser):
 
         role_to_perform = int(random.choices(role_list, weights=role_weights)[0])
         description = Passenger_Role.ROLES[role_to_perform]
-
-        sleep(random.randint(5, 10))
-        current_timestamp = time.time()
-        if (
-            Passenger_Role.admin_bearer is None
-            or Passenger_Role.admin_bearer_created_timestamp
-            + Passenger_Role.ADMIN_BEARER_LIFETIME
-            < current_timestamp
-        ):
-            Passenger_Role.admin_bearer, Passenger_Role.admin_user_id = login_user(
-                self.client,
-                str(uuid.uuid4()),
-                username=Passenger_Role.ADMIN_USERNAME,
-                password=Passenger_Role.ADMIN_PASSWORD,
-                description="Admin Login",
-            )
-            Passenger_Role.admin_bearer_created_timestamp = current_timestamp
-
         request = PassengerActions(
             self.client,
             description,
-            Passenger_Role.admin_bearer,
-            Passenger_Role.admin_user_id,
         )
 
         if role_to_perform == 0:

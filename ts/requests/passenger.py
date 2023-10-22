@@ -11,6 +11,7 @@ from ts.services.preserve_service import SeatType
 from ts.services.preserve_service import pick_random_seat_type
 from ts.services.travel_plan_service import pick_random_strategy_and_search
 from ts.services.travel_service import pick_random_travel, search_ticket
+from ts.services.auth_service import login_user
 
 from ts.config import tt_host
 
@@ -35,12 +36,21 @@ def admin_orders_get_list_by_user_id(bearer: str, account_id: str):
 
 
 class PassengerRequest:
+    ADMIN_USERNAME = "admin"
+    ADMIN_PASSWORD = "222222"
+
     def __init__(self, client, description):
         self.host = tt_host
 
         self.client = client
         self.description = description
-
+        self.admin_bearer, self.admin_user_id = login_user(
+            self.client,
+            str(uuid.uuid4()),
+            username=PassengerRequest.ADMIN_USERNAME,
+            password=PassengerRequest.ADMIN_PASSWORD,
+            description=f"Admin Login: {self.description}",
+        )
         self.username = None
         self.password = None
         self.bearer = None

@@ -77,3 +77,9 @@ nohup bash collect_node_pod.sh 14 &
 - *tt_host*: the URL of the dashboard of TrainTicket system
 - *wl_file_name*: the filename of the used workload
 - *wl_start_hour*: the starting hour of the workload, from 0 to 23.
+
+### Collect Locust Metrics
+```sh
+tar -czvf archive.tar.gz *.log *.csv nohup.out nodes_info pods_info train-ticket-report.html
+gcloud compute scp --project "iron-bedrock-366809" train-ticket-traffic-generator-102009:/home/ketai/train-ticket-traffic-generator/archive.tar.gz ~/Downloads/
+```

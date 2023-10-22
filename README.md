@@ -56,6 +56,16 @@ rm -rf ~/miniconda3/miniconda.sh
 conda create -n train-ticket --channel=conda-forge python=3.10 locust=2.17 pandas=2.1 pymongo=4.5 pyyaml=6.0
 ```
 
+### Update *experiment_config.yaml*
+- *tt_host*: the URL of the dashboard of TrainTicket system
+- *wl_file_name*: the filename of the used workload
+- *wl_start_hour*: the starting hour of the workload, from 0 to 23.
+
+Change host url and workload config
+
+vim experiment_config.yaml
+vim locust.conf
+
 ### Start locust
 
 ```sh
@@ -63,6 +73,9 @@ conda create -n train-ticket --channel=conda-forge python=3.10 locust=2.17 panda
 conda activate train-ticket
 nohup locust &
 ```
+
+
+
 
 ### Connect to TrainTicket cluster
 
@@ -74,11 +87,6 @@ gcloud container clusters get-credentials train-ticket-cluster --zone us-central
 ```sh
 nohup bash collect_node_pod.sh 14 &
 ```
-
-### Update *experiment_config.yaml*
-- *tt_host*: the URL of the dashboard of TrainTicket system
-- *wl_file_name*: the filename of the used workload
-- *wl_start_hour*: the starting hour of the workload, from 0 to 23.
 
 ### Collect Locust Metrics
 ```sh

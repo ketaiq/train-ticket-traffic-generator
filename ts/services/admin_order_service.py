@@ -6,6 +6,7 @@ from requests.exceptions import ConnectionError
 
 from ts import TIMEOUT_MAX
 from ts.log_syntax.locust_response import (
+    log_response_warning,
     log_wrong_response_error,
     log_timeout_error,
     log_response_info,
@@ -231,11 +232,9 @@ def admin_delete_one_order(
                     data,
                 )
             else:
-                key = "msg"
-                if response.json()["msg"] != "Success":
-                    log_wrong_response_error(
-                        user_id, operation, response.failure, response.json()
-                    )
+                status = int(response.json()["status"])
+                if status != 1:
+                    log_response_warning(user_id, operation, response.json())
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
                     log_timeout_error(user_id, operation, response.failure)
                 else:

@@ -25,3 +25,8 @@ def log_timeout_error(id: str, operation: str, response_failure, name: str = "us
 
 def log_response_info(id: str, operation: str, data, name: str = "user"):
     logging.info(f"{name} {id} {operation}: {data}")
+
+
+def log_response_warning(id: str, operation: str, data):
+    logging.warning(f"user {id} tries to {operation} but get {data}.")
+    raise RescheduleTask()

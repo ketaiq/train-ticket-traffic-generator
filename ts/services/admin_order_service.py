@@ -180,15 +180,39 @@ def admin_update_order(
             raise RescheduleTask()
 
 
+def admin_get_all_orders(client, admin_bearer: str):
+    operation = "admin get all orders"
+    with client.get(
+        url="/api/v1/adminorderservice/adminorder",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": admin_bearer,
+        },
+        name=operation,
+        catch_response=True,
+    ) as response:
+        try:
+            if response.ok:
+                return response.json()["data"]
+            else:
+                log_http_error("admin", operation, response, "Nothing")
+        except ConnectionError:
+            raise RescheduleTask()
+        except JSONDecodeError:
+            response.failure(f"Response could not be decoded as JSON")
+            raise RescheduleTask()
+        except KeyError:
+            response.failure(f"Response did not contain expected key '{key}'")
+            raise RescheduleTask()
+
+
 def admin_delete_one_order(
     client, admin_bearer: str, user_id: str, order_id: str, trip_id: str
 ):
     operation = "admin delete order"
     with client.delete(
-        url="/api/v1/adminorderservice/adminorder/"
-        + order_id
-        + "/"
-        + trip_id.lstrip("G"),
+        url="/api/v1/adminorderservice/adminorder/" + order_id + "/" + trip_id,
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

@@ -13,12 +13,17 @@ from ts.services.visit_page import visit_client_login
 from ts.services.cancel_service import cancel_one_order, get_refund_amount
 from ts.services.admin_order_service import (
     admin_add_order,
+    admin_delete_one_order,
+    admin_get_all_orders,
     admin_update_order,
     gen_random_order,
 )
+from ts.role import Role
 
 
 class PassengerActions(PassengerRequest):
+    ORDER_MIN_AGE = 60 * 30  # seconds
+
     def __init__(self, client, description):
         super().__init__(client, description)
 
@@ -96,13 +101,13 @@ class PassengerActions(PassengerRequest):
             self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"]
         )
 
-        if self.description == "Cancel_With_Refund":
+        if self.description == Role.Cancel_With_Refund.name:
             sleep(randint(5, 10))
             get_refund_amount(self.client, self.bearer, self.order_id, self.user_id)
 
         if (
-            self.description == "Cancel_No_Refund"
-            or self.description == "Cancel_With_Refund"
+            self.description == Role.Cancel_No_Refund.name
+            or self.description == Role.Cancel_With_Refund.name
         ):
             sleep(randint(5, 10))
             cancel_one_order(self.client, self.bearer, self.order_id, self.user_id)
@@ -122,7 +127,7 @@ class PassengerActions(PassengerRequest):
         logger_tasks.info(self.description + ": " + str(order_age))
 
     def perform_actions_sales(self):
-        if self.description == "sales_add_order":
+        if self.description == Role.Sales_Add_Order.name:
             sleep(randint(5, 10))
             order_object = gen_random_order(self.test_user_id)
             the_order = admin_add_order(
@@ -133,7 +138,7 @@ class PassengerActions(PassengerRequest):
                 self.description,
             )
 
-        if self.description == "sales_update_order":
+        elif self.description == Role.Sales_Add_Update_Order.name:
             sleep(randint(5, 10))
             order_object = gen_random_order(self.test_user_id)
             the_order = admin_add_order(
@@ -155,3 +160,32 @@ class PassengerActions(PassengerRequest):
                 order_object,
                 self.description + " update",
             )
+        elif self.description == Role.Sales_Delete_Order.name:
+            sleep(randint(5, 10))
+            all_orders = admin_get_all_orders(self.client, self.admin_bearer)
+            orders_deleted = 0
+            for order in all_orders:
+                order_id = order["id"]
+                order_train_number = order["trainNumber"]
+                order_bought_time = order["boughtDate"]
+                order_status = order["status"]
+
+                bought_time = datetime.datetime.fromtimestamp(
+                    round(order_bought_time / 1000)
+                )
+                current_time = datetime.datetime.now()
+                seconds_passed = int((current_time - bought_time).total_seconds())
+
+                if order_status == 6 or seconds_passed > PassengerActions.ORDER_MIN_AGE:
+                    admin_delete_one_order(
+                        self.client,
+                        self.admin_bearer,
+                        self.admin_user_id,
+                        order_id,
+                        order_train_number,
+                    )
+                    orders_deleted += 1
+                if orders_deleted > 100:
+                    break
+                if orders_deleted % 10 == 0:
+                    sleep(randint(5, 10))

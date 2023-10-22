@@ -13,6 +13,7 @@ from ts.services.admin_route_service import init_all_routes
 from ts.services.auth_service import login_user_request
 from ts.services.station_service import init_all_stations
 from ts.services.auth_service import login_user
+from ts.role import Role
 
 from ts.config import (
     wl_file_name,
@@ -83,16 +84,6 @@ logger_actions = setup_logger("logger_actions", "actions.log")
 class Passenger_Role(HttpUser):
     peak_hour = None
     current_time = None
-    ROLES = [
-        "Irregular_Budget",
-        "Irregular_Normal",
-        "Irregular_Comfort",
-        "Regular",
-        "Cancel_No_Refund",
-        "Cancel_With_Refund",
-        "sales_add_order",
-        "sales_update_order",
-    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -120,6 +111,7 @@ class Passenger_Role(HttpUser):
                 random.randint(0, 2),
                 random.randint(45, 47),
                 random.randint(3, 5),
+                random.randint(3, 5),
             )
         else:
             min_wait_seconds = 10
@@ -133,37 +125,40 @@ class Passenger_Role(HttpUser):
                 random.randint(0, 2),
                 random.randint(45, 47),
                 random.randint(3, 5),
+                random.randint(3, 5),
             )
 
         role_to_perform = int(random.choices(role_list, weights=role_weights)[0])
-        description = Passenger_Role.ROLES[role_to_perform]
+        description = Role[role_to_perform].name
         request = PassengerActions(
             self.client,
             description,
         )
 
-        if role_to_perform == 0:
+        if role_to_perform == Role.Irregular_Budget.value:
             request.perform_actions(logger_tasks, 1, 1, 5, 10, False, False, False)
 
-        if role_to_perform == 1:
+        elif role_to_perform == Role.Irregular_Normal.value:
             request.perform_actions(logger_tasks, 5, 10, 1, 1, True, False, False)
 
-        if role_to_perform == 2:
+        elif role_to_perform == Role.Irregular_Comfort.value:
             request.perform_actions(logger_tasks, 1, 1, 5, 10, True, True, True)
 
-        if role_to_perform == 3:
+        elif role_to_perform == Role.Regular.value:
             request.perform_actions(logger_tasks, 1, 1, 1, 1, True, True, False)
 
-        if role_to_perform == 4:
+        elif role_to_perform == Role.Cancel_No_Refund.value:
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
-        if role_to_perform == 5:
+        elif role_to_perform == Role.Cancel_With_Refund.value:
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
-        if role_to_perform == 6:
+        elif role_to_perform == Role.Sales_Add_Order.value:
             request.perform_actions_sales()
 
-        if role_to_perform == 7:
+        elif role_to_perform == Role.Sales_Add_Update_Order.value:
+            request.perform_actions_sales()
+        elif role_to_perform == Role.Sales_Delete_Order.value:
             request.perform_actions_sales()
 
         sleep(random.randint(min_wait_seconds, max_wait_seconds))

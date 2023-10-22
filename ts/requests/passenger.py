@@ -72,7 +72,6 @@ class PassengerRequest:
         self.food = None
         self.consign = None
         self.order_id = None
-        self.admin_bearer = None
 
     def tickets_search(self, number_of_smpl, number_of_adv):
         trips = []

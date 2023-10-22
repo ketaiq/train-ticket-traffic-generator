@@ -132,7 +132,7 @@ class Passenger_Role(HttpUser):
                 random.randint(3, 5),
             )
 
-        role_to_perform = int(random.choices(list(Role), weights=role_weights)[0])
+        role_to_perform = random.choices(list(Role), weights=role_weights)[0]
         description = role_to_perform.name
         request = PassengerActions(
             self.client,

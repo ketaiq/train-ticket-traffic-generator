@@ -22,6 +22,7 @@ from ts.config import (
     wl_day,
     wl_interval_mins,
     wl_start_hour,
+    wl_num_start_interval,
 )
 from ts.util import calculate_peak_seconds
 
@@ -47,7 +48,7 @@ locust.stats.PERCENTILES_TO_REPORT = [
 
 number_of_points_in_period = wl_interval_mins * 60  # seconds
 peak_points = calculate_peak_seconds(
-    wl_start_hour, weekday_peak_hours, weekend_peak_hours, wl_day
+    wl_start_hour, wl_num_start_interval, number_of_points_in_period, weekday_peak_hours, weekend_peak_hours, wl_day
 )
 
 

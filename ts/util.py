@@ -116,6 +116,7 @@ def calculate_peak_seconds_within_weeks(
             else:
                 for peak_hour in weekend_peak_hours:
                     peak_seconds += calculate_peak_range(start_offset, 0, peak_hour)
+    return peak_seconds
 
 
 def calculate_peak_range(start_offset, wl_start_hour, peak_hour):
@@ -130,6 +131,10 @@ if __name__ == "__main__":
     # print(gen_random_email())
     # print(gen_random_time())
     # print(convert_date_to_time(gen_random_date()))
-    from ts.config import use_2week_workload
+    from ts.config import use_2week_workload, weekday_peak_hours, weekend_peak_hours
 
-    print(use_2week_workload)
+    print(
+        calculate_peak_seconds_within_weeks(
+            weekday_peak_hours, weekend_peak_hours, use_2week_workload
+        )
+    )

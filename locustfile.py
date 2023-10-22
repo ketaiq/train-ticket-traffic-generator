@@ -48,7 +48,12 @@ locust.stats.PERCENTILES_TO_REPORT = [
 
 number_of_points_in_period = wl_interval_mins * 60  # seconds
 peak_points = calculate_peak_seconds(
-    wl_start_hour, wl_num_start_interval, number_of_points_in_period, weekday_peak_hours, weekend_peak_hours, wl_day
+    wl_start_hour,
+    wl_num_start_interval,
+    number_of_points_in_period,
+    weekday_peak_hours,
+    weekend_peak_hours,
+    wl_day,
 )
 
 
@@ -98,8 +103,6 @@ class Passenger_Role(HttpUser):
 
     @task
     def perform_task(self):
-        role_list = [ii for ii in range(8)]
-
         if self.peak_hour:
             min_wait_seconds = 5
             max_wait_seconds = 10
@@ -129,7 +132,7 @@ class Passenger_Role(HttpUser):
                 random.randint(3, 5),
             )
 
-        role_to_perform = int(random.choices(role_list, weights=role_weights)[0])
+        role_to_perform = int(random.choices([role.value for role in Role], weights=role_weights)[0])
         description = Role[role_to_perform].name
         request = PassengerActions(
             self.client,

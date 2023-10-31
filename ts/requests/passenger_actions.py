@@ -7,7 +7,7 @@ from ts.requests.passenger import PassengerRequest, admin_orders_get_list_by_use
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import user_add
 from ts.services.preserve_service import reserve_one_ticket
-from ts.services.inside_payment_service import pay_one_order
+from ts.services.inside_payment_service import delete_payment_by_order_id, pay_one_order
 from ts.services.execute_service import collect_one_ticket, enter_station
 from ts.services.visit_page import visit_client_login
 from ts.services.cancel_service import cancel_one_order, get_refund_amount
@@ -126,66 +126,70 @@ class PassengerActions(PassengerRequest):
         )
         logger_tasks.info(self.description + ": " + str(order_age))
 
-    def perform_actions_sales(self):
-        if self.description == Role.Sales_Add_Order.name:
-            sleep(randint(5, 10))
-            order_object = gen_random_order(self.test_user_id)
-            the_order = admin_add_order(
-                self.client,
-                self.admin_bearer,
-                self.admin_user_id,
-                order_object,
-                self.description,
-            )
+    def perform_sales_add_order(self):
+        sleep(randint(5, 10))
+        order_object = gen_random_order(self.test_user_id)
+        admin_add_order(
+            self.client,
+            self.admin_bearer,
+            self.admin_user_id,
+            order_object,
+            self.description,
+        )
 
-        elif self.description == Role.Sales_Add_Update_Order.name:
-            sleep(randint(5, 10))
-            order_object = gen_random_order(self.test_user_id)
-            the_order = admin_add_order(
-                self.client,
-                self.admin_bearer,
-                self.admin_user_id,
-                order_object,
-                self.description + " add",
-            )
+    def perform_sales_add_update_order(self):
+        sleep(randint(5, 10))
+        order_object = gen_random_order(self.test_user_id)
+        the_order = admin_add_order(
+            self.client,
+            self.admin_bearer,
+            self.admin_user_id,
+            order_object,
+            self.description + " add",
+        )
 
-            sleep(randint(5, 10))
-            order_object.id = the_order["id"]
-            order_object.boughtDate = the_order["boughtDate"]
-            order_object.contactsName = order_object.contactsName + "__"
-            the_order = admin_update_order(
-                self.client,
-                self.admin_bearer,
-                self.admin_user_id,
-                order_object,
-                self.description + " update",
-            )
-        elif self.description == Role.Sales_Delete_Order.name:
-            sleep(randint(5, 10))
-            all_orders = admin_get_all_orders(self.client, self.admin_bearer)
-            orders_deleted = 0
-            for order in all_orders:
-                order_id = order["id"]
-                order_train_number = order["trainNumber"]
-                order_bought_time = order["boughtDate"]
-                order_status = order["status"]
+        sleep(randint(5, 10))
+        order_object.id = the_order["id"]
+        order_object.boughtDate = the_order["boughtDate"]
+        order_object.contactsName = order_object.contactsName + "__"
+        the_order = admin_update_order(
+            self.client,
+            self.admin_bearer,
+            self.admin_user_id,
+            order_object,
+            self.description + " update",
+        )
 
-                bought_time = datetime.datetime.fromtimestamp(
-                    round(order_bought_time / 1000)
+    def perform_sales_delete_order(self):
+        sleep(randint(5, 10))
+        all_orders = admin_get_all_orders(self.client, self.admin_bearer)
+        orders_deleted = 0
+        # iterate through all orders
+        for order in all_orders:
+            order_id = order["id"]
+            order_train_number = order["trainNumber"]
+            order_bought_time = order["boughtDate"]
+            order_status = order["status"]
+
+            bought_time = datetime.datetime.fromtimestamp(
+                round(order_bought_time / 1000)
+            )
+            current_time = datetime.datetime.now()
+            seconds_passed = int((current_time - bought_time).total_seconds())
+            # delete used orders or expired orders
+            if order_status == 6 or seconds_passed > PassengerActions.ORDER_MIN_AGE:
+                admin_delete_one_order(
+                    self.client,
+                    self.admin_bearer,
+                    self.admin_user_id,
+                    order_id,
+                    order_train_number,
                 )
-                current_time = datetime.datetime.now()
-                seconds_passed = int((current_time - bought_time).total_seconds())
-
-                if order_status == 6 or seconds_passed > PassengerActions.ORDER_MIN_AGE:
-                    admin_delete_one_order(
-                        self.client,
-                        self.admin_bearer,
-                        self.admin_user_id,
-                        order_id,
-                        order_train_number,
-                    )
-                    orders_deleted += 1
-                if orders_deleted > 100:
-                    break
-                if orders_deleted % 10 == 0:
-                    sleep(randint(5, 10))
+                # delete payment related to the order
+                delete_payment_by_order_id(self.client, self.admin_bearer, order_id)
+                orders_deleted += 1
+            # delete at most 100 orders
+            if orders_deleted > 100:
+                break
+            if orders_deleted % 10 == 0:
+                sleep(randint(5, 10))

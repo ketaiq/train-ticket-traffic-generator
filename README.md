@@ -10,13 +10,6 @@ SBB’s route network: https://data.sbb.ch/explore/dataset/linie/information/
 Number of SBB station users: https://data.sbb.ch/explore/dataset/anzahl-sbb-bahnhofbenutzer/information/  
 Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/information/
 
-## Environment Configuration
-
-- Conda
-
-1. Install all required packages by running ``.
-2. Activate the conda environment by running ``.
-
 ## Quick Start
 
 ### Create Google Cloud Virtual Machine
@@ -54,6 +47,9 @@ rm -rf ~/miniconda3/miniconda.sh
 
 # install Python and related packages
 conda create -n train-ticket --channel=conda-forge python=3.10 locust=2.17 pandas=2.1 pymongo=4.5 pyyaml=6.0
+
+# install docker and mongodb
+docker compose up -d
 ```
 
 ### Update *experiment_config.yaml*
@@ -90,6 +86,6 @@ nohup bash collect_node_pod.sh 14 &
 
 ### Collect Locust Metrics
 ```sh
-tar -czvf archive.tar.gz *.log *.csv nohup.out nodes_info pods_info train-ticket-report.html
+tar -czvf archive.tar.gz *.log *.csv nohup.out nodes_info pods_info train-ticket-report.html experiment_config.yaml
 gcloud compute scp --project "iron-bedrock-366809" train-ticket-traffic-generator-102009:/home/ketai/train-ticket-traffic-generator/archive.tar.gz ~/Downloads/
 ```

@@ -168,12 +168,12 @@ class Passenger_Role(HttpUser):
             request.perform_actions(logger_tasks, 1, 1, 1, 1, False, False, False)
 
         elif role_to_perform == Role.Sales_Add_Order:
-            request.perform_actions_sales()
+            request.perform_sales_add_order()
 
         elif role_to_perform == Role.Sales_Add_Update_Order:
-            request.perform_actions_sales()
+            request.perform_sales_add_update_order()
         elif role_to_perform == Role.Sales_Delete_Order:
-            request.perform_actions_sales()
+            request.perform_sales_delete_order()
 
         sleep(random.randint(min_wait_seconds, max_wait_seconds))
 

@@ -193,7 +193,7 @@ def add_one_contact(client, bearer: str, user_id: str, contact: Contact) -> dict
 def add_one_contact_request(
     request_id: str, admin_bearer: str, contact: Contact
 ) -> dict:
-    operation = "delete one contact"
+    operation = "add contact"
     r = requests.post(
         url=CONTACTS_SERVICE_URL,
         headers={

@@ -1,6 +1,6 @@
 from ts.services.admin_user_service import (
     get_all_users_request,
-    add_one_user_request,
+    create_user_request,
     delete_one_user_request,
 )
 
@@ -20,7 +20,7 @@ def _test_add_one_user_request(
     admin_bearer: str,
     request_id: str,
 ):
-    add_one_user_request(request_id, admin_bearer, "testuser", "test")
+    create_user_request(request_id, admin_bearer, "testuser", "test")
 
 
 def _test_delete_one_user_request(

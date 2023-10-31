@@ -1,4 +1,4 @@
-tt_host: http://34.69.74.65:32677
+tt_host: http://35.193.145.6:32677
 wl_file_name: workload/workload_2week.csv
 wl_start_hour: 0
 wl_day: 0

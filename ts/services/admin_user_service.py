@@ -15,6 +15,7 @@ from ts.log_syntax.locust_response import (
     log_response_info,
     log_http_error,
 )
+from ts.config import tt_host
 
 
 def user_add(
@@ -164,12 +165,12 @@ def get_all_users_request(admin_bearer: str, request_id: str) -> list:
         print(f"Response did not contain expected key '{key}'")
 
 
-def add_one_user_request(
+def create_user_request(
     request_id: str, admin_bearer: str, username: str, password: str
 ):
-    operation = "add one user"
+    operation = "create user"
     r = requests.post(
-        url="/api/v1/adminuserservice/users",
+        url=f"{tt_host}/api/v1/adminuserservice/users",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",

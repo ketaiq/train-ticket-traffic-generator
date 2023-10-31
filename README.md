@@ -21,7 +21,7 @@ Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/
 ### Install Packages
 
 ```sh
-# install git
+# install git and set up SSH
 sudo apt update
 sudo apt install git
 
@@ -49,6 +49,7 @@ rm -rf ~/miniconda3/miniconda.sh
 conda create -n train-ticket --channel=conda-forge python=3.10 locust=2.17 pandas=2.1 pymongo=4.5 pyyaml=6.0
 
 # install docker and mongodb
+# see https://docs.docker.com/engine/install/debian/
 docker compose up -d
 ```
 

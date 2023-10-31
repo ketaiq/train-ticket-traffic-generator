@@ -1,4 +1,5 @@
 import uuid
+import random
 from random import randint
 from time import sleep
 import datetime
@@ -19,6 +20,7 @@ from ts.services.admin_order_service import (
     gen_random_order,
 )
 from ts.role import Role
+from ts.database_driver import db_driver
 
 
 class PassengerActions(PassengerRequest):
@@ -29,6 +31,47 @@ class PassengerActions(PassengerRequest):
 
         self.order_creation_time = None
         self.order_completion_time = None
+
+    def _sample_user_or_create(self):
+        if random.random() < 0.9:
+            # sample user from local mongodb
+            user = db_driver.sample_user()
+            self.username = user["userName"]
+            self.password = user["password"]
+            self.contact_id = user["contactId"]
+            visit_client_login(self.client, self.request_id)
+            sleep(randint(5, 10))
+            self.bearer, self.user_id = login_user(
+                client=self.client,
+                request_id=self.request_id,
+                username=self.username,
+                password=self.password,
+                description=f"User Login: {self.description}",
+            )
+        else:
+            # create a new user and contact
+            self.username = str(uuid.uuid4())
+            self.password = self.username
+            user = user_add(
+                self.client,
+                self.request_id,
+                self.admin_bearer,
+                username=self.username,
+                password=self.password,
+            )
+            visit_client_login(self.client, self.request_id)
+            sleep(randint(5, 10))
+            self.bearer, self.user_id = login_user(
+                client=self.client,
+                request_id=self.request_id,
+                username=self.username,
+                password=self.password,
+                description=f"User Login: {self.description}",
+            )
+            self.contact_id = self.contact_create_add()
+            # save new user to the local mongodb
+            user["contactId"] = self.contact_id
+            db_driver.users.insert_one(user)
 
     def perform_actions(
         self,
@@ -42,27 +85,7 @@ class PassengerActions(PassengerRequest):
         consign_incl,
     ):
         sleep(randint(5, 10))
-        self.username = str(uuid.uuid4())
-        self.password = self.username
-        user_add(
-            self.client,
-            self.request_id,
-            self.admin_bearer,
-            username=self.username,
-            password=self.password,
-        )
-        visit_client_login(self.client, self.request_id)
-
-        sleep(randint(5, 10))
-        self.bearer, self.user_id = login_user(
-            client=self.client,
-            request_id=self.request_id,
-            username=self.username,
-            password=self.password,
-            description=f"User Login: {self.description}",
-        )
-        self.contact_id = self.contact_create_add()
-
+        self._sample_user_or_create()
         sleep(randint(5, 10))
         self.tickets_search(
             randint(search_simple_fr, search_simple_to),

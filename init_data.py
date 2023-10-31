@@ -1,3 +1,4 @@
+import time
 import uuid
 
 from ts.services.admin_user_service import create_user_request
@@ -13,7 +14,7 @@ def init_users_and_contacts(num_users: int):
     admin_bearer, admin_user_id = login_user_request(
         admin_username, admin_password, request_id
     )
-    for _ in range(num_users):
+    for i in range(num_users):
         username = str(uuid.uuid4())
         password = username
         user = create_user_request(
@@ -26,8 +27,10 @@ def init_users_and_contacts(num_users: int):
         contact = add_one_contact_request(
             request_id, admin_bearer, gen_random_contact(None, user_id)
         )
+        user["contactId"] = contact["id"]
         db_driver.users.insert_one(user)
-        db_driver.contacts.insert_one(contact)
+        if i % 10 == 0:
+            time.sleep(5)
 
 
 def main():

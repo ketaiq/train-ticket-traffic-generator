@@ -8,7 +8,10 @@ class DatabaseDriver:
         self.client = MongoClient(uri)
         self.db = self.client["trainticket"]
         self.users = self.db["users"]
-        self.contacts = self.db["contacts"]
+
+    def sample_user(self) -> dict:
+        sampled_users = list(self.users.aggregate([{"$sample": {"size": 1}}]))
+        return sampled_users[0]
 
 
 db_driver = DatabaseDriver("localhost:27017", "root", "rootpass")

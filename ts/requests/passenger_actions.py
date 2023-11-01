@@ -1,3 +1,4 @@
+import logging
 import uuid
 import random
 from random import randint
@@ -7,6 +8,7 @@ import datetime
 from ts.requests.passenger import PassengerRequest, admin_orders_get_list_by_user_id
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import user_add
+from ts.services.order_other_service import refresh_user_other_orders
 from ts.services.order_service import refresh_user_orders
 from ts.services.preserve_service import reserve_one_ticket
 from ts.services.inside_payment_service import delete_payment_by_order_id, pay_one_order
@@ -76,8 +78,16 @@ class PassengerActions(PassengerRequest):
 
     def _get_order_id_to_pay(self):
         user_orders = refresh_user_orders(self.client, self.user_id, self.bearer)
-        user_orders = sorted(user_orders, key=lambda order: order["boughtDate"])
-        self.order_id = user_orders[-1]["id"]
+        user_other_orders = refresh_user_other_orders(
+            self.client, self.user_id, self.bearer
+        )
+        orders = user_orders + user_other_orders
+        orders = sorted(orders, key=lambda order: order["boughtDate"])
+        if not orders:
+            logging.warning(f"There are no orders created by user {self.user_id}!")
+            self.order_id = None
+        else:
+            self.order_id = orders[-1]["id"]
 
     def perform_actions(
         self,
@@ -119,6 +129,8 @@ class PassengerActions(PassengerRequest):
 
         sleep(randint(5, 10))
         self._get_order_id_to_pay()
+        if self.order_id is None:
+            return
 
         sleep(randint(5, 10))
         pay_one_order(

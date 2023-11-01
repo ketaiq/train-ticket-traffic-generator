@@ -76,7 +76,7 @@ gcloud container clusters get-credentials train-ticket-cluster --zone us-central
 
 ### Collect node and pod information per minute in JSON files
 ```sh
-nohup bash collect_node_pod.sh 14 &
+nohup bash collect_node_pod.sh 338 &
 ```
 
 ### Start locust

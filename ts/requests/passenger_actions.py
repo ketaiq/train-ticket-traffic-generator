@@ -82,9 +82,12 @@ class PassengerActions(PassengerRequest):
             self.client, self.user_id, self.bearer
         )
         orders = user_orders + user_other_orders
+        orders = [order for order in orders if order["status"] == 0]
         orders = sorted(orders, key=lambda order: order["boughtDate"])
         if not orders:
-            logging.warning(f"There are no orders created by user {self.user_id}!")
+            logging.warning(
+                f"There are no orders created by user {self.user_id} waiting for payment!"
+            )
             self.order_id = None
         else:
             self.order_id = orders[-1]["id"]

@@ -58,6 +58,8 @@ def create_week_workload(weekdays_pattern, weekends_pattern, num_weeks: int):
                 if number_of_users_period <= 0:
                     number_of_users_period = 1
                 week_workload.append(int(number_of_users_period * 1.5 + 0.5))
+    begin_workload = gen_overlapped_workload(1, week_workload[0], True)
+    week_workload = begin_workload + week_workload
     write_wl_to_csv(week_workload, f"workload/workload_{num_weeks}week.csv")
 
 

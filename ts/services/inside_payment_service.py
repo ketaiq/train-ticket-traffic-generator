@@ -40,16 +40,15 @@ def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str
         else:
             try:
                 res_json = response.json()
-                msg = res_json["msg"]
-                status = res_json["status"]
+                status = int(res_json["status"])
                 data = res_json["data"]
-                if status == "1":
+                if status == 1:
                     log_response_info(user_id, operation, data)
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
                     log_timeout_error(user_id, operation, response.failure)
                 else:
                     logging.warning(
-                        f"User {user_id} tries to {operation} {order_id} but gets {msg}."
+                        f"User {user_id} tries to {operation} {order_id} but gets {res_json}."
                     )
             except JSONDecodeError:
                 logging.error(f"Response {response.text} could not be decoded as JSON!")

@@ -8,6 +8,7 @@ from ts.log_syntax.locust_response import (
     log_response_info,
 )
 
+
 def refresh_user_other_orders(client, user_id: str, bearer: str) -> list:
     operation = "refresh user other orders"
     with client.post(
@@ -41,17 +42,16 @@ def refresh_user_other_orders(client, user_id: str, bearer: str) -> list:
         else:
             try:
                 res_json = response.json()
-                msg = res_json["msg"]
-                status = res_json["status"]
+                status = int(res_json["status"])
                 orders = res_json["data"]
-                if status == "1":
+                if status == 1:
                     log_response_info(user_id, operation, orders)
                     return orders
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
                     log_timeout_error(user_id, operation, response.failure)
                 else:
                     logging.warning(
-                        f"User {user_id} tries to {operation} but gets {msg}."
+                        f"User {user_id} tries to {operation} but gets {res_json}."
                     )
             except JSONDecodeError:
                 logging.error(f"Response {response.text} could not be decoded as JSON!")

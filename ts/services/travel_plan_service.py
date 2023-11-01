@@ -21,7 +21,6 @@ def get_cheapest_travel_plans(
     endPlace: str,
     departure_time: str,
 ) -> list:
-
     operation = "search cheapest travel plans"
     with client.post(
         url="/api/v1/travelplanservice/travelPlan/cheapest",
@@ -199,7 +198,6 @@ def pick_random_strategy_and_search(
     to_station: str,
     departure_date: str,
 ) -> list:
-
     strategy = random.randint(0, 2)
 
     if strategy == 0:

@@ -3,6 +3,7 @@ This module includes all API calls provided by ts-order-service.
 """
 
 from json import JSONDecodeError
+import logging
 from ts import TIMEOUT_MAX
 from locust.exception import RescheduleTask
 from ts.log_syntax.locust_response import (
@@ -13,9 +14,8 @@ from ts.log_syntax.locust_response import (
 )
 
 
-def get_orders_by_login_id(client, user_id: str, bearer: str) -> list:
-
-    operation = "search orders"
+def refresh_user_orders(client, user_id: str, bearer: str) -> list:
+    operation = "refresh user orders"
     with client.post(
         url="/api/v1/orderservice/order/refresh",
         name=operation,
@@ -46,21 +46,19 @@ def get_orders_by_login_id(client, user_id: str, bearer: str) -> list:
             )
         else:
             try:
-                key = "msg"
-                if response.json()["msg"] != "Query Orders For Refresh Success":
-                    log_wrong_response_error(
-                        user_id, operation, response.failure, response.json()
-                    )
+                res_json = response.json()
+                msg = res_json["msg"]
+                status = res_json["status"]
+                orders = res_json["data"]
+                if status == "1":
+                    log_response_info(user_id, operation, orders)
+                    return orders
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
                     log_timeout_error(user_id, operation, response.failure)
                 else:
-                    key = "data"
-                    orders = response.json()["data"]
-                    log_response_info(user_id, operation, orders)
-                    return orders
+                    logging.warning(
+                        f"User {user_id} tries to {operation} but gets {msg}."
+                    )
             except JSONDecodeError:
-                response.failure(f"Response could not be decoded as JSON")
-                raise RescheduleTask()
-            except KeyError:
-                response.failure(f"Response did not contain expected key '{key}'")
+                logging.error(f"Response {response.text} could not be decoded as JSON!")
                 raise RescheduleTask()

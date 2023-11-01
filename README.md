@@ -50,7 +50,12 @@ conda create -n train-ticket --channel=conda-forge python=3.10 locust=2.17 panda
 
 # install docker and mongodb
 # see https://docs.docker.com/engine/install/debian/
-docker compose up -d
+sudo docker compose up -d
+```
+
+### Initialize Data
+```sh
+nohup python -m init_data &
 ```
 
 ### Update *experiment_config.yaml*
@@ -63,17 +68,6 @@ Change host url and workload config
 vim experiment_config.yaml
 vim locust.conf
 
-### Start locust
-
-```sh
-# activate conda environment
-conda activate train-ticket
-nohup locust &
-```
-
-
-
-
 ### Connect to TrainTicket cluster
 
 ```sh
@@ -83,6 +77,14 @@ gcloud container clusters get-credentials train-ticket-cluster --zone us-central
 ### Collect node and pod information per minute in JSON files
 ```sh
 nohup bash collect_node_pod.sh 14 &
+```
+
+### Start locust
+
+```sh
+# activate conda environment
+conda activate train-ticket
+nohup locust &
 ```
 
 ### Collect Locust Metrics

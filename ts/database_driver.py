@@ -8,10 +8,14 @@ class DatabaseDriver:
         self.client = MongoClient(uri)
         self.db = self.client["trainticket"]
         self.users = self.db["users"]
+        self.sample_user_index = 0
 
     def sample_user(self) -> dict:
-        sampled_users = list(self.users.aggregate([{"$sample": {"size": 1}}]))
-        return sampled_users[0]
+        sampled_user = self.users.find().sort("_id")[self.sample_user_index]
+        self.sample_user_index += 1
+        if self.sample_user_index >= self.users.count_documents({}):
+            self.sample_user_index = 0
+        return sampled_user
 
 
 db_driver = DatabaseDriver("localhost:27017", "root", "rootpass")

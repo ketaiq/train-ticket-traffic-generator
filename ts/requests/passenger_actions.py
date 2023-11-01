@@ -7,6 +7,7 @@ import datetime
 from ts.requests.passenger import PassengerRequest, admin_orders_get_list_by_user_id
 from ts.services.auth_service import login_user
 from ts.services.admin_user_service import user_add
+from ts.services.order_service import refresh_user_orders
 from ts.services.preserve_service import reserve_one_ticket
 from ts.services.inside_payment_service import delete_payment_by_order_id, pay_one_order
 from ts.services.execute_service import collect_one_ticket, enter_station
@@ -33,7 +34,7 @@ class PassengerActions(PassengerRequest):
         self.order_completion_time = None
 
     def _sample_user_or_create(self):
-        if random.random() < 0.9:
+        if random.random() < 0.95:
             # sample user from local mongodb
             user = db_driver.sample_user()
             self.username = user["userName"]
@@ -73,6 +74,11 @@ class PassengerActions(PassengerRequest):
             user["contactId"] = self.contact_id
             db_driver.users.insert_one(user)
 
+    def _get_order_id_to_pay(self):
+        user_orders = refresh_user_orders(self.client, self.user_id, self.bearer)
+        user_orders = sorted(user_orders, key=lambda order: order["boughtDate"])
+        self.order_id = user_orders[-1]["id"]
+
     def perform_actions(
         self,
         logger_tasks,
@@ -111,13 +117,8 @@ class PassengerActions(PassengerRequest):
             self.consign,
         )
 
-        self.order_creation_time = datetime.datetime.now()
-
         sleep(randint(5, 10))
-        user_orders_list = admin_orders_get_list_by_user_id(
-            self.admin_bearer, self.user_id
-        )
-        self.order_id = user_orders_list[-1]["id"]
+        self._get_order_id_to_pay()
 
         sleep(randint(5, 10))
         pay_one_order(
@@ -142,12 +143,6 @@ class PassengerActions(PassengerRequest):
             enter_station(
                 self.client, self.bearer, self.user_id, self.order_id, self.description
             )
-
-        self.order_completion_time = datetime.datetime.now()
-        order_age = int(
-            (self.order_completion_time - self.order_creation_time).total_seconds()
-        )
-        logger_tasks.info(self.description + ": " + str(order_age))
 
     def perform_sales_add_order(self):
         sleep(randint(5, 10))

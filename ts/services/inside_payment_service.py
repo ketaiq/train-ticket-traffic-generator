@@ -39,22 +39,20 @@ def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str
             )
         else:
             try:
-                key = "msg"
-                if response.json()["msg"] != "Payment Success Pay Success":
-                    log_wrong_response_error(
-                        user_id, operation, response.failure, response.json()
-                    )
+                res_json = response.json()
+                msg = res_json["msg"]
+                status = res_json["status"]
+                data = res_json["data"]
+                if status == "1":
+                    log_response_info(user_id, operation, data)
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
                     log_timeout_error(user_id, operation, response.failure)
                 else:
-                    key = "data"
-                    data = response.json()["data"]
-                    log_response_info(user_id, operation, data)
+                    logging.warning(
+                        f"User {user_id} tries to {operation} {order_id} but gets {msg}."
+                    )
             except JSONDecodeError:
-                response.failure(f"Response could not be decoded as JSON")
-                raise RescheduleTask()
-            except KeyError:
-                response.failure(f"Response did not contain expected key '{key}'")
+                logging.error(f"Response {response.text} could not be decoded as JSON!")
                 raise RescheduleTask()
 
 

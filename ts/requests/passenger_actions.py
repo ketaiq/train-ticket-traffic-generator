@@ -136,9 +136,11 @@ class PassengerActions(PassengerRequest):
             return
 
         sleep(randint(5, 10))
-        pay_one_order(
+        successful = pay_one_order(
             self.client, self.bearer, self.user_id, self.order_id, self.trip["tripId"]
         )
+        if not successful:
+            return
 
         if self.description == Role.Cancel_With_Refund.name:
             sleep(randint(5, 10))

@@ -16,7 +16,7 @@ from ts.log_syntax.locust_response import (
 from ts.config import tt_host
 
 
-def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str):
+def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str) -> bool:
     operation = "pay order"
     with client.post(
         url="/api/v1/inside_pay_service/inside_payment",
@@ -44,12 +44,14 @@ def pay_one_order(client, bearer: str, user_id: str, order_id: str, trip_id: str
                 data = res_json["data"]
                 if status == 1:
                     log_response_info(user_id, operation, data)
+                    return True
                 elif response.elapsed.total_seconds() > TIMEOUT_MAX:
                     log_timeout_error(user_id, operation, response.failure)
                 else:
                     logging.warning(
                         f"User {user_id} tries to {operation} {order_id} but gets {res_json}."
                     )
+                    return False
             except JSONDecodeError:
                 logging.error(f"Response {response.text} could not be decoded as JSON!")
                 raise RescheduleTask()

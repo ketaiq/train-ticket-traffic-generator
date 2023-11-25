@@ -1,15 +1,5 @@
 # train-ticket-analysis
 
-Run `locust` to start sending requests.
-
-Run `python test.py` to do unit testing.
-
-## Resources
-
-SBB’s route network: https://data.sbb.ch/explore/dataset/linie/information/  
-Number of SBB station users: https://data.sbb.ch/explore/dataset/anzahl-sbb-bahnhofbenutzer/information/  
-Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/information/
-
 ## Quick Start
 
 ### Create Google Cloud Virtual Machine
@@ -58,15 +48,15 @@ sudo docker compose up -d
 nohup python -m init_data &
 ```
 
-### Update *experiment_config.yaml*
-- *tt_host*: the URL of the dashboard of TrainTicket system
-- *wl_file_name*: the filename of the used workload
-- *wl_start_hour*: the starting hour of the workload, from 0 to 23.
-
-Change host url and workload config
-
-vim experiment_config.yaml
-vim locust.conf
+### Update Configuration
+- locust.conf
+    - *host*: the URL of the dashboard of TrainTicket system
+- experiment_config.yaml
+    - *tt_host*: the URL of the dashboard of TrainTicket system
+    - *wl_file_name*: the filename of the used workload
+    - *wl_start_hour*: the starting hour of the workload, from 0 to 23 (use 0 by default)
+    - *wl_day*: the starting day of the workload, from 0 to 6 (use 0 by default)
+    - *use_2week_workload*: set true if *wl_file_name* is workload/workload_2week.csv
 
 ### Connect to TrainTicket cluster
 
@@ -89,6 +79,14 @@ nohup locust &
 
 ### Collect Locust Metrics
 ```sh
-tar -czvf archive.tar.gz *.log *.csv nohup.out nodes_info pods_info train-ticket-report.html experiment_config.yaml
+tar -czvf archive.tar.gz *.log *.csv nohup.out nodes_info pods_info train-ticket-report.html
 gcloud compute scp --project "iron-bedrock-366809" train-ticket-traffic-generator-102009:/home/ketai/train-ticket-traffic-generator/archive.tar.gz ~/Downloads/
 ```
+
+Run `python test.py` to do unit testing.
+
+## Resources
+
+SBB’s route network: https://data.sbb.ch/explore/dataset/linie/information/  
+Number of SBB station users: https://data.sbb.ch/explore/dataset/anzahl-sbb-bahnhofbenutzer/information/  
+Direct Trains in Europe: https://data.sbb.ch/explore/dataset/direktverbindungen/information/

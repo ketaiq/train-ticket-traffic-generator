@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 
 def visualize_integer_array(csv_file_path):
@@ -33,5 +34,23 @@ def visualize_integer_array(csv_file_path):
 
 
 # Provide the path to your CSV file here
-csv_file_path = "workload/workload_2week.csv"
-visualize_integer_array(csv_file_path)
+# csv_file_path = "workload/workload_2week.csv"
+# visualize_integer_array(csv_file_path)
+
+
+def draw(filepath):
+    df = pd.read_csv(filepath)
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(df["Users"].to_list())
+    ax.set_ybound(0)
+    ax.set_xticks(range(48, len(df), 96), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] * 2, rotation = 25)
+    ax.set_ylabel("Number of users", size=14)
+    ax.set_xlim(0, len(df))
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    figname = filepath[:-4]
+    plt.savefig(figname + ".pdf", bbox_inches="tight")
+
+
+if __name__ == "__main__":
+    draw("workload/workload_2week.csv")

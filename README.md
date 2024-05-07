@@ -1,4 +1,4 @@
-# train-ticket-analysis
+# Train Ticket Traffic Generator
 
 ## Quick Start
 
